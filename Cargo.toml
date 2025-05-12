@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = ["libs/interfaces", "gui/src-tauri", "cli", "server"]
+
+[workspace.dependencies]
+# Internal
+interfaces = { path = "./libs/interfaces" }
+
+# External
+chrono = "0.4.41"
+clap = { version = "4.5.38", features = ["derive"] }
+
+dirs = "6.0.0"
+
+log = "0.4.27"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
