@@ -1,12 +1,13 @@
 {
-  "name": "dataset-manager",
+  "name": "datasets-manager",
   "version": "0.1.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "tauri-dbg": "tauri --verbose"
   },
   "private": true,
   "dependencies": {

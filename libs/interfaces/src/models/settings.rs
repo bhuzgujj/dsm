@@ -19,7 +19,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            log_level: LevelFilter::Warn.to_string(),
+            log_level: LevelFilter::Info.to_string(),
         }
     }
 }

@@ -1,5 +1,6 @@
 [package]
 name = "dsm"
+version = "0.1.0"
 edition = "2021"
 
 [dependencies]
@@ -8,5 +9,6 @@ interfaces.workspace = true
 serializer.workspace = true
 
 # External
+anyhow.workspace = true
 clap.workspace = true
 log.workspace = true

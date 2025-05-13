@@ -6,7 +6,7 @@
     "analytics": false
   },
   "projects": {
-    "dataset-manager": {
+    "datasets-manager": {
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
@@ -15,7 +15,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/dataset-manager",
+            "outputPath": "dist/datasets-manager",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -53,10 +53,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "dataset-manager:build:production"
+              "buildTarget": "datasets-manager:build:production"
             },
             "development": {
-              "buildTarget": "dataset-manager:build:development"
+              "buildTarget": "datasets-manager:build:development"
             }
           },
           "defaultConfiguration": "development"

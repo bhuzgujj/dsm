@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 chrono = { workspace = true }
-clap = { workspace = true }
 dirs = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Fragment>
+		<DirectoryRef Id="INSTALLDIR">
+			<Directory Id="CLI" Name="bin">
+				<Component Id="DsmCliComponent" Guid="F4088CCB-800E-42B7-B024-BDBE593950FD">
+					<File Id="DsmCliExe"
+								Name="dsm.exe"
+								Source="$(sys.CURRENTDIR)\..\..\dsm.exe"
+								KeyPath="yes" />
+					<Environment Id="idEnvPathSys" Name="PATH" Action="set" Part="last" System="yes" Value="[CLI]" Permanent="no"/>
+					<Environment Id="idEnvPathUsr" Name="PATH" Action="set" Part="last" System="yes" Value="[CLI]" Permanent="no"/>
+				</Component>
+			</Directory>
+		</DirectoryRef>
+	</Fragment>
+</Wix>

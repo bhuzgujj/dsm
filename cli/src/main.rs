@@ -1,9 +1,22 @@
-use log::{info, warn};
+mod register;
 
-fn main() {
-    let sets = interfaces::models::Settings::load();
-    interfaces::logger::bind_logger(&sets).unwrap();
-    info!("LMAO");
-    warn!("LOLLL");
-    sets.save().unwrap();
+use clap::Parser;
+use log::{info, warn};
+use interfaces::logger;
+use interfaces::models::Settings;
+use crate::register::Register;
+
+#[derive(Parser, Debug)]
+enum Cli {
+    Register(Register)
+}
+
+fn main() -> anyhow::Result<()> {
+    let sets = Settings::load();
+    logger::bind_logger(&sets)?;
+    match Cli::parse() {
+        Cli::Register(regs) => info!("add"),
+    };
+    sets.save()?;
+    Ok(())
 }
