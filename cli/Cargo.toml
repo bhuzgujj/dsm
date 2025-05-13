@@ -2,6 +2,11 @@
 name = "dsm"
 edition = "2021"
 
-[dependencies.clap]
-version = "4.5.38"
-features = ["derive"]
+[dependencies]
+# Internal
+interfaces.workspace = true
+serializer.workspace = true
+
+# External
+clap.workspace = true
+log.workspace = true

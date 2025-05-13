@@ -1,3 +1,9 @@
+use log::{info, warn};
+
 fn main() {
-    println!("Hello, world!");
+    let sets = interfaces::models::Settings::load();
+    interfaces::logger::bind_logger(&sets).unwrap();
+    info!("LMAO");
+    warn!("LOLLL");
+    sets.save().unwrap();
 }

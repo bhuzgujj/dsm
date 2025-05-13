@@ -1,0 +1,12 @@
+[package]
+name = "serializer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Internal
+interfaces.workspace = true
+
+# External
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true

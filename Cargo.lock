@@ -789,8 +789,10 @@ dependencies = [
 name = "dataset_manager"
 version = "0.1.0"
 dependencies = [
+ "interfaces",
  "serde",
  "serde_json",
+ "serializer",
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",
@@ -926,6 +928,9 @@ name = "dsm"
 version = "0.0.0"
 dependencies = [
  "clap",
+ "interfaces",
+ "log",
+ "serializer",
 ]
 
 [[package]]
@@ -1872,10 +1877,13 @@ dependencies = [
 name = "interfaces"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "chrono",
  "clap",
  "dirs",
  "log",
+ "serde",
+ "toml",
 ]
 
 [[package]]
@@ -3568,6 +3576,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "serializer"
+version = "0.1.0"
+dependencies = [
+ "interfaces",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
