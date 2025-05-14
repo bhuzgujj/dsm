@@ -1,14 +1,12 @@
+use crate::yolo_1_1::strip_prefix;
+use image::image_dimensions;
+use interfaces::models::annotation::Annotation;
+use interfaces::models::entries::DatasetEntry;
 use std::collections::HashMap;
 use std::fs::{copy, create_dir_all, read_to_string, OpenOptions};
-use std::hash::Hash;
 use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
-use image::image_dimensions;
-use serde::de::Unexpected::Option;
-use interfaces::models::annotation::Annotation;
-use interfaces::models::entries::DatasetEntry;
-use crate::yolo_1_1::strip_prefix;
 
 pub(crate) fn read(refs: &PathBuf, root: &PathBuf, classes: &HashMap<u32, String>) -> anyhow::Result<Vec<DatasetEntry>> {
 	let content = read_to_string(refs)?;

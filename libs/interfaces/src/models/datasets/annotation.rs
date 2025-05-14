@@ -9,7 +9,7 @@ pub struct Annotation {
 
 impl Annotation {
 	pub fn to_file_str(&self) -> String {
-		format!("{} {} {} {} {}", self.class, self.x, self.y, self.width, self.height)
+		format!("{} {:.6} {:.6} {:.6} {:.6}", self.class, self.x, self.y, self.width, self.height)
 	}
 }
 

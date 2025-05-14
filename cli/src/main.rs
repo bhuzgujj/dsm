@@ -2,15 +2,16 @@ mod store;
 mod format;
 mod configuration;
 
+use std::fs::{remove_dir, remove_dir_all};
 use std::path::PathBuf;
-use clap::{Parser, Subcommand};
-use clap::error::ErrorKind::Format;
+use clap::Parser;
 use log::error;
+
 use interfaces::logger;
 use interfaces::models::Settings;
-use interfaces::paths::dsm_dir;
 use serializer::Formatter;
 use storage::Storage;
+
 use crate::configuration::Configuration;
 use crate::store::Store;
 
@@ -32,7 +33,9 @@ fn wrapper() -> anyhow::Result<()> {
         Cli::Test => {
             let datasets = Storage::Local(settings.get_dataset_database()).read("drone-man-yolo".to_string(), 1)?;
             dbg!(&datasets);
-            Formatter::Yolo1_1.write(&PathBuf::from("./tmp"),&settings.get_image_store(),&datasets)?;
+            let output = PathBuf::from("./tmp/output");
+            let _ = remove_dir_all(&output);
+            Formatter::Yolo1_1.write(&output, &settings.get_image_store(), &datasets)?;
         },
     };
     settings.save()?;

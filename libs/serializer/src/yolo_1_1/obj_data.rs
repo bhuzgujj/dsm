@@ -27,7 +27,7 @@ impl ObjData {
 	pub(crate) fn write(&self, root: &PathBuf) -> anyhow::Result<()> {
 		let mut content = format!("classes = {}\nnames = {}\n", self.classes, self.names);
 		for (k, v) in self.sets.iter() {
-			content.push_str(&format!("{} = {};\n", k, v));
+			content.push_str(&format!("{} = {}\n", k, v));
 		}
 		if let Some(backup) = &self.backup {
 			content.push_str(&format!("backup = {}\n", backup));
