@@ -1,6 +1,9 @@
 use std::collections::HashMap;
-use std::fs::read_to_string;
+use std::fs::{read_to_string, OpenOptions};
+use std::io::Write;
 use std::path::PathBuf;
+
+pub(crate) const FILE_NAME: &str = "obj.names";
 
 pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, String>> {
 	let names = read_to_string(path)?;
@@ -14,4 +17,17 @@ pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, String>> {
 		}
 	}
 	Ok(classes)
+}
+
+pub(crate) fn write(root: &PathBuf, classes: &HashMap<u32, String>) -> anyhow::Result<()> {
+	let vec: Vec<String> = classes.values()
+		.map(|s| s.to_string())
+		.collect();
+	OpenOptions::new()
+		.write(true)
+		.create(true)
+		.truncate(true)
+		.open(root.join(FILE_NAME))?
+		.write_all(vec.join("\n").as_bytes())?;
+	Ok(())
 }

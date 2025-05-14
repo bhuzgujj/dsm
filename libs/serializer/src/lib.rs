@@ -31,4 +31,13 @@ impl Formatter {
 			Formatter::Custom(name) => todo!("Custom format are not supported yet")
 		}
 	}
+
+	pub fn write(&self, path: &PathBuf, store_path: &PathBuf, datasets: &Datasets) -> anyhow::Result<()> {
+		debug!("Reading datasets format '{}' at '{}'", &path.canonicalize()?.to_str().unwrap_or("<Unknown path>"), &self);
+		match self {
+			Formatter::Yolo1_1 => yolo_1_1::write(store_path, path, datasets),
+			Formatter::Coco1_0 => todo!("Coco 1.0 format is not supported yet"),
+			Formatter::Custom(name) => todo!("Custom format are not supported yet")
+		}
+	}
 }

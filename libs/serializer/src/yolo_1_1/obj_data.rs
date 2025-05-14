@@ -1,9 +1,11 @@
 use std::collections::HashMap;
-use std::fs::read_to_string;
+use std::fs::{read_to_string, OpenOptions};
+use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 use log::warn;
 use crate::yolo_1_1::{strip_prefix, PREFIX};
+use crate::yolo_1_1::obj_names;
 
 const FILE_NAME: &str = "obj.data";
 
@@ -16,6 +18,29 @@ pub(crate) struct ObjData {
 }
 
 impl ObjData {
+	pub(crate) fn new(classes: u32, sets: HashMap<String, String>) -> Self {
+		Self {
+			classes, names: String::from(obj_names::FILE_NAME), sets, backup: None
+		}
+	}
+
+	pub(crate) fn write(&self, root: &PathBuf) -> anyhow::Result<()> {
+		let mut content = format!("classes = {}\nnames = {}\n", self.classes, self.names);
+		for (k, v) in self.sets.iter() {
+			content.push_str(&format!("{} = {};\n", k, v));
+		}
+		if let Some(backup) = &self.backup {
+			content.push_str(&format!("backup = {}\n", backup));
+		}
+		OpenOptions::new()
+			.write(true)
+			.create(true)
+			.truncate(true)
+			.open(root.join(FILE_NAME))?
+			.write_all(content.as_bytes())?;
+		Ok(())
+	}
+
 	pub(crate) fn read(path: &PathBuf) -> anyhow::Result<Self> {
 		let abs_path = path.join(FILE_NAME);
 		let contents = read_to_string(&abs_path)?;

@@ -23,4 +23,8 @@ impl MetaData {
     pub fn get_version(&self) -> u32 {
         self.version
     }
+    
+    pub fn get_classes(&self) -> &HashMap<u32, String> {
+        &self.classes
+    }
 }

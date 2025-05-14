@@ -1,9 +1,11 @@
 use std::collections::HashMap;
-use std::fs::read_to_string;
+use std::fs::{copy, create_dir_all, read_to_string, OpenOptions};
 use std::hash::Hash;
+use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 use image::image_dimensions;
+use serde::de::Unexpected::Option;
 use interfaces::models::annotation::Annotation;
 use interfaces::models::entries::DatasetEntry;
 use crate::yolo_1_1::strip_prefix;
@@ -35,11 +37,57 @@ fn parse_annotation(entry: &str, classes: &HashMap<u32, String>) -> anyhow::Resu
 		return Err(anyhow::anyhow!("Invalid annotation, missing fields: '{}'", entry));
 	}
 	let class_id = u32::from_str(fields[0])?;
-	let class = classes.get(&class_id).ok_or_else(|| anyhow::anyhow!("Invalid annotation id: {}", class_id))?;
+	let _ = classes.get(&class_id).ok_or_else(|| anyhow::anyhow!("Invalid annotation id: {}", class_id))?;
 
 	let x = f64::from_str(fields[1])?;
 	let y = f64::from_str(fields[2])?;
 	let width = f64::from_str(fields[3])?;
 	let height = f64::from_str(fields[4])?;
-	Ok(Annotation::new(class, x, y, width, height))
+	Ok(Annotation::new(class_id, x, y, width, height))
+}
+
+pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, dataset_prefix: &String, sets_name: &String, dataset_entry: &Vec<DatasetEntry>) -> anyhow::Result<String> {
+	let dir = format!("obj_{sets_name}_data");
+	let img_dir=  root.join(&dir);
+	create_dir_all(&img_dir)?;
+	let mut sets = Vec::new();
+	for entry in dataset_entry {
+		let new_image_name = format!("{dataset_prefix}{}", entry.get_image_path()
+			.file_name()
+			.expect("Invalid")
+			.to_str()
+			.expect("Invalid")
+		);
+		sets.push(format!("{}/{}", dir.clone(), new_image_name.clone()));
+		copy(
+			&store_path.join(entry.get_image_path()),
+		    &img_dir.join(new_image_name)
+		)?;
+
+		let mut annotation_file = entry.get_image_path();
+		annotation_file.set_extension("txt");
+		let new_annotation_name = format!("{dataset_prefix}{}", annotation_file
+			.file_name()
+			.expect("Invalid")
+			.to_str()
+			.expect("Invalid")
+		);
+		OpenOptions::new()
+			.write(true)
+			.truncate(true)
+			.create(true)
+			.open(img_dir.join(&new_annotation_name))?
+			.write_all(entry.get_annotation().iter()
+				.map(|a| a.to_file_str())
+				.collect::<Vec<String>>()
+				.join("\n").as_bytes())?;
+	}
+	let set_file = format!("{sets_name}.txt");
+	OpenOptions::new()
+		.write(true)
+		.truncate(true)
+		.create(true)
+		.open(root.join(&set_file))?
+		.write_all(sets.join("\n").as_bytes())?;
+	Ok(set_file)
 }
