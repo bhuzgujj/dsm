@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 pub struct Annotation {
-	class: String,
+	class: u32,
 	x: f64,
 	y: f64,
 	width: f64,
@@ -8,9 +8,15 @@ pub struct Annotation {
 }
 
 impl Annotation {
-	pub fn new(class: &String, x: f64, y: f64, width: f64, height: f64) -> Self {
+	pub fn to_file_str(&self) -> String {
+		format!("{} {:.6} {:.6} {:.6} {:.6}", self.class, self.x, self.y, self.width, self.height)
+	}
+}
+
+impl Annotation {
+	pub fn new(class: u32, x: f64, y: f64, width: f64, height: f64) -> Self {
 		Self {
-			class: class.clone(),
+			class,
 			x,
 			y,
 			width,
@@ -18,8 +24,8 @@ impl Annotation {
 		}
 	}
 
-	pub fn get_class(&self) -> String {
-		self.class.clone()
+	pub fn get_class(&self) -> u32 {
+		self.class
 	}
 
 	pub fn get_x(&self) -> f64 {

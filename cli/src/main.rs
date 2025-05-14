@@ -2,12 +2,16 @@ mod store;
 mod format;
 mod configuration;
 
-use clap::{Parser, Subcommand};
+use std::fs::{remove_dir, remove_dir_all};
+use std::path::PathBuf;
+use clap::Parser;
 use log::error;
+
 use interfaces::logger;
 use interfaces::models::Settings;
-use interfaces::paths::dsm_dir;
+use serializer::Formatter;
 use storage::Storage;
+
 use crate::configuration::Configuration;
 use crate::store::Store;
 
@@ -20,16 +24,21 @@ enum Cli {
 }
 
 fn wrapper() -> anyhow::Result<()> {
-    let mut sets = Settings::load();
-    logger::bind_logger(&sets)?;
-    Storage::Local(sets.get_dataset_database()).initialize()?;
+    let mut settings = Settings::load();
+    logger::bind_logger(&settings)?;
+    Storage::Local(settings.get_dataset_database()).initialize()?;
     match Cli::parse() {
-        Cli::Store(store) => store.execute(&sets)?,
-        Cli::Config(configuration) => configuration.configure(&mut sets)?,
+        Cli::Store(store) => store.execute(&settings)?,
+        Cli::Config(configuration) => configuration.configure(&mut settings)?,
         Cli::Test => {
+            let datasets = Storage::Local(settings.get_dataset_database()).read("drone-man-yolo".to_string(), 1)?;
+            dbg!(&datasets);
+            let output = PathBuf::from("./tmp/output");
+            let _ = remove_dir_all(&output);
+            Formatter::Yolo1_1.write(&output, &settings.get_image_store(), &datasets)?;
         },
     };
-    sets.save()?;
+    settings.save()?;
     Ok(())
 }
 

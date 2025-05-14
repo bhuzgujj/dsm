@@ -1,10 +1,9 @@
 mod migrations;
 mod datasets;
 
+use crate::migrations::migrate;
 use interfaces::models::Datasets;
 use std::path::PathBuf;
-use anyhow::Error;
-use crate::migrations::migrate;
 
 const DB_NAME: &'static str = "datasets.sqlite";
 
@@ -20,7 +19,7 @@ impl Storage {
 				migrate(&path.join(DB_NAME))
 			}
 			Storage::Remote(_) => {
-				Err(Error::msg("Remote Not implemented"))
+				todo!()
 			}
 		}
 	}
@@ -31,7 +30,18 @@ impl Storage {
 				datasets::store(&path.join(DB_NAME), data)
 			}
 			Storage::Remote(_) => {
-				Err(Error::msg("Remote Not implemented"))
+				todo!()
+			}
+		}
+	}
+
+	pub fn read(&self, name: String, version: u32) -> anyhow::Result<Datasets> {
+		match self {
+			Storage::Local(path) => {
+				datasets::read(&path.join(DB_NAME), name, version)
+			}
+			Storage::Remote(_) => {
+				todo!()
 			}
 		}
 	}

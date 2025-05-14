@@ -32,4 +32,8 @@ impl Datasets {
     pub fn get_entries(&self) -> &HashMap<String, Vec<DatasetEntry>> {
         &self.entries
     }
+    
+    pub fn get_classes(&self) -> &HashMap<u32, String> {
+        self.metadata.get_classes()
+    }
 }

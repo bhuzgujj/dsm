@@ -1,8 +1,7 @@
 use clap::Args;
+use interfaces::models::Settings;
 use serializer::Formatter;
 use std::path::PathBuf;
-use interfaces::models::Settings;
-use storage::Storage;
 
 /// Use a custom script to parse the datasets (NOT IMPLEMENTED)
 #[derive(Args, Debug)]
