@@ -1,12 +1,15 @@
 [package]
-name = "interfaces"
+name = "serializer"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# Internal
+interfaces.workspace = true
+
+# External
 anyhow.workspace = true
-chrono.workspace = true
-dirs.workspace = true
+image.workspace = true
 log.workspace = true
 serde = { workspace = true, features = ["derive"] }
-toml.workspace = true
+serde_json.workspace = true

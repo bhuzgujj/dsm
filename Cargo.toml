@@ -1,18 +1,35 @@
 [workspace]
 resolver = "2"
-members = ["libs/interfaces", "gui/src-tauri", "cli", "server"]
+members = [
+    "libs/interfaces",
+    "libs/serializer",
+    "libs/storage",
+    "gui/src-tauri",
+    "cli",
+    "server",
+]
 
 [workspace.dependencies]
 # Internal
 interfaces = { path = "./libs/interfaces" }
+serializer = { path = "./libs/serializer" }
+storage = { path = "./libs/storage" }
 
 # External
-chrono = "0.4.41"
-clap = { version = "4.5.38", features = ["derive"] }
+anyhow = "1"
 
-dirs = "6.0.0"
+chrono = "0.4"
+clap = { version = "4", features = ["derive"] }
 
-log = "0.4.27"
+dirs = "6"
+
+image = "0.25.6"
+
+log = "0.4"
+
+rusqlite = { version = "0.35.0", features = ["bundled"] }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+toml = "0.8"

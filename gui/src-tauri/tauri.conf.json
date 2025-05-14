@@ -1,18 +1,18 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "dataset-manager",
+  "productName": "datasets-manager",
   "version": "0.1.0",
-  "identifier": "dev.bhuzgujj.dataset-manager",
+  "identifier": "dev.bhuzgujj.datasets-manager",
   "build": {
     "beforeDevCommand": "npm run start",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist/dataset-manager/browser"
+    "frontendDist": "../dist/datasets-manager/browser"
   },
   "app": {
     "windows": [
       {
-        "title": "dataset-manager",
+        "title": "Datasets-Manager",
         "width": 800,
         "height": 600
       }
@@ -30,6 +30,16 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller"
+      },
+      "nsis": null,
+      "wix": {
+        "fragmentPaths": ["./wix/cli.wxs"],
+        "componentRefs": ["DsmCliComponent"]
+      }
+    }
   }
 }

@@ -1,5 +1,3 @@
-use tauri_plugin_cli::CliExt;
-
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {

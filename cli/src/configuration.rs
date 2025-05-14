@@ -1,0 +1,23 @@
+use std::str::FromStr;
+use clap::Args;
+use log::LevelFilter;
+use interfaces::models::Settings;
+
+/// Modify global settings
+#[derive(Args, Debug)]
+pub struct Configuration {
+	/// Set global log level
+	#[clap(short, long)]
+	log_level: Option<String>,
+}
+
+impl Configuration {
+	pub fn configure(&self, settings: &mut Settings) -> anyhow::Result<()> {
+		if let Some(log_level) = &self.log_level {
+			let level = LevelFilter::from_str(log_level)
+				.expect(format!("Invalid log level: {}", log_level).as_str());
+			settings.set_log_level(level);
+		}
+		Ok(())
+	}
+}
