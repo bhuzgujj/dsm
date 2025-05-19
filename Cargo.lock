@@ -893,9 +893,11 @@ name = "dataset_manager"
 version = "0.1.0"
 dependencies = [
  "interfaces",
+ "log",
  "serde",
  "serde_json",
  "serializer",
+ "storage",
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",

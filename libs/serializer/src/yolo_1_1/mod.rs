@@ -4,8 +4,8 @@ mod obj_names;
 
 use crate::yolo_1_1::obj_data::ObjData;
 use interfaces::models::metadata::DsmMetaData;
-use interfaces::models::DsmSets;
 use interfaces::models::DataForm;
+use interfaces::models::DsmSets;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
@@ -14,8 +14,8 @@ use std::vec;
 const PREFIX: &str = "data/";
 
 pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter: DataForm) -> anyhow::Result<Vec<DsmSets>> {
-	let objdata = ObjData::read(root)?;
-	let classes = obj_names::read(root.join(objdata.get_names()))?;
+	let obj_data = ObjData::read(root)?;
+	let classes = obj_names::read(root.join(obj_data.get_names()))?;
 	let mut sets = HashMap::new();
 	let new_name = name.clone().unwrap_or(
 		root.file_name()
@@ -23,7 +23,7 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter
 			.to_string_lossy()
 			.into(),
 	);
-	for (key, value) in objdata.get_sets() {
+	for (key, value) in obj_data.get_sets() {
 		let entries = data_entries::read(&root.join(value), &new_name, version, root, &classes)?;
 		if sets.contains_key(key) {
 			return Err(anyhow::anyhow!("duplicated set: {}", key))

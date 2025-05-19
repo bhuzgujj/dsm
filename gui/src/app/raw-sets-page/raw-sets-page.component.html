@@ -1,0 +1,30 @@
+<table class="main">
+    <tr>
+        <th>Name</th>
+        <th>Version</th>
+        <th>Classes</th>
+    </tr>
+    <tr *ngFor="let dataset of datasets" (click)="select(dataset)">
+        <td>{{dataset.metadata.name}}</td>
+        <td>v{{dataset.metadata.version}}</td>
+        <td>
+            <div *ngIf="selected  === dataset">
+                <table>
+                    <tr>
+                        <th>Id</th>
+                        <th>Classes</th>
+                        <th>Count</th>
+                    </tr>
+                    <tr *ngFor="let id of Object.keys(dataset.metadata.classes)">
+                        <th>{{id}}</th>
+                        <th>{{dataset.metadata.classes[+id].class}}</th>
+                        <th>{{countSet(dataset, +id)}}</th>
+                    </tr>
+                </table>
+            </div>
+            <div *ngIf="selected  !== dataset">
+                Count: {{Object.keys(dataset.metadata.classes).length}}
+            </div>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,29 @@
+nav {
+    width: auto;
+    padding: 0.25rem;
+    display: flex;
+    justify-content: space-around;
+}
+
+nav > a {
+    background: #333;
+    width: 200px;
+    text-align: center;
+    padding: 0.25rem;
+    border-radius: 5px;
+    text-decoration: none;
+    transition-duration: 150ms;
+}
+
+nav > a:hover {
+    background: #444;
+    transition-duration: 150ms;
+}
+
+nav > a:active {
+    background: #666;
+}
+
+.is-active {
+    background: #666;
+}

@@ -1,0 +1,34 @@
+.main {
+    padding-top: 1rem;
+    width: 100%;
+    border-radius: 5px;
+}
+
+tr {
+    padding: 0.1rem 1rem;
+    margin: 0.1rem;
+    width: 100%;
+    border-radius: 5px;
+}
+
+tr > td {
+    padding: 0.5rem;
+    background: #333;
+    text-align: center;
+}
+
+tr > td {
+    width: 20%;
+}
+
+tr:hover > td {
+    background: #555;
+}
+
+tr:first-child > th {
+   align-content: start;
+}
+
+table {
+    width: 100%;
+}

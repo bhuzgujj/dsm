@@ -21,11 +21,13 @@ tauri-build = { version = "2", features = [] }
 # Internal
 interfaces.workspace = true
 serializer.workspace = true
+storage.workspace = true
 
 # External
-tauri = { version = "2", features = [] }
+log.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
+tauri = { version = "2", features = [] }
 
 # Plugins
 tauri-plugin-opener = "2"
