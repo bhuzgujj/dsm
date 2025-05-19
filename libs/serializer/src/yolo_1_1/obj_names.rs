@@ -2,26 +2,27 @@ use std::collections::HashMap;
 use std::fs::{read_to_string, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
+use interfaces::models::classes::Classes;
 
 pub(crate) const FILE_NAME: &str = "obj.names";
 
-pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, String>> {
+pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, Classes>> {
 	let names = read_to_string(path)?;
 	let mut classes = HashMap::new();
 	let mut index: u32 = 0;
 	for line in names.lines() {
 		let trimmed = line.trim();
 		if trimmed.len() > 0 {
-			classes.insert(index, trimmed.to_string());
+			classes.insert(index, Classes::new(trimmed.to_string(), None));
 			index += 1;
 		}
 	}
 	Ok(classes)
 }
 
-pub(crate) fn write(root: &PathBuf, classes: &HashMap<u32, String>) -> anyhow::Result<()> {
+pub(crate) fn write(root: &PathBuf, classes: HashMap<u32, Classes>) -> anyhow::Result<()> {
 	let vec: Vec<String> = classes.values()
-		.map(|s| s.to_string())
+		.map(|s| s.get_classes().clone())
 		.collect();
 	OpenOptions::new()
 		.write(true)

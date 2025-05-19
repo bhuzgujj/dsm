@@ -4,7 +4,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 use log::warn;
-use crate::yolo_1_1::{strip_prefix, PREFIX};
+use crate::yolo_1_1::{strip_prefix};
 use crate::yolo_1_1::obj_names;
 
 const FILE_NAME: &str = "obj.data";

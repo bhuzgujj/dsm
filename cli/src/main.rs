@@ -1,53 +1,64 @@
 mod store;
 mod format;
 mod configuration;
+mod generator;
+mod list;
+mod merge;
 
-use std::fs::{remove_dir, remove_dir_all};
-use std::path::PathBuf;
+use std::fs::{create_dir_all};
 use clap::Parser;
 use log::error;
 
 use interfaces::logger;
-use interfaces::models::Settings;
-use serializer::Formatter;
-use storage::Storage;
+use interfaces::models::{Settings};
 
 use crate::configuration::Configuration;
+use crate::generator::Generator;
+use crate::list::List;
+use crate::merge::Merge;
 use crate::store::Store;
 
 #[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
 enum Cli {
     #[command(subcommand)]
     Store(Store),
-    Config(Configuration),
-    Test
+
+    #[command(subcommand)]
+    Gen(Generator),
+
+    #[command(subcommand)]
+    List(List),
+
+    #[command(subcommand)]
+    Merge(Merge),
+
+    Config(Configuration)
 }
 
-fn wrapper() -> anyhow::Result<()> {
+async fn wrapper() -> anyhow::Result<()> {
     let mut settings = Settings::load();
     logger::bind_logger(&settings)?;
-    Storage::Local(settings.get_dataset_database()).initialize()?;
+    create_dir_all(settings.get_ledger_path())?;
+    create_dir_all(settings.get_store_path())?;
     match Cli::parse() {
-        Cli::Store(store) => store.execute(&settings)?,
+        Cli::Store(store) => store.execute(&settings).await?,
+        Cli::Gen(generator) => generator.execute(&settings).await?,
         Cli::Config(configuration) => configuration.configure(&mut settings)?,
-        Cli::Test => {
-            let datasets = Storage::Local(settings.get_dataset_database()).read("drone-man-yolo".to_string(), 1)?;
-            dbg!(&datasets);
-            let output = PathBuf::from("./tmp/output");
-            let _ = remove_dir_all(&output);
-            Formatter::Yolo1_1.write(&output, &settings.get_image_store(), &datasets)?;
-        },
+        Cli::List(ls) => ls.execute(&settings).await?,
+        Cli::Merge(merge) => merge.execute(&settings).await?
     };
     settings.save()?;
     Ok(())
 }
 
-fn main() -> anyhow::Result<()> {
-    match wrapper() {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    match wrapper().await {
         Ok(()) => Ok(()),
         Err(e) => {
             error!("Error: {}", e);
-            Err(e)
+            Ok(())
         }
     }
 }

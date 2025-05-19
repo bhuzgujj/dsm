@@ -1,26 +1,71 @@
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Annotation {
 	class: u32,
 	x: f64,
 	y: f64,
 	width: f64,
 	height: f64,
+	segmentation: Vec<f64>,
+	iscrowd: u32,
+	occluded: bool,
+	rotation: u32
 }
 
 impl Annotation {
 	pub fn to_file_str(&self) -> String {
 		format!("{} {:.6} {:.6} {:.6} {:.6}", self.class, self.x, self.y, self.width, self.height)
 	}
+
+	pub fn to_file_percent_str(&self, width: u32, height: u32) -> String {
+		format!(
+			"{} {:.6} {:.6} {:.6} {:.6}",
+	        self.class,
+	        self.x / width as f64,
+	        self.y / height as f64,
+			self.width / width as f64,
+			self.height / height as f64
+		)
+	}
 }
 
 impl Annotation {
-	pub fn new(class: u32, x: f64, y: f64, width: f64, height: f64) -> Self {
+	pub fn new(
+		class: u32,
+		x: f64,
+		y: f64,
+		width: f64,
+		height: f64,
+		segmentation: Vec<f64>,
+		iscrowd: u32,
+		occluded: bool,
+		rotation: u32
+	) -> Self {
 		Self {
 			class,
 			x,
 			y,
 			width,
 			height,
+			segmentation,
+			iscrowd,
+			occluded,
+			rotation
+		}
+	}
+
+	pub fn map_in(&self, new_class: u32) -> Self {
+		Self {
+			class: new_class,
+			x: self.x,
+			y: self.y,
+			width: self.width,
+			height: self.height,
+			segmentation: self.segmentation.clone(),
+			iscrowd: self.iscrowd,
+			occluded: self.occluded,
+			rotation: self.rotation
 		}
 	}
 

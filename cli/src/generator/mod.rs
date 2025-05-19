@@ -3,21 +3,21 @@ mod custom;
 
 use clap::Subcommand;
 use interfaces::models::Settings;
-use crate::store::custom::Custom;
-pub use crate::store::std::Std;
+use crate::generator::custom::Custom;
+use crate::generator::std::Std;
 
 /// Add a files to the files store
 #[derive(Subcommand, Debug)]
-pub enum Store {
+pub enum Generator {
 	Custom(Custom),
 	Std(Std)
 }
 
-impl Store {
+impl Generator {
 	pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
 		match &self {
-			Store::Custom(fmt) => fmt.execute(&settings).await,
-			Store::Std(fmt) => fmt.execute(&settings).await,
+			Generator::Custom(fmt) => fmt.execute(&settings).await,
+			Generator::Std(fmt) => fmt.execute(&settings).await,
 		}
 	}
 }

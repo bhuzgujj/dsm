@@ -10,21 +10,22 @@ use serde::{Deserialize, Serialize};
 use crate::paths::dsm_dir;
 
 const SETTINGS_FILENAME: &'static str = "settings.toml";
-const STORE: &'static str = "image_store";
+const STORE: &'static str = "datasets-store";
+const LEDGER_DIRECTORY: &'static str = "files-ledger";
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Settings {
     log_level: String,
-    dataset_database: String,
-    image_store: String,
+    ledger_path: String,
+    store_path: String,
 }
 
 impl Default for Settings {
     fn default() -> Self {
         Self {
             log_level: LevelFilter::Info.to_string(),
-            dataset_database: dsm_dir().to_string_lossy().to_string(),
-            image_store: dsm_dir().join(STORE).to_string_lossy().to_string(),
+            ledger_path: dsm_dir().join(LEDGER_DIRECTORY).to_string_lossy().to_string(),
+            store_path: dsm_dir().join(STORE).to_string_lossy().to_string(),
         }
     }
 }
@@ -38,14 +39,14 @@ impl Settings {
         self.log_level = log_level.to_string();
     }
 
-    pub fn get_image_store(&self) -> PathBuf {
-        PathBuf::from_str(self.image_store.as_str())
-            .expect(format!("Invalid dataset database location: {}", self.dataset_database).as_str())
+    pub fn get_store_path(&self) -> PathBuf {
+        PathBuf::from_str(self.store_path.as_str())
+            .expect(format!("Invalid dataset database location: {}", self.ledger_path).as_str())
     }
     
-    pub fn get_dataset_database(&self) -> PathBuf {
-        PathBuf::from_str(self.dataset_database.as_str())
-            .expect(format!("Invalid dataset database location: {}", self.dataset_database).as_str())
+    pub fn get_ledger_path(&self) -> PathBuf {
+        PathBuf::from_str(self.ledger_path.as_str())
+            .expect(format!("Invalid dataset database location: {}", self.ledger_path).as_str())
     }
 
     pub fn load() -> Self {
