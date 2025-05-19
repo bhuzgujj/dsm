@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs::read_to_string;
 use clap::Args;
-use interfaces::models::{ClassMapping, MergedSet, Settings};
+use interfaces::models::{ClassMapper, MergedSet, Settings};
 use std::path::PathBuf;
 use anyhow::anyhow;
 use log::error;
@@ -54,7 +54,7 @@ impl New {
 			}
 		}
 		let content = read_to_string(&self.mapping_file)?;
-		let mapping = toml::from_str::<ClassMapping>(&content)?;
+		let mapping = toml::from_str::<ClassMapper>(&content)?;
 		let merge_set = MergedSet::new(datasets, self.name.clone(), self.version,  mapping)?;
 		storage.store_merged(&merge_set).await?;
 

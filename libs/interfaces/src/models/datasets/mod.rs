@@ -1,8 +1,9 @@
-use entries::DatasetEntry;
-use metadata::MetaData;
+use entries::DsmEntry;
+use metadata::DsmMetaData;
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use crate::models::classes::Classes;
+use crate::models::classes::DsmClasses;
+use crate::models::licence::DsmLicense;
 
 pub mod entries;
 pub mod metadata;
@@ -11,37 +12,41 @@ pub mod licence;
 pub mod classes;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct Datasets {
-    metadata: MetaData,
-    entries: HashMap<String, Vec<DatasetEntry>>,
+pub struct DsmSets {
+    metadata: DsmMetaData,
+    entries: HashMap<String, Vec<DsmEntry>>,
 }
 
-impl Datasets {
-    pub fn new(metadata: MetaData, entries: HashMap<String, Vec<DatasetEntry>>) -> Datasets {
+impl DsmSets {
+    pub fn new(metadata: DsmMetaData, entries: HashMap<String, Vec<DsmEntry>>) -> DsmSets {
         Self { metadata, entries }
     }
     
     pub fn get_name(&self) -> String {
         self.metadata.get_name()
     }
-    
-    pub fn get_metadata(&self) -> &MetaData {
+
+    pub fn get_metadata(&self) -> &DsmMetaData {
         &self.metadata
+    }
+
+    pub fn get_license(&self) -> &HashMap<u32, DsmLicense> {
+        self.metadata.get_licenses()
     }
 
     pub fn get_version(&self) -> u32 {
         self.metadata.get_version()
     }
 
-    pub fn get_mut_entries(&mut self) -> &mut HashMap<String, Vec<DatasetEntry>> {
+    pub fn get_mut_entries(&mut self) -> &mut HashMap<String, Vec<DsmEntry>> {
         &mut self.entries
     }
 
-    pub fn get_entries(&self) -> &HashMap<String, Vec<DatasetEntry>> {
+    pub fn get_entries(&self) -> &HashMap<String, Vec<DsmEntry>> {
         &self.entries
     }
     
-    pub fn get_classes(&self) -> HashMap<u32, Classes> {
+    pub fn get_classes(&self) -> HashMap<u32, DsmClasses> {
         self.metadata.get_classes()
     }
 

@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use interfaces::models::classes::Classes;
+use interfaces::models::classes::DsmClasses;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Category {
@@ -9,15 +9,15 @@ pub(crate) struct Category {
 }
 
 impl Category {
-	pub fn from_classes(classes: &Classes, id: u32) -> Self {
+	pub fn from_classes(classes: &DsmClasses, id: u32) -> Self {
 		Self {
-			id,
+			id: id + 1,
 			name: classes.get_classes().clone(),
 			supercategory: classes.get_subclass().clone().unwrap_or(String::new()),
 		}
 	}
 
-	pub fn to_classes(&self) -> Classes {
-		Classes::new(self.name.clone(), Some(self.supercategory.clone()))
+	pub fn to_classes(&self) -> DsmClasses {
+		DsmClasses::new(self.name.clone(), Some(self.supercategory.clone()))
 	}
 }

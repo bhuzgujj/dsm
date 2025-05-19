@@ -1,8 +1,9 @@
-use crate::models::ClassMapping;
+use crate::models::{ClassMapper, LicenseMapper};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct StorableMerged {
 	pub datasets: Vec<String>,
-	pub mapping: ClassMapping
+	pub class_mapper: ClassMapper,
+	pub license_mapper: LicenseMapper
 }

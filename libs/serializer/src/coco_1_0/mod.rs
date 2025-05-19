@@ -1,7 +1,7 @@
 use std::fs::{copy, create_dir_all, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-use interfaces::models::Datasets;
+use interfaces::models::DsmSets;
 use interfaces::models::DataForm;
 use crate::coco_1_0::models::sequence::{Sequence, IMAGE_PATH};
 
@@ -9,7 +9,7 @@ mod models;
 
 const ANNOTATION_DIR: &'static str = "annotations";
 
-pub(crate) fn read(root: &PathBuf, name: Option<String>, version: Option<u32>, data_form: DataForm) -> anyhow::Result<Vec<Datasets>> {
+pub(crate) fn read(root: &PathBuf, name: Option<String>, version: Option<u32>, data_form: DataForm) -> anyhow::Result<Vec<DsmSets>> {
 	let sequences = models::read(&root.join(ANNOTATION_DIR))?;
 	let mut datasets = Vec::new();
 	let new_name = name.clone().unwrap_or(
@@ -24,13 +24,14 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: Option<u32>, d
 	Ok(datasets)
 }
 
-pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &Datasets) -> anyhow::Result<()> {
+pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &DsmSets) -> anyhow::Result<()> {
 	create_dir_all(&root.join(ANNOTATION_DIR))?;
 	let (sequences, image_map) = Sequence::from_datasets(datasets)?;
 	for (name, sequence) in sequences {
 		let json = serde_json::to_string_pretty(&sequence)?;
 		OpenOptions::new()
 			.write(true)
+			.create(true)
 			.truncate(true)
 			.open(&root.join(ANNOTATION_DIR).join(format!("instances_{}.json", name)))?
 			.write_all(json.as_bytes())?;

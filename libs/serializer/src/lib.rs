@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::path::PathBuf;
 use log::debug;
-use interfaces::models::Datasets;
+use interfaces::models::DsmSets;
 
 mod yolo_1_1;
 mod coco_1_0;
@@ -24,7 +24,7 @@ impl Display for DataForm {
 }
 
 impl DataForm {
-	pub fn read(&self, path: &PathBuf, name: Option<String>, version: Option<u32>) -> anyhow::Result<Vec<Datasets>> {
+	pub fn read(&self, path: &PathBuf, name: Option<String>, version: Option<u32>) -> anyhow::Result<Vec<DsmSets>> {
 		debug!("Reading files format '{}' at '{}'", &path.canonicalize()?.to_str().unwrap_or("<Unknown path>"), &self);
 		match &self {
 			DataForm::Yolo1_1 => yolo_1_1::read(&path, name, version.unwrap_or(1), self.clone().into()),
@@ -33,11 +33,11 @@ impl DataForm {
 		}
 	}
 
-	pub fn write(&self, path: &PathBuf, store_path: &PathBuf, datasets: &Datasets) -> anyhow::Result<()> {
+	pub fn write(&self, path: &PathBuf, store_path: &PathBuf, datasets: &DsmSets) -> anyhow::Result<()> {
 		debug!("Reading files format '{}' at '{}'", &path.canonicalize()?.to_str().unwrap_or("<Unknown path>"), &self);
 		match self {
 			DataForm::Yolo1_1 => yolo_1_1::write(store_path, path, datasets),
-			DataForm::Coco1_0 => todo!("Coco 1.0 format is not supported yet"),
+			DataForm::Coco1_0 => coco_1_0::write(store_path, path, datasets),
 			DataForm::Custom(_) => todo!("Custom format are not supported yet")
 		}
 	}

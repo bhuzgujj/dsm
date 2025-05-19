@@ -3,8 +3,8 @@ mod data_entries;
 mod obj_names;
 
 use crate::yolo_1_1::obj_data::ObjData;
-use interfaces::models::metadata::MetaData;
-use interfaces::models::Datasets;
+use interfaces::models::metadata::DsmMetaData;
+use interfaces::models::DsmSets;
 use interfaces::models::DataForm;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
@@ -13,7 +13,7 @@ use std::vec;
 
 const PREFIX: &str = "data/";
 
-pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter: DataForm) -> anyhow::Result<Vec<Datasets>> {
+pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter: DataForm) -> anyhow::Result<Vec<DsmSets>> {
 	let objdata = ObjData::read(root)?;
 	let classes = obj_names::read(root.join(objdata.get_names()))?;
 	let mut sets = HashMap::new();
@@ -30,7 +30,7 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter
 		}
 		sets.insert(key.clone(), entries);
 	}
-	let metadata = MetaData::new(
+	let metadata = DsmMetaData::new(
 		new_name,
 		version,
 		None,
@@ -43,10 +43,10 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter
 		classes,
 		HashMap::new()
 	);
-	Ok(vec![Datasets::new(metadata, sets)])
+	Ok(vec![DsmSets::new(metadata, sets)])
 }
 
-pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &Datasets) -> anyhow::Result<()> {
+pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &DsmSets) -> anyhow::Result<()> {
 	create_dir_all(&root)?;
 	obj_names::write(&root, datasets.get_classes())?;
 	let mut sets = HashMap::new();

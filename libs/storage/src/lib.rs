@@ -1,6 +1,6 @@
 mod files;
 
-use interfaces::models::{Datasets, MergedSet};
+use interfaces::models::{DsmSets, MergedSet};
 use std::path::PathBuf;
 
 pub enum Storage {
@@ -12,7 +12,7 @@ pub enum Storage {
 }
 
 impl Storage {
-	pub async fn store(&self, datasets: &Datasets, datasets_path: &PathBuf) -> anyhow::Result<()> {
+	pub async fn store(&self, datasets: &DsmSets, datasets_path: &PathBuf) -> anyhow::Result<()> {
 		match self {
 			Storage::Local { ledger_directory, store_directory}  => {
 				files::store(store_directory, ledger_directory, datasets_path, datasets).await
@@ -33,7 +33,7 @@ impl Storage {
 		}
 	}
 
-	pub async fn read(&self, name: String, version: String) -> anyhow::Result<Option<Datasets>> {
+	pub async fn read(&self, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
 		match self {
 			Storage::Local{ledger_directory, store_directory} => {
 				files::read(store_directory, ledger_directory, name, version).await
@@ -55,7 +55,7 @@ impl Storage {
 		}
 	}
 	
-	pub async fn list_raw(&self) -> anyhow::Result<Vec<Datasets>> {
+	pub async fn list_raw(&self) -> anyhow::Result<Vec<DsmSets>> {
 		match self {
 			Storage::Local{ledger_directory, store_directory} => {
 				files::list_raw(store_directory, ledger_directory).await

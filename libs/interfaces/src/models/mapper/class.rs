@@ -1,18 +1,18 @@
-use crate::models::classes::Classes;
-use crate::models::Datasets;
+use crate::models::classes::DsmClasses;
+use crate::models::DsmSets;
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ClassMapping {
+pub struct ClassMapper {
 	pub classes: HashMap<String, u32>,
 	pub mapping: HashMap<String, Vec<String>>,
 	pub custom: Option<HashMap<String, Custom>>,
 }
 
-impl ClassMapping {
-	pub fn validate(&self, dataset: &Datasets) -> anyhow::Result<()> {
+impl ClassMapper {
+	pub fn validate(&self, dataset: &DsmSets) -> anyhow::Result<()> {
 		for (_, classes) in dataset.get_classes() {
 			if let Some(custom) = &self.custom {
 				if custom.get(&dataset.get_name()).is_some_and(|k| k.mapping.contains_key(classes.get_classes())) {
@@ -33,7 +33,7 @@ impl ClassMapping {
 		Ok(())
 	}
 
-	pub(crate) fn get_class_for(&self, name: &String, class: &Classes) -> Option<&u32> {
+	pub(crate) fn get_class_for(&self, name: &String, class: &DsmClasses) -> Option<&u32> {
 		if let Some(custom) = &self.custom {
 			if let Some(k) = custom.get(name) {
 				if let Some(new_name) =  k.mapping.get(class.get_classes()) {

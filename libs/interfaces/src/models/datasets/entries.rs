@@ -1,12 +1,12 @@
 use std::collections::HashMap;
-use crate::models::datasets::annotation::Annotation;
+use crate::models::datasets::annotation::DsmAnnotation;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use crate::models::classes::Classes;
-use crate::models::ClassMapping;
+use crate::models::classes::DsmClasses;
+use crate::models::{ClassMapper, LicenseMapper};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct DatasetEntry {
+pub struct DsmEntry {
     file_name: String,
     image_relative_path: PathBuf,
     width: u32,
@@ -15,10 +15,10 @@ pub struct DatasetEntry {
     flickr_url: Option<String>,
     coco_url: Option<String>,
     date_captured: Option<u32>,
-    annotation: Vec<Annotation>,
+    annotation: Vec<DsmAnnotation>,
 }
 
-impl DatasetEntry {
+impl DsmEntry {
     pub fn new(
         image_path: PathBuf,
         width: u32,
@@ -28,7 +28,7 @@ impl DatasetEntry {
         flickr_url: Option<String>,
         coco_url: Option<String>,
         date_captured: Option<u32>,
-        annotation: Vec<Annotation>
+        annotation: Vec<DsmAnnotation>
     ) -> Self {
         Self {
             image_relative_path: image_path,
@@ -58,25 +58,52 @@ impl DatasetEntry {
     pub fn get_height(&self) -> u32 {
         self.height
     }
+
+    pub fn get_license(&self) -> Option<u32> {
+        self.license
+    }
+
+    pub fn get_flickr_url(&self) -> &Option<String> {
+        &self.flickr_url
+    }
+
+    pub fn get_coco_url(&self) -> &Option<String> {
+        &self.coco_url
+    }
     
-    pub fn get_annotation(&self) -> &Vec<Annotation> {
+    pub fn get_annotation(&self) -> &Vec<DsmAnnotation> {
         &self.annotation
     }
 
-    pub fn map_in(&self, name: String, version: u32, mapping: &ClassMapping, classes: HashMap<u32, Classes>) -> anyhow::Result<Self> {
+    pub fn get_date_captured(&self) -> Option<u32> {
+        self.date_captured
+    }
+
+    pub fn map_in(
+        &self,
+        name: String,
+        version: u32,
+        class_mapper: &ClassMapper,
+        licence_mapper: &LicenseMapper,
+        classes: HashMap<u32, DsmClasses>
+    ) -> anyhow::Result<Self> {
         let prefix = format!("{}-v{}", name, version);
         let mut new_annotation = Vec::new();
         for ann in &self.annotation {
             let old_class = classes.get(&ann.get_class()).expect("TODO: Class not found");
-            let new_class = mapping.get_class_for(&name, old_class).expect("TODO: Class not found");
+            let new_class = class_mapper.get_class_for(&name, old_class).expect("TODO: Class not found");
             new_annotation.push(ann.map_in(*new_class));
+        }
+        let mut licence_new_id = None;
+        if let Some(id) = self.license {
+            licence_new_id = licence_mapper.map_licence(id, name);
         }
         Ok(Self {
             image_relative_path: self.image_relative_path.clone(),
             width: self.width.clone(),
             height: self.height.clone(),
             file_name: format!("{}-{}", prefix, self.file_name.clone()),
-            license: self.license.clone(),
+            license: licence_new_id,
             flickr_url: self.flickr_url.clone(),
             coco_url: self.coco_url.clone(),
             date_captured: self.date_captured.clone(),

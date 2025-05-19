@@ -4,10 +4,10 @@ use crate::coco_1_0::models::image::Image;
 use crate::coco_1_0::models::info::Info;
 use crate::coco_1_0::models::license::License;
 use anyhow::anyhow;
-use interfaces::models::entries::DatasetEntry;
-use interfaces::models::metadata::MetaData;
+use interfaces::models::entries::DsmEntry;
+use interfaces::models::metadata::DsmMetaData;
 use interfaces::models::DataForm;
-use interfaces::models::Datasets;
+use interfaces::models::DsmSets;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -24,11 +24,11 @@ pub(crate) struct Sequence {
 }
 
 impl Sequence {
-    pub(crate) fn to_datasets(self, data_form: &DataForm, name: &String, version: &Option<u32>, subset: String) -> anyhow::Result<Datasets> {
+    pub(crate) fn to_datasets(self, data_form: &DataForm, name: &String, version: &Option<u32>, subset: String) -> anyhow::Result<DsmSets> {
         let actual_name = strip_name(subset)?;
         let version = version.unwrap_or(1);
         let n = format!("{}-{}", name.clone(), actual_name.clone());
-        let metadata: MetaData = MetaData::new(
+        let metadata: DsmMetaData = DsmMetaData::new(
             n.clone(),
             version,
             Some(self.info.version),
@@ -51,8 +51,8 @@ impl Sequence {
                     acc
                 }),
         );
-        let mut entries: HashMap<String, Vec<DatasetEntry>> = HashMap::new();
-        let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::Annotation>> = HashMap::new();
+        let mut entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
+        let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::DsmAnnotation>> = HashMap::new();
         for ann in self.annotations {
             if annotations.contains_key(&ann.image_id) {
                 let img = annotations
@@ -66,7 +66,7 @@ impl Sequence {
         let mut data_entries = Vec::new();
         let path = PathBuf::from(&n).join(format!("v{}", version)).join(IMAGE_PATH).join(actual_name.clone());
         for imgs in self.images {
-            data_entries.push(DatasetEntry::new(
+            data_entries.push(DsmEntry::new(
                 path.join(&imgs.file_name).clone(),
                 imgs.width,
                 imgs.height,
@@ -83,15 +83,24 @@ impl Sequence {
         }
         entries.insert(actual_name.clone(), data_entries);
 
-        Ok(Datasets::new(metadata, entries))
+        Ok(DsmSets::new(metadata, entries))
     }
 
-    pub(crate) fn from_datasets(datasets: &Datasets) -> anyhow::Result<(HashMap<String, Self>, HashMap<String, String>)> {
+    pub(crate) fn from_datasets(datasets: &DsmSets) -> anyhow::Result<(HashMap<String, Self>, HashMap<String, PathBuf>)> {
         let mut sequences = HashMap::new();
-        let mut image_map = HashMap::new();
+        let mut image_map: HashMap<String, PathBuf> = HashMap::new();
+        let mut images_index: u32 = 0;
+        let mut annotations_index: u32 = 0;
         for (subset, entries) in datasets.get_entries() {
-            let (sequence, images) = Self::from_parts(datasets.get_metadata(), entries.clone())?;
-            for (refs, name) in &images {
+            let (sequence, images, imgi, anni) = Self::from_parts(
+                datasets.get_metadata(),
+                entries.clone(),
+                &images_index,
+                &annotations_index
+            )?;
+            images_index = imgi;
+            annotations_index = anni;
+            for (name, refs) in &images {
                 image_map.insert(name.clone(), refs.clone());
             }
             sequences.insert(subset.clone(), sequence);
@@ -100,18 +109,29 @@ impl Sequence {
         Ok((sequences, image_map))
     }
 
-    fn from_parts(meta_data: &MetaData, entries: Vec<DatasetEntry>) -> anyhow::Result<(Self, HashMap<String, String>)> {
+    fn from_parts(meta_data: &DsmMetaData, entries: Vec<DsmEntry>, images_i: &u32, annotations_i: &u32) -> anyhow::Result<(Self, HashMap<String, PathBuf>, u32, u32)> {
         let mut image_map = HashMap::new();
-        let mut licenses: Vec<License>,
-        let mut info: Info = Info::from_meta(meta_data);
-        let mut categories: Vec<Category> = meta_data.get_classes().iter().fold(Vec::new(), |mut acc, (index, class)| {
+        let licenses: Vec<License> = meta_data.get_licenses().clone().iter().fold(Vec::new(), |mut acc, (index, license)| {
+            acc.push(License::from_base(index, license));
+            acc
+        });
+        let mut images_index = *images_i;
+        let mut annotations_index = *annotations_i;
+        let info: Info = Info::from_meta(meta_data);
+        let categories: Vec<Category> = meta_data.get_classes().iter().fold(Vec::new(), |mut acc, (index, class)| {
             acc.push(Category::from_classes(class, *index));
             acc
         });
         let mut images: Vec<Image> = Vec::with_capacity(entries.len());
         let mut annotations: Vec<Annotation> = Vec::with_capacity(entries.len());
         for entry in entries {
-
+            images_index += 1;
+            images.push(Image::from_data_entry(images_index, &entry));
+            for annotation in entry.get_annotation() {
+                annotations_index += 1;
+                annotations.push(Annotation::from_interface(annotations_index, images_index, &annotation));
+            }
+            image_map.insert(entry.get_file_name(), entry.get_image_relative_path());
         }
 
         Ok((Self {
@@ -120,7 +140,7 @@ impl Sequence {
             categories,
             images,
             annotations
-        }, image_map))
+        }, image_map, images_index, annotations_index))
     }
 }
 

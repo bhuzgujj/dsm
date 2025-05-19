@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct Annotation {
+pub struct DsmAnnotation {
 	class: u32,
 	x: f64,
 	y: f64,
@@ -13,7 +13,7 @@ pub struct Annotation {
 	rotation: u32
 }
 
-impl Annotation {
+impl DsmAnnotation {
 	pub fn to_file_str(&self) -> String {
 		format!("{} {:.6} {:.6} {:.6} {:.6}", self.class, self.x, self.y, self.width, self.height)
 	}
@@ -30,7 +30,7 @@ impl Annotation {
 	}
 }
 
-impl Annotation {
+impl DsmAnnotation {
 	pub fn new(
 		class: u32,
 		x: f64,
@@ -87,5 +87,25 @@ impl Annotation {
 
 	pub fn get_height(&self) -> f64 {
 		self.height
+	}
+
+	pub fn get_segmentation(&self) -> &Vec<f64> {
+		&self.segmentation
+	}
+
+	pub fn get_area(&self) -> f64 {
+		self.height * self.width
+	}
+
+	pub fn get_iscrowd(&self) -> u32 {
+		self.iscrowd
+	}
+
+	pub fn get_occluded(&self) -> bool {
+		self.occluded
+	}
+	
+	pub fn get_rotation(&self) -> u32 {
+		self.rotation
 	}
 }

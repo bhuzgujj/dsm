@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct Classes {
+pub struct DsmClasses {
 	class: String,
 	subclass: Option<String>,
 }
 
-impl Classes {
+impl DsmClasses {
 	pub fn new(class: String, subclass: Option<String>) -> Self {
 		Self { class, subclass }
 	}

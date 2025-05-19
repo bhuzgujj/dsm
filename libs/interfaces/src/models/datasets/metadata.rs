@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use crate::models::dataform::DataForm;
-use crate::models::datasets::classes::Classes;
-use crate::models::datasets::licence::License;
+use crate::models::form::DataForm;
+use crate::models::datasets::classes::DsmClasses;
+use crate::models::datasets::licence::DsmLicense;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct MetaData {
+pub struct DsmMetaData {
     name: String,
     version: u32,
     subset_version: Option<String>,
@@ -15,11 +15,11 @@ pub struct MetaData {
     url: String,
     year: String,
     formatter: DataForm,
-    classes: HashMap<u32, Classes>,
-    licenses: HashMap<u32, License>,
+    classes: HashMap<u32, DsmClasses>,
+    licenses: HashMap<u32, DsmLicense>,
 }
 
-impl MetaData {
+impl DsmMetaData {
     pub fn new(
         name: String,
         version: u32,
@@ -30,8 +30,8 @@ impl MetaData {
         url: String,
         year: String,
         formatter: DataForm,
-        classes: HashMap<u32, Classes>,
-        licenses: HashMap<u32, License>
+        classes: HashMap<u32, DsmClasses>,
+        licenses: HashMap<u32, DsmLicense>
     ) -> Self {
         Self {
             name,
@@ -56,7 +56,7 @@ impl MetaData {
         self.version.clone()
     }
     
-    pub fn get_classes(&self) -> HashMap<u32, Classes> {
+    pub fn get_classes(&self) -> HashMap<u32, DsmClasses> {
         self.classes.clone()
     }
     
@@ -86,5 +86,9 @@ impl MetaData {
 
     pub fn get_formatter(&self) -> DataForm {
         self.formatter.clone()
+    }
+
+    pub fn get_licenses(&self) -> &HashMap<u32, DsmLicense> {
+        &self.licenses
     }
 }

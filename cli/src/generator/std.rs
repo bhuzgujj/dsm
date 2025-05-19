@@ -41,9 +41,10 @@ impl Std {
 		let new_set = if let Some(ds) = datasets {
 			ds
 		} else {
-			storage.read_merged(self.datasets.clone(), self.version.clone()).await?
-				.expect("Could not find datasets")
-				.to_dataset(formatter.to_data_form())?
+			let merged_set = storage.read_merged(self.datasets.clone(), self.version.clone()).await?
+				.expect("Could not find datasets");
+			
+			merged_set.to_dataset(formatter.to_data_form())?
 		};
 		formatter.write(&path, &settings.get_store_path(), &new_set)?;
 		Ok(())

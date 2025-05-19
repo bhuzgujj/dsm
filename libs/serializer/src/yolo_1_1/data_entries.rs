@@ -1,15 +1,15 @@
 use crate::yolo_1_1::strip_prefix;
 use image::image_dimensions;
-use interfaces::models::annotation::Annotation;
-use interfaces::models::classes::Classes;
-use interfaces::models::entries::DatasetEntry;
+use interfaces::models::annotation::DsmAnnotation;
+use interfaces::models::classes::DsmClasses;
+use interfaces::models::entries::DsmEntry;
 use std::collections::HashMap;
 use std::fs::{copy, create_dir_all, read_to_string, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-pub(crate) fn read(refs: &PathBuf, datasets_name: &String, datasets_version: u32, root: &PathBuf, classes: &HashMap<u32, Classes>) -> anyhow::Result<Vec<DatasetEntry>> {
+pub(crate) fn read(refs: &PathBuf, datasets_name: &String, datasets_version: u32, root: &PathBuf, classes: &HashMap<u32, DsmClasses>) -> anyhow::Result<Vec<DsmEntry>> {
 	let content = read_to_string(refs)?;
 	let version = format!("v{}", datasets_version);
 	let mut entries = Vec::new();
@@ -27,7 +27,7 @@ pub(crate) fn read(refs: &PathBuf, datasets_name: &String, datasets_version: u32
 				annotations.push(parse_annotation(&annotation, &classes, img_width, img_height)?);
 			}
 		}
-		entries.push(DatasetEntry::new(
+		entries.push(DsmEntry::new(
 			PathBuf::from(&datasets_name).join(&version).join(image_relative_path),
 			img_width,
 			img_height,
@@ -42,7 +42,7 @@ pub(crate) fn read(refs: &PathBuf, datasets_name: &String, datasets_version: u32
 	Ok(entries)
 }
 
-fn parse_annotation(entry: &str, classes: &HashMap<u32, Classes>, img_width: u32, img_height: u32) -> anyhow::Result<Annotation> {
+fn parse_annotation(entry: &str, classes: &HashMap<u32, DsmClasses>, img_width: u32, img_height: u32) -> anyhow::Result<DsmAnnotation> {
 	let fields: Vec<&str> = entry.split(&['\t', ' ']).collect();
 	if fields.len() != 5 {
 		return Err(anyhow::anyhow!("Invalid annotation, missing fields: '{}'", entry));
@@ -54,7 +54,7 @@ fn parse_annotation(entry: &str, classes: &HashMap<u32, Classes>, img_width: u32
 	let y = f64::from_str(fields[2])? * img_height as f64;
 	let width = f64::from_str(fields[3])? * img_width as f64;
 	let height = f64::from_str(fields[4])? * img_height as f64;
-	Ok(Annotation::new(
+	Ok(DsmAnnotation::new(
 		class_id,
 		x,
 		y,
@@ -67,7 +67,7 @@ fn parse_annotation(entry: &str, classes: &HashMap<u32, Classes>, img_width: u32
 	))
 }
 
-pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, sets_name: &String, dataset_entry: &Vec<DatasetEntry>) -> anyhow::Result<String> {
+pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, sets_name: &String, dataset_entry: &Vec<DsmEntry>) -> anyhow::Result<String> {
 	let dir = format!("obj_{sets_name}_data");
 	let img_dir=  root.join(&dir);
 	create_dir_all(&img_dir)?;

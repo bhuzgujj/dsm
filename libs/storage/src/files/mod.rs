@@ -2,7 +2,7 @@ mod copy;
 
 use crate::files::copy::copy_recursively;
 use anyhow::Error;
-use interfaces::models::{Datasets, MergedSet, StorableMerged};
+use interfaces::models::{DsmSets, MergedSet, StorableMerged};
 use std::fs::{create_dir_all, read_dir, read_to_string, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
@@ -15,7 +15,7 @@ pub(crate) async fn store(
 	store_directory: &PathBuf,
 	ledger_directory: &PathBuf,
 	datasets_path: &PathBuf,
-	datasets: &Datasets,
+	datasets: &DsmSets,
 ) -> anyhow::Result<()> {
 	let subset = format!("v{}", datasets.get_version());
 	let store_path = store_directory.join(datasets.get_name()).join(&subset);
@@ -43,14 +43,14 @@ pub(crate) async fn store(
 	Ok(())
 }
 
-pub(crate) async fn read(_store_directory: &PathBuf, ledger_directory: &PathBuf, name: String, version: String) -> anyhow::Result<Option<Datasets>> {
+pub(crate) async fn read(_store_directory: &PathBuf, ledger_directory: &PathBuf, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
 	let datasets_ledger = ledger_raw_dir.join(format!("{}-v{}.json", name, version));
 	if !datasets_ledger.exists() {
 		return Ok(None)
 	}
 	let content = read_to_string(datasets_ledger)?;
-	let datasets: Datasets = serde_json::from_str(&content)?;
+	let datasets: DsmSets = serde_json::from_str(&content)?;
 	Ok(Some(datasets))
 }
 
@@ -66,13 +66,13 @@ pub(crate) async fn read_merged(_store_directory: &PathBuf, ledger_directory: &P
 	let mut datasets = Vec::new();
 	for set in storable.datasets {
 		let content = read_to_string(ledger_raw_dir.join(set))?;
-		let ds: Datasets = serde_json::from_str(&content)?;
+		let ds: DsmSets = serde_json::from_str(&content)?;
 		datasets.push(ds);
 	}
-	Ok(Some(MergedSet::from_vec(datasets, name, u32::from_str(version.as_str())?, storable.mapping)?))
+	Ok(Some(MergedSet::from_vec(datasets, name, u32::from_str(version.as_str())?, storable.class_mapper, storable.license_mapper)?))
 }
 
-pub(crate) async fn list_raw(_store_directory: &PathBuf, ledger_directory: &PathBuf) -> anyhow::Result<Vec<Datasets>> {
+pub(crate) async fn list_raw(_store_directory: &PathBuf, ledger_directory: &PathBuf) -> anyhow::Result<Vec<DsmSets>> {
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
 	if !ledger_raw_dir.exists() {
 		return Ok(Vec::new())
@@ -85,7 +85,7 @@ pub(crate) async fn list_raw(_store_directory: &PathBuf, ledger_directory: &Path
 			continue;
 		}
 		let content = read_to_string(path)?;
-		let dataset: Datasets = serde_json::from_str(&content)?;
+		let dataset: DsmSets = serde_json::from_str(&content)?;
 		datasets.push(dataset);
 	}
 	Ok(datasets)
