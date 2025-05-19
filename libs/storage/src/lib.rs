@@ -1,22 +1,31 @@
-mod migrations;
-mod datasets;
+mod files;
 
-use crate::migrations::migrate;
-use interfaces::models::Datasets;
+use interfaces::models::{DsmSets, MergedSet};
 use std::path::PathBuf;
 
-const DB_NAME: &'static str = "datasets.sqlite";
-
 pub enum Storage {
-	Local(PathBuf),
+	Local {
+		ledger_directory: PathBuf,
+		store_directory: PathBuf,
+	},
 	Remote(String)
 }
 
 impl Storage {
-	pub fn initialize(&self) -> anyhow::Result<()> {
+	pub async fn store(&self, datasets: &DsmSets, datasets_path: &PathBuf) -> anyhow::Result<()> {
 		match self {
-			Storage::Local(path) => {
-				migrate(&path.join(DB_NAME))
+			Storage::Local { ledger_directory, store_directory}  => {
+				files::store(store_directory, ledger_directory, datasets_path, datasets).await
+			}
+			Storage::Remote(_) => {
+				todo!()
+			}
+		}
+	}
+	pub async fn store_merged(&self, datasets: &MergedSet) -> anyhow::Result<()> {
+		match self {
+			Storage::Local { ledger_directory, store_directory}  => {
+				files::store_merged(store_directory, ledger_directory, datasets).await
 			}
 			Storage::Remote(_) => {
 				todo!()
@@ -24,10 +33,10 @@ impl Storage {
 		}
 	}
 
-	pub fn store(&self, data: &Datasets) -> anyhow::Result<()> {
+	pub async fn read(&self, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
 		match self {
-			Storage::Local(path) => {
-				datasets::store(&path.join(DB_NAME), data)
+			Storage::Local{ledger_directory, store_directory} => {
+				files::read(store_directory, ledger_directory, name, version).await
 			}
 			Storage::Remote(_) => {
 				todo!()
@@ -35,10 +44,21 @@ impl Storage {
 		}
 	}
 
-	pub fn read(&self, name: String, version: u32) -> anyhow::Result<Datasets> {
+	pub async fn read_merged(&self, name: String, version: String) -> anyhow::Result<Option<MergedSet>> {
 		match self {
-			Storage::Local(path) => {
-				datasets::read(&path.join(DB_NAME), name, version)
+			Storage::Local{ledger_directory, store_directory} => {
+				files::read_merged(store_directory, ledger_directory, name, version).await
+			}
+			Storage::Remote(_) => {
+				todo!()
+			}
+		}
+	}
+	
+	pub async fn list_raw(&self) -> anyhow::Result<Vec<DsmSets>> {
+		match self {
+			Storage::Local{ledger_directory, store_directory} => {
+				files::list_raw(store_directory, ledger_directory).await
 			}
 			Storage::Remote(_) => {
 				todo!()

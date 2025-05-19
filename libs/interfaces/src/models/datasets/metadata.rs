@@ -1,18 +1,50 @@
 use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
+use crate::models::form::DataForm;
+use crate::models::datasets::classes::DsmClasses;
+use crate::models::datasets::licence::DsmLicense;
 
-#[derive(Debug, Clone)]
-pub struct MetaData {
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct DsmMetaData {
     name: String,
     version: u32,
-    classes: HashMap<u32, String>,
+    subset_version: Option<String>,
+    contributor: String,
+    date_created: String,
+    description: String,
+    url: String,
+    year: String,
+    formatter: DataForm,
+    classes: HashMap<u32, DsmClasses>,
+    licenses: HashMap<u32, DsmLicense>,
 }
 
-impl MetaData {
-    pub fn new(name: String, version: u32, classes: HashMap<u32, String>) -> Self {
+impl DsmMetaData {
+    pub fn new(
+        name: String,
+        version: u32,
+        subset_version: Option<String>,
+        contributor: String,
+        date_created: String,
+        description: String,
+        url: String,
+        year: String,
+        formatter: DataForm,
+        classes: HashMap<u32, DsmClasses>,
+        licenses: HashMap<u32, DsmLicense>
+    ) -> Self {
         Self {
             name,
             version,
-            classes
+            subset_version,
+            contributor,
+            date_created,
+            description,
+            url,
+            year,
+            formatter,
+            classes,
+            licenses,
         }
     }
 
@@ -21,10 +53,42 @@ impl MetaData {
     }
 
     pub fn get_version(&self) -> u32 {
-        self.version
+        self.version.clone()
     }
     
-    pub fn get_classes(&self) -> &HashMap<u32, String> {
-        &self.classes
+    pub fn get_classes(&self) -> HashMap<u32, DsmClasses> {
+        self.classes.clone()
+    }
+    
+    pub fn get_subset_version(&self) -> Option<String> {
+        self.subset_version.clone()
+    }
+
+    pub fn get_contributor(&self) -> String {
+        self.contributor.clone()
+    }
+
+    pub fn get_date_created(&self) -> String {
+        self.date_created.clone()
+    }
+
+    pub fn get_description(&self) -> String {
+        self.description.clone()
+    }
+
+    pub fn get_url(&self) -> String {
+        self.url.clone()
+    }
+
+    pub fn get_year(&self) -> String {
+        self.year.clone()
+    }
+
+    pub fn get_formatter(&self) -> DataForm {
+        self.formatter.clone()
+    }
+
+    pub fn get_licenses(&self) -> &HashMap<u32, DsmLicense> {
+        &self.licenses
     }
 }

@@ -4,8 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# Internal
 interfaces.workspace = true
 
+# External
 anyhow.workspace = true
+
 log.workspace = true
-rusqlite = { workspace = true, features = ["bundled"] }
+
+serde_json.workspace = true

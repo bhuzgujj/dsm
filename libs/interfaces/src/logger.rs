@@ -52,7 +52,7 @@ impl Log for Logger {
         }
 
         let log_line = log(&record);
-        println!("{}", log_line);
+        println!("{}", record.args());
 
         if let Some(file_path) = &self.file {
             let mut file = OpenOptions::new()
