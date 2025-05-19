@@ -12,9 +12,9 @@ pub enum Format {
 	Yolo_1_1
 }
 
-impl Into<DataForm> for Format {
-	fn into(self) -> DataForm {
-		match self { 
+impl From<Format> for DataForm {
+	fn from(val: Format) -> Self {
+		match val { 
 			Format::Coco_1_0 => DataForm::Coco1_0,
 			Format::Yolo_1_1 => DataForm::Yolo1_1
 		}

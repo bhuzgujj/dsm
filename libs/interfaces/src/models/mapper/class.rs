@@ -21,7 +21,7 @@ impl ClassMapper {
 			}
 			let mut err = true;
 			for (_, map) in self.mapping.iter() {
-				if map.contains(&classes.get_classes()) {
+				if map.contains(classes.get_classes()) {
 					err = false;
 					break;
 				}
@@ -42,7 +42,7 @@ impl ClassMapper {
 			}
 		}
 		for (key, map) in self.mapping.iter() {
-			if map.contains(&class.get_classes()) {
+			if map.contains(class.get_classes()) {
 				return self.classes.get(key);
 			}
 		}

@@ -100,13 +100,13 @@ impl DsmEntry {
         }
         Ok(Self {
             image_relative_path: self.image_relative_path.clone(),
-            width: self.width.clone(),
-            height: self.height.clone(),
+            width: self.width,
+            height: self.height,
             file_name: format!("{}-{}", prefix, self.file_name.clone()),
             license: licence_new_id,
             flickr_url: self.flickr_url.clone(),
             coco_url: self.coco_url.clone(),
-            date_captured: self.date_captured.clone(),
+            date_captured: self.date_captured,
             annotation: new_annotation,
         })
     }

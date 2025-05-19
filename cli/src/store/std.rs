@@ -32,7 +32,7 @@ impl Std {
             Storage::Local {
                 ledger_directory: settings.get_ledger_path(),
                 store_directory: settings.get_store_path(),
-            }.store(&dataset, &path).await?;
+            }.store(dataset, &path).await?;
         }
         Ok(())
     }

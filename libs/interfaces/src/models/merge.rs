@@ -38,8 +38,8 @@ impl MergedSet {
 			name,
 			version,
 			class_mapper,
-			date_created: date_created.unwrap_or(String::new()),
-			description: description.unwrap_or(String::new()),
+			date_created: date_created.unwrap_or_default(),
+			description: description.unwrap_or_default(),
 			license_mapper
 		})
 	}
@@ -61,8 +61,8 @@ impl MergedSet {
 			name,
 			version,
 			class_mapper,
-			date_created: date_created.unwrap_or(String::new()),
-			description: description.unwrap_or(String::new()),
+			date_created: date_created.unwrap_or_default(),
+			description: description.unwrap_or_default(),
 			license_mapper
 		})
 	}

@@ -69,7 +69,7 @@ impl ObjData {
 								warn!("Duplicate classes in line '{}' of '{}'", nline, &abs_path.display());
 							}
 							classes = Some(u32::from_str(value)
-								.expect(format!("Invalid class value, '{}' should be a integer!", value).as_str()));
+								.unwrap_or_else(|_| panic!("Invalid class value, '{}' should be a integer!", value)));
 						},
 						"names" => {
 							let value = strip_prefix(value);
@@ -90,8 +90,8 @@ impl ObjData {
 			}
 		}
 		Ok(Self {
-			classes: classes.expect(format!("Missing 'classes' in '{}'", abs_path.display()).as_str()),
-			names: names.expect(format!("Missing 'names' in '{}'", abs_path.display()).as_str()),
+			classes: classes.unwrap_or_else(|| panic!("Missing 'classes' in '{}'", abs_path.display())),
+			names: names.unwrap_or_else(|| panic!("Missing 'names' in '{}'", abs_path.display())),
 			backup,
 			sets,
 		})

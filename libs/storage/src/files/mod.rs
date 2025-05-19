@@ -8,8 +8,8 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-const RAW_SET: &'static str = "raw_sets";
-const MERGED_SET: &'static str = "merged_sets";
+const RAW_SET: &str = "raw_sets";
+const MERGED_SET: &str = "merged_sets";
 
 pub(crate) async fn store(
 	store_directory: &PathBuf,
@@ -39,7 +39,7 @@ pub(crate) async fn store(
 		.open(&datasets_ledger)?
 		.write_all(content.as_bytes())?;
 	create_dir_all(&store_path)?;
-	copy_recursively(&datasets_path, &store_path)?;
+	copy_recursively(datasets_path, &store_path)?;
 	Ok(())
 }
 

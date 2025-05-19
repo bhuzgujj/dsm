@@ -16,8 +16,8 @@ pub enum Store {
 impl Store {
 	pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
 		match &self {
-			Store::Custom(fmt) => fmt.execute(&settings).await,
-			Store::Std(fmt) => fmt.execute(&settings).await,
+			Store::Custom(fmt) => fmt.execute(settings).await,
+			Store::Std(fmt) => fmt.execute(settings).await,
 		}
 	}
 }

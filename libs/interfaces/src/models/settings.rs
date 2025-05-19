@@ -9,9 +9,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::paths::dsm_dir;
 
-const SETTINGS_FILENAME: &'static str = "settings.toml";
-const STORE: &'static str = "datasets-store";
-const LEDGER_DIRECTORY: &'static str = "files-ledger";
+const SETTINGS_FILENAME: &str = "settings.toml";
+const STORE: &str = "datasets-store";
+const LEDGER_DIRECTORY: &str = "files-ledger";
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Settings {
@@ -41,12 +41,12 @@ impl Settings {
 
     pub fn get_store_path(&self) -> PathBuf {
         PathBuf::from_str(self.store_path.as_str())
-            .expect(format!("Invalid dataset database location: {}", self.ledger_path).as_str())
+            .unwrap_or_else(|_| panic!("Invalid dataset database location: {}", self.ledger_path))
     }
     
     pub fn get_ledger_path(&self) -> PathBuf {
         PathBuf::from_str(self.ledger_path.as_str())
-            .expect(format!("Invalid dataset database location: {}", self.ledger_path).as_str())
+            .unwrap_or_else(|_| panic!("Invalid dataset database location: {}", self.ledger_path))
     }
 
     pub fn load() -> Self {

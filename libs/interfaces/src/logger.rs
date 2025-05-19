@@ -6,7 +6,7 @@ use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
 
-const FILE_NAME: &'static str = "dsm.log";
+const FILE_NAME: &str = "dsm.log";
 static mut LOGGER: Logger = Logger { file: None };
 
 /// This function modify the logger's field
@@ -51,17 +51,16 @@ impl Log for Logger {
             return;
         }
 
-        let log_line = log(&record);
+        let log_line = log(record);
         println!("{}", record.args());
 
         if let Some(file_path) = &self.file {
             let mut file = OpenOptions::new()
-                .write(true)
+                
                 .append(true)
-                .create(true)
                 .open(file_path)
                 .unwrap();
-            file.write(format!("{}\n", log_line).as_bytes())
+            file.write_all(format!("{}\n", log_line).as_bytes())
                 .expect("Could not write to the log file");
         }
     }

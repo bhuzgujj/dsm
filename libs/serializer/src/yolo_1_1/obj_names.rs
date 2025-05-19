@@ -12,7 +12,7 @@ pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
 	let mut index: u32 = 0;
 	for line in names.lines() {
 		let trimmed = line.trim();
-		if trimmed.len() > 0 {
+		if !trimmed.is_empty() {
 			classes.insert(index, DsmClasses::new(trimmed.to_string(), None));
 			index += 1;
 		}

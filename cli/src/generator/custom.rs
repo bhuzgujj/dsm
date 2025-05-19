@@ -12,9 +12,9 @@ pub struct Custom {
 	path: String,
 }
 
-impl Into<DataForm> for Custom {
-	fn into(self) -> DataForm {
-		DataForm::Custom(self.formats.clone())
+impl From<Custom> for DataForm {
+	fn from(val: Custom) -> Self {
+		DataForm::Custom(val.formats.clone())
 	}
 }
 

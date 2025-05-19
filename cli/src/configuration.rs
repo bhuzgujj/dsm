@@ -15,7 +15,7 @@ impl Configuration {
 	pub fn configure(&self, settings: &mut Settings) -> anyhow::Result<()> {
 		if let Some(log_level) = &self.log_level {
 			let level = LevelFilter::from_str(log_level)
-				.expect(format!("Invalid log level: {}", log_level).as_str());
+				.unwrap_or_else(|_| panic!("Invalid log level: {}", log_level));
 			settings.set_log_level(level);
 		}
 		Ok(())

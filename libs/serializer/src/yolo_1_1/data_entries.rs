@@ -23,8 +23,8 @@ pub(crate) fn read(refs: &PathBuf, datasets_name: &String, datasets_version: u32
 		let mut annotations = Vec::new();
 		for annotation in annotations_file.lines() {
 			let annotation = annotation.trim();
-			if annotation.len() > 0 {
-				annotations.push(parse_annotation(&annotation, &classes, img_width, img_height)?);
+			if !annotation.is_empty() {
+				annotations.push(parse_annotation(annotation, classes, img_width, img_height)?);
 			}
 		}
 		entries.push(DsmEntry::new(
@@ -77,12 +77,12 @@ pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, sets_name: &String, da
 		let new_image_name = entry.get_file_name();
 		sets.push(format!("{}/{}", dir.clone(), new_image_name.clone()));
 		copy(
-			&data_dir.join(entry.get_image_relative_path()),
-			&img_dir.join(&new_image_name)
+			data_dir.join(entry.get_image_relative_path()),
+			img_dir.join(&new_image_name)
 		)?;
-		let (img_width, img_height) = image_dimensions(&img_dir.join(&new_image_name))?;
+		let (img_width, img_height) = image_dimensions(img_dir.join(&new_image_name))?;
 
-		let mut annotation_file = PathBuf::from_str(&entry.get_file_name().as_str()).unwrap();
+		let mut annotation_file = PathBuf::from_str(entry.get_file_name().as_str()).unwrap();
 		annotation_file.set_extension("txt");
 		let new_annotation_name = annotation_file
 			.file_name()
@@ -93,7 +93,7 @@ pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, sets_name: &String, da
 			.write(true)
 			.truncate(true)
 			.create(true)
-			.open(img_dir.join(&new_annotation_name))?
+			.open(img_dir.join(new_annotation_name))?
 			.write_all(entry.get_annotation().iter()
 				.map(|a| a.to_file_percent_str(img_width, img_height))
 				.collect::<Vec<String>>()

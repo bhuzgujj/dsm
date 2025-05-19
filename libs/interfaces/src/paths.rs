@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-const DSM_DIR: &'static str = ".dsm";
+const DSM_DIR: &str = ".dsm";
 
 pub fn dsm_dir() -> PathBuf {
     dirs::home_dir()

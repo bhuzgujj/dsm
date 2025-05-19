@@ -13,7 +13,7 @@ impl Category {
 		Self {
 			id: id + 1,
 			name: classes.get_classes().clone(),
-			supercategory: classes.get_subclass().clone().unwrap_or(String::new()),
+			supercategory: classes.get_subclass().clone().unwrap_or_default(),
 		}
 	}
 

@@ -25,7 +25,7 @@ impl List {
 				for set in sets {
 					let counts = set.get_class_count();
 					let classes = serde_json::to_string(&set.get_classes().iter().map(|(k, c)| {
-						let count = counts.get(&k).unwrap_or(&0);
+						let count = counts.get(k).unwrap_or(&0);
 						if c.get_subclass().clone().is_some_and(|s| !s.is_empty()) {
 							format!("{}({}) [{}]", c.get_classes().clone(), c.get_subclass().clone().unwrap(), count)
 						} else {

@@ -16,8 +16,8 @@ pub enum Generator {
 impl Generator {
 	pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
 		match &self {
-			Generator::Custom(fmt) => fmt.execute(&settings).await,
-			Generator::Std(fmt) => fmt.execute(&settings).await,
+			Generator::Custom(fmt) => fmt.execute(settings).await,
+			Generator::Std(fmt) => fmt.execute(settings).await,
 		}
 	}
 }

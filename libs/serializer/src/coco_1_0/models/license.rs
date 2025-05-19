@@ -10,7 +10,7 @@ pub(crate) struct License {
 impl License {
 	pub(crate) fn from_base(id: &u32, license: &interfaces::models::licence::DsmLicense) -> Self {
 		Self {
-			id: id.clone(),
+			id: *id,
 			name: license.name.clone(),
 			url: license.url.clone(),
 		}

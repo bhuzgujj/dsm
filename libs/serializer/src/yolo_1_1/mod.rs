@@ -24,7 +24,7 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter
 			.into(),
 	);
 	for (key, value) in objdata.get_sets() {
-		let entries = data_entries::read(&root.join(value), &new_name, version, &root, &classes)?;
+		let entries = data_entries::read(&root.join(value), &new_name, version, root, &classes)?;
 		if sets.contains_key(key) {
 			return Err(anyhow::anyhow!("duplicated set: {}", key))
 		}
@@ -47,18 +47,18 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter
 }
 
 pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &DsmSets) -> anyhow::Result<()> {
-	create_dir_all(&root)?;
-	obj_names::write(&root, datasets.get_classes())?;
+	create_dir_all(root)?;
+	obj_names::write(root, datasets.get_classes())?;
 	let mut sets = HashMap::new();
 	for (key, value) in datasets.get_entries() {
 		sets.insert(key.clone(), data_entries::write(
-			&store_path,
-			&root,
+			store_path,
+			root,
 			key,
 			value
 		)?);
 	}
-	ObjData::new(datasets.get_classes().len() as u32, sets).write(&root)?;
+	ObjData::new(datasets.get_classes().len() as u32, sets).write(root)?;
 	Ok(())
 }
 
