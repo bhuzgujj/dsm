@@ -3,7 +3,7 @@ name: msi.yml
 on:
   push:
     branches:
-      - trunk
+      - release
 
 jobs:
   build-msi:
@@ -39,9 +39,10 @@ jobs:
         working-directory: gui
         run: npm run tauri build -- --release
 
-      - name: Archive production artifacts
+      - name: Upload Msi
         uses: actions/upload-artifact@v4
         with:
-          name: msi
+          name: DataSets-Manager
+          retention-days: 5
           path: |
             target/**/**/**/*.msi
