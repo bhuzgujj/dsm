@@ -45,4 +45,4 @@ jobs:
           name: DataSets-Manager
           retention-days: 5
           path: |
-            target/**/**/**/*.msi
+            target/release/bundle/msi/*.msi
