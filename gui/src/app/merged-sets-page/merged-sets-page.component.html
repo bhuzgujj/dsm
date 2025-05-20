@@ -1,0 +1,23 @@
+<table class="main">
+    <tr>
+        <th>Name</th>
+        <th>Version</th>
+        <th>Included sets</th>
+    </tr>
+    <tr *ngFor="let dataset of datasets" (click)="select(dataset)">
+        <td>{{dataset.name}}</td>
+        <td>v{{dataset.version}}</td>
+        <td class="sets">
+            <div *ngIf="selected  === dataset">
+                <ul>
+                    <li *ngFor="let sets of dataset.datasets">
+                        {{sets.metadata.name}}
+                    </li>
+                </ul>
+            </div>
+            <div *ngIf="selected  !== dataset">
+                Count: {{dataset.datasets.length}}
+            </div>
+        </td>
+    </tr>
+</table>

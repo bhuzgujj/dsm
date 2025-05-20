@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct StorableMerged {
+	pub name: String,
+	pub version: u32,
 	pub datasets: Vec<String>,
 	pub class_mapper: ClassMapper,
 	pub license_mapper: LicenseMapper

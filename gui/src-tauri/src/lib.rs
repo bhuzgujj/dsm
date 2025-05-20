@@ -1,10 +1,23 @@
 use interfaces::logger;
-use interfaces::models::{DsmSets, Settings};
+use interfaces::models::{DsmSets, MergedSet, Settings};
 use std::fs::create_dir_all;
 use tauri::{Error, Manager, State};
 use log::error;
 use tauri::async_runtime::Mutex;
 use storage::Storage;
+
+#[tauri::command]
+async fn list_merged_datasets(state: State<'_, Mutex<Settings>>) -> Result<Vec<MergedSet>, Error> {
+    let state = state.lock().await;
+    let storage = Storage::Local {
+        ledger_directory: state.get_ledger_path(),
+        store_directory: state.get_store_path(),
+    };
+    Ok(storage.list_merged().await.unwrap_or_else(|e| {
+        error!("Error listing datasets: {}", e);
+        Vec::new()
+    }))
+}
 
 #[tauri::command]
 async fn list_raw_datasets(state: State<'_, Mutex<Settings>>) -> Result<Vec<DsmSets>, Error> {
@@ -38,7 +51,10 @@ pub fn run() {
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![list_raw_datasets])
+        .invoke_handler(tauri::generate_handler![
+            list_merged_datasets,
+            list_raw_datasets
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

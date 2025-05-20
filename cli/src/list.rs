@@ -36,7 +36,21 @@ impl List {
 					println!("{: <30}{: <20}{: <20}{: <50}", set.get_name(), set.get_version(), set.get_entry_count(), classes);
 				}
 			}
-			List::Merged => {}
+			List::Merged => {
+				let sets = Storage::Local {
+					ledger_directory: settings.get_ledger_path(),
+					store_directory: settings.get_store_path(),
+				}.list_merged().await?;
+				println!("{: <30}{: <20}{: <50}", "Set name", "Version", "Sets");
+				println!("{:=<30}{:=<20}{:=<50}", "", "", "");
+				for merged_set in sets {
+					let sets = merged_set.get_datasets_include().iter()
+						.map(|s| format!("{}={}", s.get_name(), s.get_version()))
+						.collect::<Vec<String>>();
+					let sets = serde_json::to_string(&sets)?;
+					println!("{: <30}{: <20}{: <50}", merged_set.get_name(), merged_set.get_version(), sets);
+				}
+			}
 		}
 		Ok(())
 	}

@@ -30,7 +30,7 @@ impl ValueEnum for Format {
 		&[Format::Coco_1_0, Format::Yolo_1_1]
 	}
 
-	fn from_str(input: &str, ignore_case: bool) -> Result<Self, String> {
+	fn from_str(input: &str, _ignore_case: bool) -> Result<Self, String> {
 		match input {
 			"coco-1-0" => Ok(Format::Coco_1_0),
 			"yolo-1-1" => Ok(Format::Yolo_1_1),

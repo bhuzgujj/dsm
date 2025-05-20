@@ -4,32 +4,32 @@ export type DsmSets = {
 }
 
 export type DsmMetaData = {
-    name: String,
+    name: string,
     version: number,
-    subset_version: String | null,
-    contributor: String,
-    date_created: String,
-    description: String,
-    url: String,
-    year: String,
+    subset_version: string | null,
+    contributor: string,
+    date_created: string,
+    description: string,
+    url: string,
+    year: string,
     formatter: string,
     classes: {[key: number]: DsmClasses},
     licenses: {[key: number]: DsmLicense},
 }
 
 export type DsmClasses = {
-    class: String,
-    subclass: String | null,
+    class: string,
+    subclass: string | null,
 }
 
 export type DsmLicense = {
-    name: String,
-    url: String,
+    name: string,
+    url: string,
 }
 
 export type DataForm = {
-    name: String,
-    url: String,
+    name: string,
+    url: string,
 }
 
 export type DsmAnnotation = {
@@ -45,13 +45,39 @@ export type DsmAnnotation = {
 }
 
 export type DsmEntry = {
-    file_name: String,
-    image_relative_path: String,
+    file_name: string,
+    image_relative_path: string,
     width: number,
     height: number,
     license: number | null,
-    flickr_url: String | null,
-    coco_url: String | null,
+    flickr_url: string | null,
+    coco_url: string | null,
     date_captured: number | null,
     annotation: DsmAnnotation[],
+}
+
+export type MergedSet = {
+    datasets: DsmSets[],
+    name: string,
+    version: number,
+    class_mapper: ClassMapper,
+    license_mapper: LicenseMapper,
+    date_created: string,
+    description: string,
+}
+
+export type ClassMapper = {
+    classes: Map<string, number>,
+    mapping: Map<string, string[]>,
+    custom: Map<string, Custom> | null,
+}
+
+export type LicenseMapper = {
+    current_id: number,
+    licences: Map<number, DsmLicense>,
+    mapping: Map<string, Map<number, number>>,
+}
+
+export type Custom = {
+    mapping: Map<string, string>,
 }
