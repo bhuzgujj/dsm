@@ -5,12 +5,11 @@ mod generator;
 mod list;
 mod merge;
 
-use std::fs::{create_dir_all};
 use clap::Parser;
-use log::error;
+use std::fs::create_dir_all;
 
 use interfaces::logger;
-use interfaces::models::{Settings};
+use interfaces::models::Settings;
 
 use crate::configuration::Configuration;
 use crate::generator::Generator;
@@ -21,10 +20,7 @@ use crate::store::Store;
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 enum Cli {
-    #[command(subcommand)]
     Store(Store),
-
-    #[command(subcommand)]
     Gen(Generator),
 
     #[command(subcommand)]
@@ -56,9 +52,6 @@ async fn wrapper() -> anyhow::Result<()> {
 async fn main() -> anyhow::Result<()> {
     match wrapper().await {
         Ok(()) => Ok(()),
-        Err(e) => {
-            error!("Error: {}", e);
-            Ok(())
-        }
+        Err(_) => Ok(())
     }
 }

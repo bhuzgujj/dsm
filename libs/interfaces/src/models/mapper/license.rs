@@ -33,7 +33,7 @@ impl LicenseMapper {
 	}
 
 	pub(crate) fn map_licence(&self, id: u32, set_name: String) -> Option<u32> {
-		self.mapping.get(&set_name).map(|map| map.get(&id).cloned()).flatten()
+		self.mapping.get(&set_name).and_then(|map| map.get(&id).cloned())
 	}
 
 	pub(crate) fn get_licences(&self) -> &HashMap<u32, DsmLicense> {

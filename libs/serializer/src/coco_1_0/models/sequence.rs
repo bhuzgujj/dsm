@@ -54,13 +54,13 @@ impl Sequence {
         let mut entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
         let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::DsmAnnotation>> = HashMap::new();
         for ann in self.annotations {
-            if annotations.contains_key(&ann.image_id) {
+            if let std::collections::hash_map::Entry::Vacant(e) = annotations.entry(ann.image_id) {
+                e.insert(vec![ann.to_datasettable()]);
+            } else {
                 let img = annotations
                     .get_mut(&ann.image_id)
                     .expect("ann.id not found in annotations");
                 img.push(ann.to_datasettable());
-            } else {
-                annotations.insert(ann.image_id, vec![ann.to_datasettable()]);
             }
         }
         let mut data_entries = Vec::new();
@@ -129,7 +129,7 @@ impl Sequence {
             images.push(Image::from_data_entry(images_index, &entry));
             for annotation in entry.get_annotation() {
                 annotations_index += 1;
-                annotations.push(Annotation::from_interface(annotations_index, images_index, &annotation));
+                annotations.push(Annotation::from_interface(annotations_index, images_index, annotation));
             }
             image_map.insert(entry.get_file_name(), entry.get_image_relative_path());
         }
@@ -149,5 +149,5 @@ fn strip_name(json_name: String) -> anyhow::Result<String> {
     if parts.len() != 2 {
         return Err(anyhow!("'{json_name}' is not a valid json name"));
     }
-    Ok(parts[0].split('_').last().unwrap().to_string())
+    Ok(parts[0].split('_').next_back().unwrap().to_string())
 }

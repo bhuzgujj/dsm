@@ -2,17 +2,25 @@ use std::collections::HashMap;
 use std::fs::{read_to_string, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
+use log::{debug, error};
 use interfaces::models::classes::DsmClasses;
 
 pub(crate) const FILE_NAME: &str = "obj.names";
 
 pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
-	let names = read_to_string(path)?;
+	debug!("Reading '{}'", path.display());
+	let contents = match read_to_string(&path) {
+		Ok(contents) => contents,
+		Err(err) => {
+			error!("Error reading file '{}': {}", path.display(), err);
+			return Err(err.into());
+		}
+	};
 	let mut classes = HashMap::new();
 	let mut index: u32 = 0;
-	for line in names.lines() {
+	for line in contents.lines() {
 		let trimmed = line.trim();
-		if trimmed.len() > 0 {
+		if !trimmed.is_empty() {
 			classes.insert(index, DsmClasses::new(trimmed.to_string(), None));
 			index += 1;
 		}

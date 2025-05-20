@@ -8,8 +8,8 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-const RAW_SET: &'static str = "raw_sets";
-const MERGED_SET: &'static str = "merged_sets";
+const RAW_SET: &str = "raw_sets";
+const MERGED_SET: &str = "merged_sets";
 
 pub(crate) async fn store(
 	store_directory: &PathBuf,
@@ -39,11 +39,11 @@ pub(crate) async fn store(
 		.open(&datasets_ledger)?
 		.write_all(content.as_bytes())?;
 	create_dir_all(&store_path)?;
-	copy_recursively(&datasets_path, &store_path)?;
+	copy_recursively(datasets_path, &store_path)?;
 	Ok(())
 }
 
-pub(crate) async fn read(_store_directory: &PathBuf, ledger_directory: &PathBuf, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
+pub(crate) async fn read_raw(_store_directory: &PathBuf, ledger_directory: &PathBuf, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
 	let datasets_ledger = ledger_raw_dir.join(format!("{}-v{}.json", name, version));
 	if !datasets_ledger.exists() {
@@ -89,6 +89,38 @@ pub(crate) async fn list_raw(_store_directory: &PathBuf, ledger_directory: &Path
 		datasets.push(dataset);
 	}
 	Ok(datasets)
+}
+
+pub(crate) async fn list_merged(_store_directory: &PathBuf, ledger_directory: &PathBuf) -> anyhow::Result<Vec<MergedSet>> {
+	let ledger_raw_dir = ledger_directory.join(RAW_SET);
+	let ledger_merged_dir = ledger_directory.join(MERGED_SET);
+	if !ledger_raw_dir.exists() || !ledger_merged_dir.exists() {
+		return Ok(Vec::new())
+	}
+	let mut mergedsets = Vec::new();
+	for entry in read_dir(ledger_merged_dir)? {
+		let entry = entry?;
+		let path = entry.path();
+		if path.is_dir() {
+			continue;
+		}
+		let content = read_to_string(path)?;
+		let storable_set: StorableMerged = serde_json::from_str(&content)?;
+		let mut datasets = Vec::new();
+		for set in storable_set.datasets {
+			let content = read_to_string(&ledger_raw_dir.join(set))?;
+			let sets: DsmSets = serde_json::from_str(&content)?;
+			datasets.push(sets);
+		}
+		mergedsets.push(MergedSet::from_vec(
+			datasets,
+			storable_set.name,
+			storable_set.version,
+			storable_set.class_mapper,
+			storable_set.license_mapper
+		)?);
+	}
+	Ok(mergedsets)
 }
 
 pub(crate) async fn store_merged(_store_directory: &PathBuf, ledger_directory: &PathBuf, merged: &MergedSet) -> anyhow::Result<()> {

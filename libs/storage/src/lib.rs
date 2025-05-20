@@ -36,7 +36,7 @@ impl Storage {
 	pub async fn read(&self, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
 		match self {
 			Storage::Local{ledger_directory, store_directory} => {
-				files::read(store_directory, ledger_directory, name, version).await
+				files::read_raw(store_directory, ledger_directory, name, version).await
 			}
 			Storage::Remote(_) => {
 				todo!()
@@ -59,6 +59,17 @@ impl Storage {
 		match self {
 			Storage::Local{ledger_directory, store_directory} => {
 				files::list_raw(store_directory, ledger_directory).await
+			}
+			Storage::Remote(_) => {
+				todo!()
+			}
+		}
+	}
+	
+	pub async fn list_merged(&self) -> anyhow::Result<Vec<MergedSet>> {
+		match self {
+			Storage::Local{ledger_directory, store_directory} => {
+				files::list_merged(store_directory, ledger_directory).await
 			}
 			Storage::Remote(_) => {
 				todo!()

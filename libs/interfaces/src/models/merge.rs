@@ -4,8 +4,9 @@ use crate::models::metadata::DsmMetaData;
 use crate::models::storable_merged::StorableMerged;
 use crate::models::{ClassMapper, DataForm, DsmSets, LicenseMapper};
 use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct MergedSet {
 	datasets: Vec<DsmSets>,
 	name: String,
@@ -38,8 +39,8 @@ impl MergedSet {
 			name,
 			version,
 			class_mapper,
-			date_created: date_created.unwrap_or(String::new()),
-			description: description.unwrap_or(String::new()),
+			date_created: date_created.unwrap_or_default(),
+			description: description.unwrap_or_default(),
 			license_mapper
 		})
 	}
@@ -61,8 +62,8 @@ impl MergedSet {
 			name,
 			version,
 			class_mapper,
-			date_created: date_created.unwrap_or(String::new()),
-			description: description.unwrap_or(String::new()),
+			date_created: date_created.unwrap_or_default(),
+			description: description.unwrap_or_default(),
 			license_mapper
 		})
 	}
@@ -115,6 +116,10 @@ impl MergedSet {
 
 		Ok(DsmSets::new(metadata, data_entries))
 	}
+	
+	pub fn get_datasets_include(&self) -> &Vec<DsmSets> {
+		&self.datasets
+	}
 
 	pub fn to_storable(&self) -> StorableMerged {
 		let mut sets = Vec::new();
@@ -124,6 +129,8 @@ impl MergedSet {
 		}
 
 		StorableMerged {
+			name: self.name.clone(),
+			version: self.version,
 			datasets: sets,
 			class_mapper: self.class_mapper.clone(),
 			license_mapper: self.license_mapper.clone(),

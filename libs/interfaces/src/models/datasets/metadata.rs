@@ -53,7 +53,7 @@ impl DsmMetaData {
     }
 
     pub fn get_version(&self) -> u32 {
-        self.version.clone()
+        self.version
     }
     
     pub fn get_classes(&self) -> HashMap<u32, DsmClasses> {

@@ -9,7 +9,7 @@ use storage::Storage;
 
 /// Parse the files in a known standard format
 #[derive(Args, Debug)]
-pub struct Std {
+pub struct Generator {
 	/// In which format the files will be read as
 	formats: Format,
 
@@ -25,7 +25,7 @@ pub struct Std {
 	version: String,
 }
 
-impl Std {
+impl Generator {
 	pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
 		if self.datasets.is_empty() {
 			error!("Require at least one dataset");
@@ -43,7 +43,7 @@ impl Std {
 		} else {
 			let merged_set = storage.read_merged(self.datasets.clone(), self.version.clone()).await?
 				.expect("Could not find datasets");
-			
+
 			merged_set.to_dataset(formatter.to_data_form())?
 		};
 		formatter.write(&path, &settings.get_store_path(), &new_set)?;
