@@ -20,18 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: setup node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
-      - name: install Rust stable
+      - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Build Cli
         run: cargo build --workspace --release
 
-      - name: Npm deps
+      - name: Npm Install
         working-directory: gui
         run: npm i
 
