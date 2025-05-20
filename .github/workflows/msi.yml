@@ -32,9 +32,11 @@ jobs:
         run: cargo build --workspace --release
 
       - name: Npm deps
+        working-directory: gui
         run: npm i
 
       - name: Build Gui
+        working-directory: gui
         run: npm run tauri build -- --release
 
       - name: Archive production artifacts
