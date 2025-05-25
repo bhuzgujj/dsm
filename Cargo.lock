@@ -892,6 +892,7 @@ dependencies = [
 name = "dataset_manager"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "interfaces",
  "log",
  "serde",
@@ -4184,6 +4185,7 @@ dependencies = [
  "anyhow",
  "interfaces",
  "log",
+ "serde",
  "serde_json",
 ]
 

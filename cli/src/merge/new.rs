@@ -1,10 +1,9 @@
+use clap::Args;
+use interfaces::logger::error;
+use interfaces::models::{ClassMapper, MergedSet, Settings};
 use std::collections::HashMap;
 use std::fs::read_to_string;
-use clap::Args;
-use interfaces::models::{ClassMapper, MergedSet, Settings};
 use std::path::PathBuf;
-use anyhow::anyhow;
-use log::error;
 use storage::Storage;
 
 /// Parse the files in a known standard format
@@ -23,7 +22,7 @@ pub struct New {
 
 	/// The version of the merged set
 	#[clap(short, long, default_value = "1")]
-	version: u32,
+	version: String,
 }
 
 impl New {
@@ -35,13 +34,11 @@ impl New {
 		};
 		for sets_label in self.datasets.iter() {
 			if datasets.contains_key(sets_label) {
-				error!("Cannot have twice the same dataset {}", sets_label);
-				return Err(anyhow!("Cannot have twice the same dataset {}", sets_label));
+				return error(format!("Cannot have twice the same dataset {}", sets_label));
 			}
 			let splits: Vec<&str> = sets_label.split('=').collect();
 			if splits.len() != 2 {
-				error!("Can only have 1 equals sign in {}", sets_label);
-				return Err(anyhow!("Can only have 1 equals sign in {}", sets_label));
+				return error(format!("Can only have 1 equals sign in {}", sets_label));
 			}
 			let name = splits[0];
 			let version = splits[1];
@@ -49,13 +46,18 @@ impl New {
 			if let Some(local_set) = local_set {
 				datasets.insert(name.to_string(), local_set);
 			} else {
-				error!("Could not find {}", sets_label);
-				return Err(anyhow!("Could not find {}", sets_label));
+				return error(format!("Could not find {}", sets_label));
 			}
 		}
-		let content = read_to_string(&self.mapping_file)?;
-		let mapping = toml::from_str::<ClassMapper>(&content)?;
-		let merge_set = MergedSet::new(datasets, self.name.clone(), self.version,  mapping)?;
+		let content = match read_to_string(&self.mapping_file) {
+			Ok(content) => content,
+			Err(err) => return error(format!("Could not read file '{}': {err}", &self.mapping_file.display()))
+		};
+		let mapping: ClassMapper =  match toml::from_str(&content) {
+			Ok(content) => content,
+			Err(err) => return error(format!("Could not deserialize toml mapping file '{}': {err}", &self.mapping_file.display()))
+		};
+		let merge_set = MergedSet::new(datasets, self.name.clone(), self.version.clone(),  mapping);
 		storage.store_merged(&merge_set).await?;
 
 		Ok(())

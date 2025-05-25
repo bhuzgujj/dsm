@@ -4,7 +4,7 @@ mod obj_names;
 
 use crate::yolo_1_1::obj_data::ObjData;
 use interfaces::models::metadata::DsmMetaData;
-use interfaces::models::DataForm;
+use interfaces::models::DsmDataForm;
 use interfaces::models::DsmSets;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
@@ -13,7 +13,7 @@ use std::vec;
 
 const PREFIX: &str = "data/";
 
-pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter: DataForm) -> anyhow::Result<Vec<DsmSets>> {
+pub(crate) fn read(root: &PathBuf, name: Option<String>, version: String, formatter: DsmDataForm) -> anyhow::Result<Vec<DsmSets>> {
 	let obj_data = ObjData::read(root)?;
 	let classes = obj_names::read(root.join(obj_data.get_names()))?;
 	let mut sets = HashMap::new();
@@ -24,7 +24,7 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter
 			.into(),
 	);
 	for (key, value) in obj_data.get_sets() {
-		let entries = data_entries::read(&root.join(value), &new_name, version, root, &classes)?;
+		let entries = data_entries::read(&root.join(value), &new_name, &version, root, &classes)?;
 		if sets.contains_key(key) {
 			return Err(anyhow::anyhow!("duplicated set: {}", key))
 		}
@@ -48,7 +48,7 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: u32, formatter
 
 pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &DsmSets) -> anyhow::Result<()> {
 	create_dir_all(root)?;
-	obj_names::write(root, datasets.get_classes())?;
+	obj_names::write(root, datasets.get_classes().clone())?;
 	let mut sets = HashMap::new();
 	for (key, value) in datasets.get_entries() {
 		sets.insert(key.clone(), data_entries::write(

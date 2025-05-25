@@ -20,8 +20,8 @@ pub struct Store {
 	name: Option<String>,
 
 	/// Datasets registered version
-	#[clap(short, long)]
-	version: Option<u32>,
+	#[clap(short, long, default_value="1")]
+	version: String,
 }
 
 impl Store {
@@ -29,7 +29,7 @@ impl Store {
 		let path = PathBuf::from(self.path.clone());
 		let formatter: DataForm = self.formats.clone().into();
 		debug!("Storing dataset '{}' with '{}'", path.display(), formatter);
-		let datasets = formatter.read(&path, self.name.clone(), self.version)?;
+		let datasets = formatter.read(&path, self.name.clone(), self.version.clone())?;
 		for dataset in datasets.iter() {
 			Storage::Local {
 				ledger_directory: settings.get_ledger_path(),

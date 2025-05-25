@@ -1,8 +1,7 @@
 use crate::models::classes::DsmClasses;
-use crate::models::DsmSets;
-use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use log::trace;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClassMapper {
@@ -12,38 +11,23 @@ pub struct ClassMapper {
 }
 
 impl ClassMapper {
-	pub fn validate(&self, dataset: &DsmSets) -> anyhow::Result<()> {
-		for (_, classes) in dataset.get_classes() {
-			if let Some(custom) = &self.custom {
-				if custom.get(&dataset.get_name()).is_some_and(|k| k.mapping.contains_key(classes.get_classes())) {
-					continue;
-				}
-			}
-			let mut err = true;
-			for (_, map) in self.mapping.iter() {
-				if map.contains(classes.get_classes()) {
-					err = false;
-					break;
-				}
-			}
-			if err {
-				return Err(anyhow!("Missing classes mapping: {}", classes.get_classes()));
-			}
-		}
-		Ok(())
-	}
-
 	pub(crate) fn get_class_for(&self, name: &String, class: &DsmClasses) -> Option<&u32> {
 		if let Some(custom) = &self.custom {
 			if let Some(k) = custom.get(name) {
-				if let Some(new_name) =  k.mapping.get(class.get_classes()) {
+				if let Some(new_name) =  k.mapping.get(class.get_classes_name()) {
 					return self.classes.get(new_name);
+				} else {
+					trace!("Custom mapping does not have '{}', will be ignored", class.get_classes_name());
 				}
+			} else {
+				trace!("'{}' does not have a custom mapping", name);
 			}
 		}
 		for (key, map) in self.mapping.iter() {
-			if map.contains(class.get_classes()) {
+			if map.contains(class.get_classes_name()) {
 				return self.classes.get(key);
+			} else {
+				trace!("Could not map '{}' with {key}", class.get_classes_name());
 			}
 		}
 		None

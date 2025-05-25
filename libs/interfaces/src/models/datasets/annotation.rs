@@ -28,9 +28,7 @@ impl DsmAnnotation {
 			self.height / height as f64
 		)
 	}
-}
 
-impl DsmAnnotation {
 	pub fn new(
 		class: u32,
 		x: f64,
@@ -69,24 +67,24 @@ impl DsmAnnotation {
 		}
 	}
 
-	pub fn get_class(&self) -> u32 {
-		self.class
+	pub fn get_class(&self) -> &u32 {
+		&self.class
 	}
 
-	pub fn get_x(&self) -> f64 {
-		self.x
+	pub fn get_x(&self) -> &f64 {
+		&self.x
 	}
 
-	pub fn get_y(&self) -> f64 {
-		self.y
+	pub fn get_y(&self) -> &f64 {
+		&self.y
 	}
 
-	pub fn get_width(&self) -> f64 {
-		self.width
+	pub fn get_width(&self) -> &f64 {
+		&self.width
 	}
 
-	pub fn get_height(&self) -> f64 {
-		self.height
+	pub fn get_height(&self) -> &f64 {
+		&self.height
 	}
 
 	pub fn get_segmentation(&self) -> &Vec<f64> {
@@ -97,15 +95,15 @@ impl DsmAnnotation {
 		self.height * self.width
 	}
 
-	pub fn get_iscrowd(&self) -> u32 {
-		self.iscrowd
+	pub fn get_iscrowd(&self) -> &u32 {
+		&self.iscrowd
 	}
 
-	pub fn get_occluded(&self) -> bool {
-		self.occluded
+	pub fn get_occluded(&self) -> &bool {
+		&self.occluded
 	}
 	
-	pub fn get_rotation(&self) -> u32 {
-		self.rotation
+	pub fn get_rotation(&self) -> &u32 {
+		&self.rotation
 	}
 }

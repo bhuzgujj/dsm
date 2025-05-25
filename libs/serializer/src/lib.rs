@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::path::PathBuf;
 use log::debug;
-use interfaces::models::DsmSets;
+use interfaces::models::{DsmDataForm, DsmSets};
 
 mod yolo_1_1;
 mod coco_1_0;
@@ -24,10 +24,10 @@ impl Display for DataForm {
 }
 
 impl DataForm {
-	pub fn read(&self, path: &PathBuf, name: Option<String>, version: Option<u32>) -> anyhow::Result<Vec<DsmSets>> {
+	pub fn read(&self, path: &PathBuf, name: Option<String>, version: String) -> anyhow::Result<Vec<DsmSets>> {
 		debug!("Reading files format '{}' at '{}'", &path.canonicalize()?.to_str().unwrap_or("<Unknown path>"), &self);
 		match &self {
-			DataForm::Yolo1_1 => yolo_1_1::read(path, name, version.unwrap_or(1), self.clone().into()),
+			DataForm::Yolo1_1 => yolo_1_1::read(path, name, version, self.clone().into()),
 			DataForm::Coco1_0 => coco_1_0::read(path, name, version, self.clone().into()),
 			DataForm::Custom(_) => todo!("Custom format are not supported yet")
 		}
@@ -42,21 +42,21 @@ impl DataForm {
 		}
 	}
 
-	pub fn to_data_form(&self) -> interfaces::models::DataForm {
+	pub fn to_data_form(&self) -> DsmDataForm {
 		match self {
-			DataForm::Yolo1_1 => interfaces::models::DataForm::Yolo1_1,
-			DataForm::Coco1_0 => interfaces::models::DataForm::Coco1_0,
+			DataForm::Yolo1_1 => DsmDataForm::Yolo1_1,
+			DataForm::Coco1_0 => DsmDataForm::Coco1_0,
 			DataForm::Custom(_) => todo!("Custom format are not supported yet")
 		}
 	}
 }
 
-impl From<DataForm> for interfaces::models::DataForm {
-	fn from(val: DataForm) -> Self {
-		match val {
-			DataForm::Yolo1_1 => interfaces::models::DataForm::Yolo1_1,
-			DataForm::Coco1_0 => interfaces::models::DataForm::Coco1_0,
-			DataForm::Custom(f) => interfaces::models::DataForm::Custom(f.clone())
+impl From<DataForm> for DsmDataForm {
+	fn from(form: DataForm) -> Self {
+		match form {
+			DataForm::Yolo1_1 => DsmDataForm::Yolo1_1,
+			DataForm::Coco1_0 => DsmDataForm::Coco1_0,
+			DataForm::Custom(f) => DsmDataForm::Custom(f.clone())
 		}
 	}
 }

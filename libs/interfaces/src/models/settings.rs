@@ -1,13 +1,12 @@
 use std::{
-    fs::{read_to_string, OpenOptions},
-    io::Write,
+    fs::read_to_string,
     str::FromStr,
 };
 use std::path::PathBuf;
 use log::{trace, LevelFilter};
 use serde::{Deserialize, Serialize};
-
-use crate::paths::dsm_dir;
+use crate::logger::error;
+use crate::paths::{dsm_dir, write_to_file};
 
 const SETTINGS_FILENAME: &str = "settings.toml";
 const STORE: &str = "datasets-store";
@@ -51,22 +50,21 @@ impl Settings {
 
     pub fn load() -> Self {
         let settings_filename = dsm_dir().join(SETTINGS_FILENAME);
-        if let Ok(content) = read_to_string(settings_filename) {
+        if let Ok(content) = read_to_string(&settings_filename) {
             toml::from_str(content.as_str()).unwrap_or_default()
         } else {
+            trace!("Settings file not found at '{}'", settings_filename.display());
             Self::default()
         }
     }
 
     pub fn save(&self) -> anyhow::Result<()> {
         let settings_filename = dsm_dir().join(SETTINGS_FILENAME);
-        let content = toml::to_string(self)?;
+        let content = match toml::to_string(self) {
+            Ok(ctnt) => ctnt,
+            Err(err) => return error(format!("Could not serialize in toml settings: {err}"))
+        };
         trace!("Saving settings \n\"\"\" Path: '{}'\n{}\n\"\"\"", settings_filename.display(), content);
-        Ok(OpenOptions::new()
-            .write(true)
-            .truncate(true)
-            .create(true)
-            .open(settings_filename)?
-            .write_all(content.as_bytes())?)
+        write_to_file(&settings_filename, content, true, true)
     }
 }

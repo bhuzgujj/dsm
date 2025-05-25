@@ -1,12 +1,12 @@
 mod copy;
 
 use crate::files::copy::copy_recursively;
-use anyhow::Error;
+use interfaces::logger::error;
 use interfaces::models::{DsmSets, MergedSet, StorableMerged};
-use std::fs::{create_dir_all, read_dir, read_to_string, OpenOptions};
-use std::io::Write;
+use interfaces::paths::write_to_file;
+use serde::de::DeserializeOwned;
+use std::fs::{create_dir_all, read_dir, read_to_string};
 use std::path::PathBuf;
-use std::str::FromStr;
 
 const RAW_SET: &str = "raw_sets";
 const MERGED_SET: &str = "merged_sets";
@@ -19,39 +19,45 @@ pub(crate) async fn store(
 ) -> anyhow::Result<()> {
 	let subset = format!("v{}", datasets.get_version());
 	let store_path = store_directory.join(datasets.get_name()).join(&subset);
+	let json_filename = format!("{}-{}.json", datasets.get_name(), subset);
 	if store_path.exists() {
-		return Err(Error::msg("Datasets already exists"))
+		return error(format!("Datasets has the same name and version than a raw set: {json_filename}"))
 	}
 
-	let content = serde_json::to_string_pretty(&datasets)?;
+	let content = match serde_json::to_string_pretty(&datasets) {
+		Ok(content) => content,
+		Err(err) => return error(format!("Failed to serialize datasets {}: {}", datasets.get_name(), err))
+	};
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
-	create_dir_all(&ledger_raw_dir)?;
-	let datasets_ledger = ledger_raw_dir.join(format!("{}-{}.json", datasets.get_name(), subset));
+	if let Err(err) = create_dir_all(&ledger_raw_dir) {
+		return error(format!("Failed to create dir {}: {}", ledger_raw_dir.display(), err))
+	}
+	let datasets_ledger = ledger_raw_dir.join(&json_filename);
 	if datasets_ledger.exists() {
-		return Err(Error::msg("Datasets already exists"))
+		return error(format!("Datasets has the same name and version: {json_filename}"))
 	}
-	if ledger_directory.join(MERGED_SET).join(format!("{}-{}.json", datasets.get_name(), subset)).exists() {
-		return Err(Error::msg("Datasets has the same name and version than a merged set"))
+	if ledger_directory.join(MERGED_SET).join(&json_filename).exists() {
+		return error(format!("Datasets has the same name and version than a merged set: {json_filename}"))
 	}
-	OpenOptions::new()
-		.create(true)
-		.write(true)
-		.open(&datasets_ledger)?
-		.write_all(content.as_bytes())?;
-	create_dir_all(&store_path)?;
-	copy_recursively(datasets_path, &store_path)?;
-	Ok(())
+	write_to_file(&datasets_ledger, content, true, true)?;
+	if let Err(err) = create_dir_all(&store_path) {
+		return error(format!("Failed to create dir {}: {}", store_path.display(), err))
+	}
+	if let Err(err) = copy_recursively(datasets_path, &store_path) {
+		error(format!("Failed to copy datasets from {} to {}: {}", datasets_path.display(), store_path.display(), err))
+	} else {
+		Ok(())
+	}
 }
 
 pub(crate) async fn read_raw(_store_directory: &PathBuf, ledger_directory: &PathBuf, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
-	let datasets_ledger = ledger_raw_dir.join(format!("{}-v{}.json", name, version));
-	if !datasets_ledger.exists() {
+	let datasets_path = ledger_raw_dir.join(format!("{}-v{}.json", name, version));
+	if !datasets_path.exists() {
 		return Ok(None)
 	}
-	let content = read_to_string(datasets_ledger)?;
-	let datasets: DsmSets = serde_json::from_str(&content)?;
-	Ok(Some(datasets))
+	let dsm_sets: DsmSets = read_dsm(&datasets_path)?;
+	Ok(Some(dsm_sets))
 }
 
 pub(crate) async fn read_merged(_store_directory: &PathBuf, ledger_directory: &PathBuf, name: String, version: String) -> anyhow::Result<Option<MergedSet>> {
@@ -60,16 +66,13 @@ pub(crate) async fn read_merged(_store_directory: &PathBuf, ledger_directory: &P
 	if !datasets_ledger.exists() {
 		return Ok(None)
 	}
+	let storable: StorableMerged = read_dsm(&datasets_ledger)?;
 
-	let content = read_to_string(datasets_ledger)?;
-	let storable: StorableMerged = serde_json::from_str(&content)?;
-	let mut datasets = Vec::new();
+	let mut datasets: Vec<DsmSets> = Vec::new();
 	for set in storable.datasets {
-		let content = read_to_string(ledger_raw_dir.join(set))?;
-		let ds: DsmSets = serde_json::from_str(&content)?;
-		datasets.push(ds);
+		datasets.push(read_dsm(&ledger_raw_dir.join(&set))?);
 	}
-	Ok(Some(MergedSet::from_vec(datasets, name, u32::from_str(version.as_str())?, storable.class_mapper, storable.license_mapper)?))
+	Ok(Some(MergedSet::from_vec(datasets, name, version, storable.class_mapper, storable.license_mapper)))
 }
 
 pub(crate) async fn list_raw(_store_directory: &PathBuf, ledger_directory: &PathBuf) -> anyhow::Result<Vec<DsmSets>> {
@@ -77,18 +80,24 @@ pub(crate) async fn list_raw(_store_directory: &PathBuf, ledger_directory: &Path
 	if !ledger_raw_dir.exists() {
 		return Ok(Vec::new())
 	}
-	let mut datasets = Vec::new();
-	for entry in read_dir(ledger_raw_dir)? {
-		let entry = entry?;
-		let path = entry.path();
-		if path.is_dir() {
-			continue;
+	match read_dir(&ledger_raw_dir) {
+		Ok(dir) => {
+			let mut datasets = Vec::new();
+			for entry in dir {
+				let entry = entry?;
+				let path = entry.path();
+				if path.is_dir() || path.extension().is_none_or(|ext| ext != "json") {
+					continue;
+				}
+				let dataset: DsmSets = read_dsm(&path)?;
+				datasets.push(dataset);
+			}
+			Ok(datasets)
 		}
-		let content = read_to_string(path)?;
-		let dataset: DsmSets = serde_json::from_str(&content)?;
-		datasets.push(dataset);
+		Err(err) => {
+			error(format!("Failed to read dataset directory '{}': {err}", ledger_raw_dir.display()))
+		}
 	}
-	Ok(datasets)
 }
 
 pub(crate) async fn list_merged(_store_directory: &PathBuf, ledger_directory: &PathBuf) -> anyhow::Result<Vec<MergedSet>> {
@@ -97,30 +106,34 @@ pub(crate) async fn list_merged(_store_directory: &PathBuf, ledger_directory: &P
 	if !ledger_raw_dir.exists() || !ledger_merged_dir.exists() {
 		return Ok(Vec::new())
 	}
-	let mut mergedsets = Vec::new();
-	for entry in read_dir(ledger_merged_dir)? {
-		let entry = entry?;
-		let path = entry.path();
-		if path.is_dir() {
-			continue;
+	match read_dir(&ledger_merged_dir) {
+		Ok(dir) => {
+			let mut mergedsets = Vec::new();
+			for entry in dir {
+				let entry = entry?;
+				let path = entry.path();
+				if path.is_dir() {
+					continue;
+				}
+				let storable_set: StorableMerged = read_dsm(&path)?;
+				let mut datasets = Vec::new();
+				for set in storable_set.datasets {
+					datasets.push(read_dsm(&ledger_raw_dir.join(set))?);
+				}
+				mergedsets.push(MergedSet::from_vec(
+					datasets,
+					storable_set.name,
+					storable_set.version,
+					storable_set.class_mapper,
+					storable_set.license_mapper
+				));
+			}
+			Ok(mergedsets)
 		}
-		let content = read_to_string(path)?;
-		let storable_set: StorableMerged = serde_json::from_str(&content)?;
-		let mut datasets = Vec::new();
-		for set in storable_set.datasets {
-			let content = read_to_string(&ledger_raw_dir.join(set))?;
-			let sets: DsmSets = serde_json::from_str(&content)?;
-			datasets.push(sets);
+		Err(err) => {
+			error(format!("Failed to read dataset directory '{}': {err}", ledger_merged_dir.display()))
 		}
-		mergedsets.push(MergedSet::from_vec(
-			datasets,
-			storable_set.name,
-			storable_set.version,
-			storable_set.class_mapper,
-			storable_set.license_mapper
-		)?);
 	}
-	Ok(mergedsets)
 }
 
 pub(crate) async fn store_merged(_store_directory: &PathBuf, ledger_directory: &PathBuf, merged: &MergedSet) -> anyhow::Result<()> {
@@ -129,17 +142,28 @@ pub(crate) async fn store_merged(_store_directory: &PathBuf, ledger_directory: &
 	let merged_dir = ledger_directory.join(MERGED_SET);
 	let merged_path = merged_dir.join(&merged_file);
 	if merged_path.exists() {
-		return Err(Error::msg("Merged set name with version already exists"))
+		return error(format!("Merged set '{} v{}' already exists", merged.get_name(), merged.get_version()))
 	}
 	if ledger_directory.join(RAW_SET).join(merged_file).exists() {
-		return Err(Error::msg("Datasets has the same name and version than a merged set"))
+		return error(format!("Raw set already exists with '{} v{}'", merged.get_name(), merged.get_version()))
 	}
-	create_dir_all(&merged_dir)?;
-	let content = serde_json::to_string_pretty(&storable)?;
-	OpenOptions::new()
-		.create(true)
-		.write(true)
-		.open(merged_path)?
-		.write_all(content.as_bytes())?;
-	Ok(())
+	if let Err(err) = create_dir_all(&merged_dir) {
+		return error(format!("Failed to create dir {}: {}", merged_dir.display(), err))
+	}
+	match serde_json::to_string_pretty(&storable) {
+		Ok(content) => write_to_file(&merged_path, content, true, true),
+		Err(err) => error(format!("Failed to serialize datasets {}: {}", merged_dir.display(), err))
+	}
+}
+
+#[inline]
+fn read_dsm<T: DeserializeOwned>(path: &PathBuf) -> anyhow::Result<T> {
+	let content = match read_to_string(path) {
+		Ok(ctnt) => ctnt,
+		Err(err) => return error(format!("Failed to read datasets {}: {}", path.display(), err))
+	};
+	match serde_json::from_str(content.as_str()) {
+		Ok(datasets) => Ok(datasets),
+		Err(err) => error(format!("Failed to deserialize datasets {}: {}", path.display(), err))
+	}
 }

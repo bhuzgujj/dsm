@@ -1,9 +1,10 @@
 use std::collections::HashMap;
-use std::fs::{read_to_string, OpenOptions};
-use std::io::Write;
+use std::fs::read_to_string;
 use std::path::PathBuf;
-use log::{debug, error};
+use log::debug;
+use interfaces::logger::error;
 use interfaces::models::classes::DsmClasses;
+use interfaces::paths::write_to_file;
 
 pub(crate) const FILE_NAME: &str = "obj.names";
 
@@ -12,8 +13,7 @@ pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
 	let contents = match read_to_string(&path) {
 		Ok(contents) => contents,
 		Err(err) => {
-			error!("Error reading file '{}': {}", path.display(), err);
-			return Err(err.into());
+			return error(format!("Failed to read '{}': {err}", path.display()));
 		}
 	};
 	let mut classes = HashMap::new();
@@ -30,13 +30,8 @@ pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
 
 pub(crate) fn write(root: &PathBuf, classes: HashMap<u32, DsmClasses>) -> anyhow::Result<()> {
 	let vec: Vec<String> = classes.values()
-		.map(|s| s.get_classes().clone())
+		.map(|s| s.get_classes_name().clone())
 		.collect();
-	OpenOptions::new()
-		.write(true)
-		.create(true)
-		.truncate(true)
-		.open(root.join(FILE_NAME))?
-		.write_all(vec.join("\n").as_bytes())?;
-	Ok(())
+	let path_buf = root.join(FILE_NAME);
+	write_to_file(&path_buf, vec.join("\n"), true, true)
 }

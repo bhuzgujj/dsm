@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use log::trace;
 use serde::{Deserialize, Serialize};
 use crate::models::licence::DsmLicense;
 
@@ -25,6 +26,7 @@ impl LicenseMapper {
 		if let Some(mapping) = self.mapping.get_mut(&set_name) {
 			mapping.insert(id, self.current_id);
 		} else {
+			trace!("Adding {set_name} in the licence mapping");
 			let mut m = HashMap::new();
 			m.insert(id, self.current_id);
 			self.mapping.insert(set_name, m);
@@ -32,8 +34,8 @@ impl LicenseMapper {
 		self.current_id += 1;
 	}
 
-	pub(crate) fn map_licence(&self, id: u32, set_name: String) -> Option<u32> {
-		self.mapping.get(&set_name).and_then(|map| map.get(&id).cloned())
+	pub(crate) fn map_licence(&self, id: u32, set_name: String) -> Option<&u32> {
+		self.mapping.get(&set_name).and_then(|map| map.get(&id))
 	}
 
 	pub(crate) fn get_licences(&self) -> &HashMap<u32, DsmLicense> {

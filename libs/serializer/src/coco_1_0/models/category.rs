@@ -9,15 +9,15 @@ pub(crate) struct Category {
 }
 
 impl Category {
-	pub fn from_classes(classes: &DsmClasses, id: u32) -> Self {
+	pub fn from_dsm(classes: &DsmClasses, id: u32) -> Self {
 		Self {
 			id: id + 1,
-			name: classes.get_classes().clone(),
+			name: classes.get_classes_name().clone(),
 			supercategory: classes.get_subclass().clone().unwrap_or_default(),
 		}
 	}
 
-	pub fn to_classes(&self) -> DsmClasses {
+	pub fn to_dsm(&self) -> DsmClasses {
 		DsmClasses::new(self.name.clone(), Some(self.supercategory.clone()))
 	}
 }

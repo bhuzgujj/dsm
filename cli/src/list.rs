@@ -27,9 +27,9 @@ impl List {
 					let classes = serde_json::to_string(&set.get_classes().iter().map(|(k, c)| {
 						let count = counts.get(k).unwrap_or(&0);
 						if c.get_subclass().clone().is_some_and(|s| !s.is_empty()) {
-							format!("{}({}) [{}]", c.get_classes().clone(), c.get_subclass().clone().unwrap(), count)
+							format!("{}({}) [{}]", c.get_classes_name().clone(), c.get_subclass().clone().unwrap(), count)
 						} else {
-							format!("{} [{}]", c.get_classes().clone(), count)
+							format!("{} [{}]", c.get_classes_name().clone(), count)
 						}
 					}).collect::<Vec<_>>())?;
 

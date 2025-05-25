@@ -1,20 +1,20 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use crate::models::form::DataForm;
+use crate::models::form::DsmDataForm;
 use crate::models::datasets::classes::DsmClasses;
 use crate::models::datasets::licence::DsmLicense;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DsmMetaData {
     name: String,
-    version: u32,
+    version: String,
     subset_version: Option<String>,
     contributor: String,
     date_created: String,
     description: String,
     url: String,
     year: String,
-    formatter: DataForm,
+    formatter: DsmDataForm,
     classes: HashMap<u32, DsmClasses>,
     licenses: HashMap<u32, DsmLicense>,
 }
@@ -22,14 +22,14 @@ pub struct DsmMetaData {
 impl DsmMetaData {
     pub fn new(
         name: String,
-        version: u32,
+        version: String,
         subset_version: Option<String>,
         contributor: String,
         date_created: String,
         description: String,
         url: String,
         year: String,
-        formatter: DataForm,
+        formatter: DsmDataForm,
         classes: HashMap<u32, DsmClasses>,
         licenses: HashMap<u32, DsmLicense>
     ) -> Self {
@@ -48,44 +48,44 @@ impl DsmMetaData {
         }
     }
 
-    pub fn get_name(&self) -> String {
-        self.name.clone()
+    pub fn get_name(&self) -> &String {
+        &self.name
     }
 
-    pub fn get_version(&self) -> u32 {
-        self.version
+    pub fn get_version(&self) -> &String {
+        &self.version
     }
     
-    pub fn get_classes(&self) -> HashMap<u32, DsmClasses> {
-        self.classes.clone()
+    pub fn get_classes(&self) -> &HashMap<u32, DsmClasses> {
+        &self.classes
     }
     
-    pub fn get_subset_version(&self) -> Option<String> {
-        self.subset_version.clone()
+    pub fn get_subset_version(&self) -> &Option<String> {
+        &self.subset_version
     }
 
-    pub fn get_contributor(&self) -> String {
-        self.contributor.clone()
+    pub fn get_contributor(&self) -> &String {
+        &self.contributor
     }
 
-    pub fn get_date_created(&self) -> String {
-        self.date_created.clone()
+    pub fn get_date_created(&self) -> &String {
+        &self.date_created
     }
 
-    pub fn get_description(&self) -> String {
-        self.description.clone()
+    pub fn get_description(&self) -> &String {
+        &self.description
     }
 
-    pub fn get_url(&self) -> String {
-        self.url.clone()
+    pub fn get_url(&self) -> &String {
+        &self.url
     }
 
-    pub fn get_year(&self) -> String {
-        self.year.clone()
+    pub fn get_year(&self) -> &String {
+        &self.year
     }
 
-    pub fn get_formatter(&self) -> DataForm {
-        self.formatter.clone()
+    pub fn get_formatter(&self) -> &DsmDataForm {
+        &self.formatter
     }
 
     pub fn get_licenses(&self) -> &HashMap<u32, DsmLicense> {

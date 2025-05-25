@@ -2,15 +2,16 @@ use crate::models::classes::DsmClasses;
 use crate::models::entries::DsmEntry;
 use crate::models::metadata::DsmMetaData;
 use crate::models::storable_merged::StorableMerged;
-use crate::models::{ClassMapper, DataForm, DsmSets, LicenseMapper};
+use crate::models::{ClassMapper, DsmDataForm, DsmSets, LicenseMapper};
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use crate::logger::error;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct MergedSet {
 	datasets: Vec<DsmSets>,
 	name: String,
-	version: u32,
+	version: String,
 	class_mapper: ClassMapper,
 	license_mapper: LicenseMapper,
 	date_created: String,
@@ -21,20 +22,19 @@ impl MergedSet {
 	pub fn new(
 		datasets: HashMap<String, DsmSets>,
 		name: String,
-		version: u32,
+		version: String,
 		class_mapper: ClassMapper
-	) -> anyhow::Result<Self> {
+	) -> Self {
 		let sets: Vec<DsmSets> = datasets.values().cloned().collect();
 		let date_created: Option<String> = None;
 		let description: Option<String> = None;
 		let mut license_mapper = LicenseMapper::new();
 		for dataset in &sets {
-			class_mapper.validate(dataset)?;
 			for (id, licence) in dataset.get_license() {
-				license_mapper.add_licence(*id, dataset.get_name(), licence.clone());
+				license_mapper.add_licence(*id, dataset.get_name().clone(), licence.clone());
 			}
 		}
-		Ok(Self {
+		Self {
 			datasets: sets,
 			name,
 			version,
@@ -42,22 +42,19 @@ impl MergedSet {
 			date_created: date_created.unwrap_or_default(),
 			description: description.unwrap_or_default(),
 			license_mapper
-		})
+		}
 	}
 
 	pub fn from_vec(
 		datasets: Vec<DsmSets>,
 		name: String,
-		version: u32,
+		version: String,
 		class_mapper: ClassMapper,
 		license_mapper: LicenseMapper
-	) -> anyhow::Result<Self> {
+	) -> Self {
 		let date_created: Option<String> = None;
 		let description: Option<String> = None;
-		for dataset in &datasets {
-			class_mapper.validate(dataset)?;
-		}
-		Ok(Self {
+		Self {
 			datasets,
 			name,
 			version,
@@ -65,21 +62,21 @@ impl MergedSet {
 			date_created: date_created.unwrap_or_default(),
 			description: description.unwrap_or_default(),
 			license_mapper
-		})
+		}
 	}
 
 	pub fn get_name(&self) -> &str {
 		&self.name
 	}
 
-	pub fn get_version(&self) -> String {
-		self.version.to_string()
+	pub fn get_version(&self) -> &String {
+		&self.version
 	}
 
-	pub fn to_dataset(&self, form: DataForm) -> anyhow::Result<DsmSets> {
+	pub fn to_dataset(&self, form: DsmDataForm) -> anyhow::Result<DsmSets> {
 		let metadata = DsmMetaData::new(
 			self.name.clone(),
-			self.version,
+			self.version.clone(),
 			None,
 			String::new(),
 			self.date_created.clone(),
@@ -101,15 +98,17 @@ impl MergedSet {
 				}
 				for entry in entries {
 					let new_entry = entry.map_in(
-						dataset.get_name(),
-						dataset.get_version(),
+						dataset.get_name().clone(),
+						dataset.get_version().clone(),
 						&self.class_mapper,
 						&self.license_mapper,
-						dataset.get_classes()
-					)?;
-					data_entries.get_mut(name)
-						.expect("data entry exists")
-						.push(new_entry);
+						dataset.get_classes().clone()
+					);
+					if let Some(entries) = data_entries.get_mut(name) {
+						entries.push(new_entry);
+					} else {
+						return error(format!("Entries vector for '{name}' has not been inserted"));
+					}
 				}
 			}
 		}
@@ -130,7 +129,7 @@ impl MergedSet {
 
 		StorableMerged {
 			name: self.name.clone(),
-			version: self.version,
+			version: self.version.clone(),
 			datasets: sets,
 			class_mapper: self.class_mapper.clone(),
 			license_mapper: self.license_mapper.clone(),

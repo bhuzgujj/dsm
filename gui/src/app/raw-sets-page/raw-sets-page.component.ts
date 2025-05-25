@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {listRawDatasets} from "../../backend";
 import {NgForOf, NgIf} from "@angular/common";
-import {DsmEntry, DsmSets} from "../../backend.types";
+import {DsmSets} from "../../backend.types";
 
 @Component({
   selector: 'app-raw-sets-page',
@@ -16,6 +16,7 @@ import {DsmEntry, DsmSets} from "../../backend.types";
 export class RawSetsPageComponent {
   datasets: DsmSets[] = []
   selected: DsmSets | null = null
+
   constructor() {
     listRawDatasets().then((sets) => {
       this.datasets = sets

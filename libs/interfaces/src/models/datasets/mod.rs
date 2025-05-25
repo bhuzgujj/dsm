@@ -22,7 +22,7 @@ impl DsmSets {
         Self { metadata, entries }
     }
     
-    pub fn get_name(&self) -> String {
+    pub fn get_name(&self) -> &String {
         self.metadata.get_name()
     }
 
@@ -34,7 +34,7 @@ impl DsmSets {
         self.metadata.get_licenses()
     }
 
-    pub fn get_version(&self) -> u32 {
+    pub fn get_version(&self) -> &String {
         self.metadata.get_version()
     }
 
@@ -46,7 +46,7 @@ impl DsmSets {
         &self.entries
     }
     
-    pub fn get_classes(&self) -> HashMap<u32, DsmClasses> {
+    pub fn get_classes(&self) -> &HashMap<u32, DsmClasses> {
         self.metadata.get_classes()
     }
 
@@ -55,10 +55,10 @@ impl DsmSets {
         for (_, entry) in self.entries.iter() {
             for entry in entry {
                 for annotation in entry.get_annotation() {
-                    if class_count.contains_key(&annotation.get_class()) {
-                        class_count.insert(annotation.get_class(), class_count.get(&annotation.get_class()).unwrap() + 1);
+                    if class_count.contains_key(annotation.get_class()) {
+                        class_count.insert(*annotation.get_class(), class_count.get(annotation.get_class()).unwrap() + 1);
                     } else {
-                        class_count.insert(annotation.get_class(), 1);
+                        class_count.insert(*annotation.get_class(), 1);
                     }
                 }
             }

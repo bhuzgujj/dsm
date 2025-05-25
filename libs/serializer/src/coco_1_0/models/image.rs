@@ -14,12 +14,12 @@ pub(crate) struct Image {
 }
 
 impl Image {
-	pub(crate) fn from_data_entry(id: u32, data_entry: &DsmEntry) -> Self {
+	pub(crate) fn from_dsm(id: u32, data_entry: &DsmEntry) -> Self {
 		Self {
 			id,
-			width: data_entry.get_width(),
-			height: data_entry.get_height(),
-			file_name: data_entry.get_file_name(),
+			width: *data_entry.get_width(),
+			height: *data_entry.get_height(),
+			file_name: data_entry.get_file_name().clone(),
 			license: data_entry.get_license().unwrap_or(0),
 			flickr_url: data_entry.get_flickr_url().clone().unwrap_or_default(),
 			coco_url: data_entry.get_coco_url().clone().unwrap_or_default(),

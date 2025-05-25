@@ -4,27 +4,40 @@ use interfaces::models::annotation::DsmAnnotation;
 use interfaces::models::classes::DsmClasses;
 use interfaces::models::entries::DsmEntry;
 use std::collections::HashMap;
-use std::fs::{copy, create_dir_all, read_to_string, OpenOptions};
-use std::io::Write;
+use std::fs::{copy, create_dir_all, read_to_string};
 use std::path::PathBuf;
 use std::str::FromStr;
+use interfaces::logger::error;
+use interfaces::paths::write_to_file;
 
-pub(crate) fn read(refs: &PathBuf, datasets_name: &String, datasets_version: u32, root: &PathBuf, classes: &HashMap<u32, DsmClasses>) -> anyhow::Result<Vec<DsmEntry>> {
-	let content = read_to_string(refs)?;
+pub(crate) fn read(refs: &PathBuf, datasets_name: &String, datasets_version: &String, root: &PathBuf, classes: &HashMap<u32, DsmClasses>) -> anyhow::Result<Vec<DsmEntry>> {
+	let content = match read_to_string(refs) {
+		Ok(ctnt) => ctnt,
+		Err(err) => return error(format!("Could not read '{}': {}", refs.display(), err))
+	};
 	let version = format!("v{}", datasets_version);
 	let mut entries = Vec::new();
 	for line in content.lines() {
 		let image_relative_path = strip_prefix(line.trim());
 		let images_path = root.join(&image_relative_path);
-		let (img_width, img_height) = image_dimensions(&images_path)?;
+		let (img_width, img_height) = match image_dimensions(&images_path) {
+			Ok((w, h)) => (w, h),
+			Err(err) => return error(format!("Could not read image '{}': {}", images_path.display(), err))
+		};
 		let mut annotation_path = images_path.clone();
 		annotation_path.set_extension("txt");
-		let annotations_file = read_to_string(&annotation_path)?;
+		let annotations_file = match read_to_string(annotation_path) {
+			Ok(ctnt) => ctnt,
+			Err(err) => return error(format!("Could not read '{}': {}", refs.display(), err))
+		};
 		let mut annotations = Vec::new();
 		for annotation in annotations_file.lines() {
 			let annotation = annotation.trim();
 			if !annotation.is_empty() {
-				annotations.push(parse_annotation(annotation, classes, img_width, img_height)?);
+				annotations.push(match parse_annotation(annotation, classes, img_width, img_height) {
+					Ok(annot) => annot,
+					Err(err) => return error(format!("Could not parse annotation '{}': {}", annotation, err))
+				});
 			}
 		}
 		entries.push(DsmEntry::new(
@@ -70,41 +83,49 @@ fn parse_annotation(entry: &str, classes: &HashMap<u32, DsmClasses>, img_width: 
 pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, sets_name: &String, dataset_entry: &Vec<DsmEntry>) -> anyhow::Result<String> {
 	let dir = format!("obj_{sets_name}_data");
 	let img_dir=  root.join(&dir);
-	create_dir_all(&img_dir)?;
+	if let Err(err) = create_dir_all(&img_dir) {
+		return error(format!("Failed to create dir {}: {}", img_dir.display(), err))
+	}
 	let mut sets = Vec::new();
 	let data_dir = store_path;
 	for entry in dataset_entry {
 		let new_image_name = entry.get_file_name();
 		sets.push(format!("{}/{}", dir.clone(), new_image_name.clone()));
-		copy(
+		if let Err(err) = copy(
 			data_dir.join(entry.get_image_relative_path()),
-			img_dir.join(&new_image_name)
-		)?;
-		let (img_width, img_height) = image_dimensions(img_dir.join(&new_image_name))?;
+			img_dir.join(new_image_name)
+		) {
+			return error(format!(
+				"Failed to copy '{}' to '{}': {}",
+				data_dir.join(entry.get_image_relative_path()).display(),
+				img_dir.join(new_image_name).display(),
+				err
+			))
+		}
 
-		let mut annotation_file = PathBuf::from_str(entry.get_file_name().as_str()).unwrap();
+		let (img_width, img_height) = match image_dimensions(img_dir.join(new_image_name)) {
+			Ok((w, h)) => (w, h),
+			Err(err) => return error(format!("Could not read image '{}': {}", img_dir.join(new_image_name).display(), err))
+		};
+
+		let mut annotation_file = PathBuf::from(entry.get_file_name().as_str());
 		annotation_file.set_extension("txt");
 		let new_annotation_name = annotation_file
 			.file_name()
 			.expect("Invalid")
 			.to_str()
 			.expect("Invalid");
-		OpenOptions::new()
-			.write(true)
-			.truncate(true)
-			.create(true)
-			.open(img_dir.join(new_annotation_name))?
-			.write_all(entry.get_annotation().iter()
+		write_to_file(
+			&img_dir.join(new_annotation_name),
+			entry.get_annotation().iter()
 				.map(|a| a.to_file_percent_str(img_width, img_height))
 				.collect::<Vec<String>>()
-				.join("\n").as_bytes())?;
+				.join("\n"),
+			true,
+			true
+		)?;
 	}
 	let set_file = format!("{sets_name}.txt");
-	OpenOptions::new()
-		.write(true)
-		.truncate(true)
-		.create(true)
-		.open(root.join(&set_file))?
-		.write_all(sets.join("\n").as_bytes())?;
+	write_to_file(&root.join(&set_file), sets.join("\n"), true, true)?;
 	Ok(set_file)
 }
