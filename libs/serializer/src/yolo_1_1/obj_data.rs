@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs::{read_to_string};
-use std::path::PathBuf;
+use std::path::Path;
 use std::str::FromStr;
 use log::{debug, warn};
 use interfaces::logger::error;
@@ -25,7 +25,7 @@ impl ObjData {
 		}
 	}
 
-	pub(crate) fn write(&self, root: &PathBuf) -> anyhow::Result<()> {
+	pub(crate) fn write(&self, root: &Path) -> anyhow::Result<()> {
 		let mut content = format!("classes = {}\nnames = {}\n", self.classes, self.names);
 		for (k, v) in self.sets.iter() {
 			content.push_str(&format!("{} = {}\n", k, v));
@@ -37,7 +37,7 @@ impl ObjData {
 		write_to_file(&root.join(FILE_NAME), content, true, true)
 	}
 
-	pub(crate) fn read(path: &PathBuf) -> anyhow::Result<Self> {
+	pub(crate) fn read(path: &Path) -> anyhow::Result<Self> {
 		let abs_path = path.join(FILE_NAME);
 		debug!("Reading '{}'", abs_path.display());
 		let contents = match read_to_string(&abs_path) {
@@ -83,7 +83,7 @@ impl ObjData {
 						},
 						_ => {
 							let value = strip_prefix(value);
-							if sets.contains_key(&key.to_string()) {
+							if sets.contains_key(key) {
 								warn!("Duplicate names in line '{}' of '{}'", nline, &abs_path.display());
 							}
 							debug!("'{}' has been read as '{}'", key, value);

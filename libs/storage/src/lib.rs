@@ -1,7 +1,7 @@
 mod files;
 
 use interfaces::models::{DsmSets, MergedSet};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub enum Storage {
 	Local {
@@ -12,7 +12,7 @@ pub enum Storage {
 }
 
 impl Storage {
-	pub async fn store(&self, datasets: &DsmSets, datasets_path: &PathBuf) -> anyhow::Result<()> {
+	pub async fn store(&self, datasets: &DsmSets, datasets_path: &Path) -> anyhow::Result<()> {
 		match self {
 			Storage::Local { ledger_directory, store_directory}  => {
 				files::store(store_directory, ledger_directory, datasets_path, datasets).await

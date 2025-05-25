@@ -1,5 +1,5 @@
 use std::fs::{copy, create_dir_all};
-use std::path::PathBuf;
+use std::path::Path;
 use interfaces::logger::error;
 use interfaces::models::DsmSets;
 use interfaces::models::DsmDataForm;
@@ -10,7 +10,7 @@ mod models;
 
 const ANNOTATION_DIR: &str = "annotations";
 
-pub(crate) fn read(root: &PathBuf, name: Option<String>, version: String, data_form: DsmDataForm) -> anyhow::Result<Vec<DsmSets>> {
+pub(crate) fn read(root: &Path, name: Option<String>, version: String, data_form: DsmDataForm) -> anyhow::Result<Vec<DsmSets>> {
 	let sequences = models::read(&root.join(ANNOTATION_DIR))?;
 	let mut datasets = Vec::new();
 	let new_name = name.clone().unwrap_or(
@@ -20,12 +20,12 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: String, data_f
 	        .into(),
 	);
 	for (json, sequence) in sequences {
-		datasets.push(sequence.to_dsm(&data_form, &new_name, &version, json)?);
+		datasets.push(sequence.dsm(&data_form, &new_name, &version, json)?);
 	}
 	Ok(datasets)
 }
 
-pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &DsmSets) -> anyhow::Result<()> {
+pub(crate) fn write(store_path: &Path, root: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
 	if let Err(err) = create_dir_all(root.join(ANNOTATION_DIR)) {
 		return error(format!("Failed to create dir {}: {}", root.join(ANNOTATION_DIR).display(), err))
 	}

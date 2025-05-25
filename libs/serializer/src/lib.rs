@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use std::path::PathBuf;
+use std::path::Path;
 use log::debug;
 use interfaces::models::{DsmDataForm, DsmSets};
 
@@ -24,7 +24,7 @@ impl Display for DataForm {
 }
 
 impl DataForm {
-	pub fn read(&self, path: &PathBuf, name: Option<String>, version: String) -> anyhow::Result<Vec<DsmSets>> {
+	pub fn read(&self, path: &Path, name: Option<String>, version: String) -> anyhow::Result<Vec<DsmSets>> {
 		debug!("Reading files format '{}' at '{}'", &path.canonicalize()?.to_str().unwrap_or("<Unknown path>"), &self);
 		match &self {
 			DataForm::Yolo1_1 => yolo_1_1::read(path, name, version, self.clone().into()),
@@ -33,7 +33,7 @@ impl DataForm {
 		}
 	}
 
-	pub fn write(&self, path: &PathBuf, store_path: &PathBuf, datasets: &DsmSets) -> anyhow::Result<()> {
+	pub fn write(&self, path: &Path, store_path: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
 		debug!("Reading files format '{}' at '{}'", &path.canonicalize()?.to_str().unwrap_or("<Unknown path>"), &self);
 		match self {
 			DataForm::Yolo1_1 => yolo_1_1::write(store_path, path, datasets),

@@ -17,7 +17,7 @@ impl License {
 		}
 	}
 	
-	pub fn to_dsm(&self) -> DsmLicense {
+	pub fn dsm(&self) -> DsmLicense {
 		DsmLicense::new(self.name.clone(), self.url.clone())
 	}
 }

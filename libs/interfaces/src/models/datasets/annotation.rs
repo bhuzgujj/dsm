@@ -29,30 +29,6 @@ impl DsmAnnotation {
 		)
 	}
 
-	pub fn new(
-		class: u32,
-		x: f64,
-		y: f64,
-		width: f64,
-		height: f64,
-		segmentation: Vec<f64>,
-		iscrowd: u32,
-		occluded: bool,
-		rotation: u32
-	) -> Self {
-		Self {
-			class,
-			x,
-			y,
-			width,
-			height,
-			segmentation,
-			iscrowd,
-			occluded,
-			rotation
-		}
-	}
-
 	pub fn map_in(&self, new_class: u32) -> Self {
 		Self {
 			class: new_class,
@@ -105,5 +81,73 @@ impl DsmAnnotation {
 	
 	pub fn get_rotation(&self) -> &u32 {
 		&self.rotation
+	}
+}
+
+pub struct DsmAnnotationBuilder {
+	class: u32,
+	x: f64,
+	y: f64,
+	width: f64,
+	height: f64,
+	segmentation: Vec<f64>,
+	iscrowd: u32,
+	occluded: bool,
+	rotation: u32
+}
+
+impl DsmAnnotationBuilder {
+	pub fn builder(
+		class: u32,
+		x: f64,
+		y: f64,
+		width: f64,
+		height: f64
+	) -> Self {
+		Self {
+			class,
+			x,
+			y,
+			width,
+			height,
+			segmentation: Vec::new(),
+			iscrowd: 0,
+			occluded: false,
+			rotation: 0
+		}
+	}
+
+	pub fn set_segmentation(mut self, segmentation: Vec<f64>) -> Self {
+		self.segmentation = segmentation;
+		self
+	}
+
+	pub fn set_iscrowd(mut self, iscrowd: u32) -> Self {
+		self.iscrowd = iscrowd;
+		self
+	}
+
+	pub fn set_occluded(mut self, occluded: bool) -> Self {
+		self.occluded = occluded;
+		self
+	}
+
+	pub fn set_rotation(mut self, rotation: u32) -> Self {
+		self.rotation = rotation;
+		self
+	}
+
+	pub fn build(self) -> DsmAnnotation {
+		DsmAnnotation {
+			class: self.class,
+			x: self.x,
+			y: self.y,
+			width: self.width,
+			height: self.height,
+			segmentation: self.segmentation,
+			iscrowd: self.iscrowd,
+			occluded: self.occluded,
+			rotation: self.rotation
+		}
 	}
 }

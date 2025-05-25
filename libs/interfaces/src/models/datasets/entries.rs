@@ -19,30 +19,6 @@ pub struct DsmEntry {
 }
 
 impl DsmEntry {
-    pub fn new(
-        image_path: PathBuf,
-        width: u32,
-        height: u32,
-        file_name: String,
-        license: Option<u32>,
-        flickr_url: Option<String>,
-        coco_url: Option<String>,
-        date_captured: Option<u32>,
-        annotation: Vec<DsmAnnotation>
-    ) -> Self {
-        Self {
-            image_relative_path: image_path,
-            width,
-            height,
-            file_name,
-            license,
-            flickr_url,
-            coco_url,
-            date_captured,
-            annotation
-        }
-    }
-
     pub fn get_image_relative_path(&self) -> &PathBuf {
         &self.image_relative_path
     }
@@ -50,11 +26,11 @@ impl DsmEntry {
     pub fn get_file_name(&self) -> &String {
         &self.file_name
     }
-    
+
     pub fn get_width(&self) -> &u32 {
         &self.width
     }
-    
+
     pub fn get_height(&self) -> &u32 {
         &self.height
     }
@@ -70,7 +46,7 @@ impl DsmEntry {
     pub fn get_coco_url(&self) -> &Option<String> {
         &self.coco_url
     }
-    
+
     pub fn get_annotation(&self) -> &Vec<DsmAnnotation> {
         &self.annotation
     }
@@ -85,7 +61,7 @@ impl DsmEntry {
         version: String,
         class_mapper: &ClassMapper,
         licence_mapper: &LicenseMapper,
-        classes: HashMap<u32, DsmClasses>
+        classes: HashMap<u32, DsmClasses>,
     ) -> Self {
         let prefix = format!("{}-v{}", name, version);
         let mut new_annotation = Vec::new();
@@ -110,6 +86,73 @@ impl DsmEntry {
             coco_url: self.coco_url.clone(),
             date_captured: self.date_captured,
             annotation: new_annotation,
+        }
+    }
+}
+
+pub struct DsmEntryBuilder {
+    file_name: String,
+    image_relative_path: PathBuf,
+    width: u32,
+    height: u32,
+    license: Option<u32>,
+    flickr_url: Option<String>,
+    coco_url: Option<String>,
+    date_captured: Option<u32>,
+    annotation: Vec<DsmAnnotation>,
+}
+
+impl DsmEntryBuilder {
+    pub fn new(file_name: String, image_relative_path: PathBuf, width: u32, height: u32) -> Self {
+        Self {
+            file_name,
+            image_relative_path,
+            width,
+            height,
+            license: None,
+            flickr_url: None,
+            coco_url: None,
+            date_captured: None,
+            annotation: Vec::new(),
+        }
+    }
+
+    pub fn set_license(mut self, license: Option<u32>) -> Self {
+        self.license = license;
+        self
+    }
+
+    pub fn set_flickr_url(mut self, flickr_url: Option<String>) -> Self {
+        self.flickr_url = flickr_url;
+        self
+    }
+
+    pub fn set_coco_url(mut self, coco_url: Option<String>) -> Self {
+        self.coco_url = coco_url;
+        self
+    }
+
+    pub fn set_date_captured(mut self, date_captured: Option<u32>) -> Self {
+        self.date_captured = date_captured;
+        self
+    }
+
+    pub fn set_annotation(mut self, annotation: Vec<DsmAnnotation>) -> Self {
+        self.annotation = annotation;
+        self
+    }
+
+    pub fn build(self) -> DsmEntry {
+        DsmEntry {
+            file_name: self.file_name,
+            image_relative_path: self.image_relative_path,
+            width: self.width,
+            height: self.height,
+            license: self.license,
+            flickr_url: self.flickr_url,
+            coco_url: self.coco_url,
+            date_captured: self.date_captured,
+            annotation: self.annotation,
         }
     }
 }

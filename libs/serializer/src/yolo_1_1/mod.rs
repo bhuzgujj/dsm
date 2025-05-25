@@ -3,17 +3,17 @@ mod data_entries;
 mod obj_names;
 
 use crate::yolo_1_1::obj_data::ObjData;
-use interfaces::models::metadata::DsmMetaData;
+use interfaces::models::metadata::DsmMetaDataBuilder;
 use interfaces::models::DsmDataForm;
 use interfaces::models::DsmSets;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
-use std::path::PathBuf;
+use std::path::Path;
 use std::vec;
 
 const PREFIX: &str = "data/";
 
-pub(crate) fn read(root: &PathBuf, name: Option<String>, version: String, formatter: DsmDataForm) -> anyhow::Result<Vec<DsmSets>> {
+pub(crate) fn read(root: &Path, name: Option<String>, version: String, formatter: DsmDataForm) -> anyhow::Result<Vec<DsmSets>> {
 	let obj_data = ObjData::read(root)?;
 	let classes = obj_names::read(root.join(obj_data.get_names()))?;
 	let mut sets = HashMap::new();
@@ -30,23 +30,16 @@ pub(crate) fn read(root: &PathBuf, name: Option<String>, version: String, format
 		}
 		sets.insert(key.clone(), entries);
 	}
-	let metadata = DsmMetaData::new(
+	let metadata = DsmMetaDataBuilder::new(
 		new_name,
 		version,
-		None,
-		String::new(),
-		String::new(),
-		String::new(),
-		String::new(),
-		String::new(),
 		formatter,
 		classes,
-		HashMap::new()
-	);
+	).build();
 	Ok(vec![DsmSets::new(metadata, sets)])
 }
 
-pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &DsmSets) -> anyhow::Result<()> {
+pub(crate) fn write(store_path: &Path, root: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
 	create_dir_all(root)?;
 	obj_names::write(root, datasets.get_classes().clone())?;
 	let mut sets = HashMap::new();
@@ -63,7 +56,7 @@ pub(crate) fn write(store_path: &PathBuf, root: &PathBuf, datasets: &DsmSets) ->
 }
 
 pub(crate) fn strip_prefix(value: &str) -> String {
-	if value.starts_with(PREFIX) {
-		value[PREFIX.len()..].to_string()
+	if let Some(stripped) = value.strip_prefix(PREFIX) {
+		stripped.to_string()
 	} else { value.to_string() }
 }

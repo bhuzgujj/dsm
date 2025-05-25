@@ -1,6 +1,6 @@
 use crate::coco_1_0::models::attribute::Attribute;
 use serde::{Deserialize, Serialize};
-use interfaces::models::annotation::DsmAnnotation;
+use interfaces::models::annotation::{DsmAnnotation, DsmAnnotationBuilder};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub(crate) struct Annotation {
@@ -15,18 +15,19 @@ pub(crate) struct Annotation {
 }
 
 impl Annotation {
-	pub(crate) fn to_dsm(&self) -> DsmAnnotation {
-		DsmAnnotation::new(
+	pub(crate) fn dsm(&self) -> DsmAnnotation {
+		DsmAnnotationBuilder::builder(
 			self.category_id,
 			self.bbox[0] + (self.bbox[2] / 2f64),
 			self.bbox[1] + (self.bbox[3] / 2f64),
 			self.bbox[2],
-			self.bbox[3],
-			self.segmentation.clone(),
-			self.iscrowd,
-			self.attributes.occluded,
-			self.attributes.rotation
+			self.bbox[3]
 		)
+			.set_segmentation(self.segmentation.clone())
+			.set_iscrowd(self.iscrowd)
+			.set_occluded(self.attributes.occluded)
+			.set_rotation(self.attributes.rotation)
+			.build()
 	}
 
 	pub(crate) fn from_dsm(id: u32, image_id: u32, data_entry: &DsmAnnotation) -> Annotation {

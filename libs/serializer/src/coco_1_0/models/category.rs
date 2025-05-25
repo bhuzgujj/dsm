@@ -17,7 +17,7 @@ impl Category {
 		}
 	}
 
-	pub fn to_dsm(&self) -> DsmClasses {
+	pub fn dsm(&self) -> DsmClasses {
 		DsmClasses::new(self.name.clone(), Some(self.supercategory.clone()))
 	}
 }

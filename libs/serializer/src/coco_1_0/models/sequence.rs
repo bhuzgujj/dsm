@@ -4,8 +4,8 @@ use crate::coco_1_0::models::image::Image;
 use crate::coco_1_0::models::info::Info;
 use crate::coco_1_0::models::license::License;
 use interfaces::logger::error;
-use interfaces::models::entries::DsmEntry;
-use interfaces::models::metadata::DsmMetaData;
+use interfaces::models::entries::{DsmEntry, DsmEntryBuilder};
+use interfaces::models::metadata::{DsmMetaData, DsmMetaDataBuilder};
 use interfaces::models::DsmDataForm;
 use interfaces::models::DsmSets;
 use serde::{Deserialize, Serialize};
@@ -24,68 +24,82 @@ pub(crate) struct Sequence {
 }
 
 impl Sequence {
-    pub(crate) fn to_dsm(self, data_form: &DsmDataForm, name: &String, version: &String, subset: String) -> anyhow::Result<DsmSets> {
+    pub(crate) fn dsm(
+        self,
+        data_form: &DsmDataForm,
+        name: &str,
+        version: &String,
+        subset: String,
+    ) -> anyhow::Result<DsmSets> {
         let actual_name = strip_name(subset)?;
-        let n = format!("{}-{}", name.clone(), actual_name.clone());
-        let metadata: DsmMetaData = DsmMetaData::new(
-            n.clone(),
+        let new_name = format!("{}-{}", name, actual_name.clone());
+        let metadata: DsmMetaData = DsmMetaDataBuilder::new(
+            new_name.clone(),
             version.clone(),
-            Some(self.info.version),
-            self.info.contributor,
-            self.info.date_created,
-            self.info.description,
-            self.info.url,
-            self.info.year,
             data_form.clone(),
             self.categories
                 .iter()
                 .fold(HashMap::new(), |mut acc, category| {
-                    let _ = acc.insert(category.id, category.to_dsm());
+                    let _ = acc.insert(category.id, category.dsm());
                     acc
                 }),
+        )
+        .set_contributor(self.info.contributor)
+        .set_date_created(self.info.date_created)
+        .set_licenses(
             self.licenses
                 .iter()
                 .fold(HashMap::new(), |mut acc, license| {
-                    let _ = acc.insert(license.id, license.to_dsm());
+                    let _ = acc.insert(license.id, license.dsm());
                     acc
                 }),
-        );
+        )
+        .set_url(self.info.url)
+        .set_year(self.info.year)
+        .set_description(self.info.description)
+        .build();
         let mut entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
-        let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::DsmAnnotation>> = HashMap::new();
+        let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::DsmAnnotation>> =
+            HashMap::new();
         for ann in self.annotations {
             if let std::collections::hash_map::Entry::Vacant(e) = annotations.entry(ann.image_id) {
-                e.insert(vec![ann.to_dsm()]);
+                e.insert(vec![ann.dsm()]);
             } else {
                 let img = annotations
                     .get_mut(&ann.image_id)
                     .expect("ann.id not found in annotations");
-                img.push(ann.to_dsm());
+                img.push(ann.dsm());
             }
         }
         let mut data_entries = Vec::new();
-        let path = PathBuf::from(&n).join(format!("v{}", version)).join(IMAGE_PATH).join(actual_name.clone());
+        let path = PathBuf::from(&new_name)
+            .join(format!("v{}", version))
+            .join(IMAGE_PATH)
+            .join(actual_name.clone());
         for imgs in self.images {
-            data_entries.push(DsmEntry::new(
-                path.join(&imgs.file_name).clone(),
-                imgs.width,
-                imgs.height,
-                imgs.file_name.clone(),
-                Some(imgs.license),
-                Some(imgs.flickr_url),
-                Some(imgs.coco_url),
-                Some(imgs.date_captured),
-                annotations
-	                .get(&imgs.id)
-	                .unwrap_or(&Vec::new())
-	                .clone()
-            ))
+            data_entries.push(
+                DsmEntryBuilder::new(
+                    imgs.file_name.clone(),
+                    path.join(&imgs.file_name).clone(),
+                    imgs.width,
+                    imgs.height,
+                )
+                .set_license(Some(imgs.license))
+                .set_annotation(annotations.get(&imgs.id).unwrap_or(&Vec::new()).clone())
+                .set_coco_url(Some(imgs.coco_url))
+                .set_date_captured(Some(imgs.date_captured))
+                .set_flickr_url(Some(imgs.flickr_url))
+                .build(),
+            )
         }
         entries.insert(actual_name.clone(), data_entries);
 
         Ok(DsmSets::new(metadata, entries))
     }
 
-    pub(crate) fn from_dsm(datasets: &DsmSets) -> (HashMap<String, Self>, HashMap<String, PathBuf>) {
+    pub(crate) fn from_dsm(
+        datasets: &DsmSets,
+    ) -> (HashMap<String, Self>, HashMap<String, PathBuf>) {
         let mut sequences = HashMap::new();
         let mut image_map: HashMap<String, PathBuf> = HashMap::new();
         let mut images_index: u32 = 0;
@@ -95,7 +109,7 @@ impl Sequence {
                 datasets.get_metadata(),
                 entries.clone(),
                 &images_index,
-                &annotations_index
+                &annotations_index,
             );
             images_index = imgi;
             annotations_index = anni;
@@ -108,19 +122,31 @@ impl Sequence {
         (sequences, image_map)
     }
 
-    fn from_parts(meta_data: &DsmMetaData, entries: Vec<DsmEntry>, images_i: &u32, annotations_i: &u32) -> (Self, HashMap<String, PathBuf>, u32, u32) {
+    fn from_parts(
+        meta_data: &DsmMetaData,
+        entries: Vec<DsmEntry>,
+        images_i: &u32,
+        annotations_i: &u32,
+    ) -> (Self, HashMap<String, PathBuf>, u32, u32) {
         let mut image_map = HashMap::new();
-        let licenses: Vec<License> = meta_data.get_licenses().clone().iter().fold(Vec::new(), |mut acc, (index, license)| {
-            acc.push(License::from_dsm(index, license));
-            acc
-        });
+        let licenses: Vec<License> = meta_data.get_licenses().clone().iter().fold(
+            Vec::new(),
+            |mut acc, (index, license)| {
+                acc.push(License::from_dsm(index, license));
+                acc
+            },
+        );
         let mut images_index = *images_i;
         let mut annotations_index = *annotations_i;
         let info: Info = Info::from_dsm(meta_data);
-        let categories: Vec<Category> = meta_data.get_classes().iter().fold(Vec::new(), |mut acc, (index, class)| {
-            acc.push(Category::from_dsm(class, *index));
-            acc
-        });
+        let categories: Vec<Category> =
+            meta_data
+                .get_classes()
+                .iter()
+                .fold(Vec::new(), |mut acc, (index, class)| {
+                    acc.push(Category::from_dsm(class, *index));
+                    acc
+                });
         let mut images: Vec<Image> = Vec::with_capacity(entries.len());
         let mut annotations: Vec<Annotation> = Vec::with_capacity(entries.len());
         for entry in entries {
@@ -128,18 +154,30 @@ impl Sequence {
             images.push(Image::from_dsm(images_index, &entry));
             for annotation in entry.get_annotation() {
                 annotations_index += 1;
-                annotations.push(Annotation::from_dsm(annotations_index, images_index, annotation));
+                annotations.push(Annotation::from_dsm(
+                    annotations_index,
+                    images_index,
+                    annotation,
+                ));
             }
-            image_map.insert(entry.get_file_name().clone(), entry.get_image_relative_path().clone());
+            image_map.insert(
+                entry.get_file_name().clone(),
+                entry.get_image_relative_path().clone(),
+            );
         }
 
-        (Self {
-            licenses,
-            info,
-            categories,
-            images,
-            annotations
-        }, image_map, images_index, annotations_index)
+        (
+            Self {
+                licenses,
+                info,
+                categories,
+                images,
+                annotations,
+            },
+            image_map,
+            images_index,
+            annotations_index,
+        )
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::models::classes::DsmClasses;
 use crate::models::entries::DsmEntry;
-use crate::models::metadata::DsmMetaData;
+use crate::models::metadata::DsmMetaDataBuilder;
 use crate::models::storable_merged::StorableMerged;
 use crate::models::{ClassMapper, DsmDataForm, DsmSets, LicenseMapper};
 use std::collections::HashMap;
@@ -26,8 +26,6 @@ impl MergedSet {
 		class_mapper: ClassMapper
 	) -> Self {
 		let sets: Vec<DsmSets> = datasets.values().cloned().collect();
-		let date_created: Option<String> = None;
-		let description: Option<String> = None;
 		let mut license_mapper = LicenseMapper::new();
 		for dataset in &sets {
 			for (id, licence) in dataset.get_license() {
@@ -39,8 +37,8 @@ impl MergedSet {
 			name,
 			version,
 			class_mapper,
-			date_created: date_created.unwrap_or_default(),
-			description: description.unwrap_or_default(),
+			date_created: String::default(),
+			description: String::default(),
 			license_mapper
 		}
 	}
@@ -52,15 +50,13 @@ impl MergedSet {
 		class_mapper: ClassMapper,
 		license_mapper: LicenseMapper
 	) -> Self {
-		let date_created: Option<String> = None;
-		let description: Option<String> = None;
 		Self {
 			datasets,
 			name,
 			version,
 			class_mapper,
-			date_created: date_created.unwrap_or_default(),
-			description: description.unwrap_or_default(),
+			date_created: String::default(),
+			description: String::default(),
 			license_mapper
 		}
 	}
@@ -74,22 +70,20 @@ impl MergedSet {
 	}
 
 	pub fn to_dataset(&self, form: DsmDataForm) -> anyhow::Result<DsmSets> {
-		let metadata = DsmMetaData::new(
+		let metadata = DsmMetaDataBuilder::new(
 			self.name.clone(),
 			self.version.clone(),
-			None,
-			String::new(),
-			self.date_created.clone(),
-			self.description.clone(),
-			String::new(),
-			String::new(),
 			form,
 			self.class_mapper.classes.iter().fold(HashMap::new(), |mut acc, (class, index)| {
 				acc.insert(*index, DsmClasses::new(class.clone(), None));
 				acc
 			}),
-			self.license_mapper.get_licences().clone()
-		);
+
+		)
+			.set_date_created(self.date_created.clone())
+			.set_licenses(self.license_mapper.get_licences().clone())
+			.set_description(self.description.clone())
+			.build();
 		let mut data_entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
 		for dataset in &self.datasets {
 			for (name, entries) in dataset.get_entries() {

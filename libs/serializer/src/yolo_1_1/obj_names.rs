@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs::read_to_string;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use log::debug;
 use interfaces::logger::error;
 use interfaces::models::classes::DsmClasses;
@@ -28,7 +28,7 @@ pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
 	Ok(classes)
 }
 
-pub(crate) fn write(root: &PathBuf, classes: HashMap<u32, DsmClasses>) -> anyhow::Result<()> {
+pub(crate) fn write(root: &Path, classes: HashMap<u32, DsmClasses>) -> anyhow::Result<()> {
 	let vec: Vec<String> = classes.values()
 		.map(|s| s.get_classes_name().clone())
 		.collect();

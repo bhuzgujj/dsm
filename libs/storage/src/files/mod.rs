@@ -6,15 +6,15 @@ use interfaces::models::{DsmSets, MergedSet, StorableMerged};
 use interfaces::paths::write_to_file;
 use serde::de::DeserializeOwned;
 use std::fs::{create_dir_all, read_dir, read_to_string};
-use std::path::PathBuf;
+use std::path::Path;
 
 const RAW_SET: &str = "raw_sets";
 const MERGED_SET: &str = "merged_sets";
 
 pub(crate) async fn store(
-	store_directory: &PathBuf,
-	ledger_directory: &PathBuf,
-	datasets_path: &PathBuf,
+	store_directory: &Path,
+	ledger_directory: &Path,
+	datasets_path: &Path,
 	datasets: &DsmSets,
 ) -> anyhow::Result<()> {
 	let subset = format!("v{}", datasets.get_version());
@@ -50,7 +50,7 @@ pub(crate) async fn store(
 	}
 }
 
-pub(crate) async fn read_raw(_store_directory: &PathBuf, ledger_directory: &PathBuf, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
+pub(crate) async fn read_raw(_store_directory: &Path, ledger_directory: &Path, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
 	let datasets_path = ledger_raw_dir.join(format!("{}-v{}.json", name, version));
 	if !datasets_path.exists() {
@@ -60,7 +60,7 @@ pub(crate) async fn read_raw(_store_directory: &PathBuf, ledger_directory: &Path
 	Ok(Some(dsm_sets))
 }
 
-pub(crate) async fn read_merged(_store_directory: &PathBuf, ledger_directory: &PathBuf, name: String, version: String) -> anyhow::Result<Option<MergedSet>> {
+pub(crate) async fn read_merged(_store_directory: &Path, ledger_directory: &Path, name: String, version: String) -> anyhow::Result<Option<MergedSet>> {
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
 	let datasets_ledger = ledger_directory.join(MERGED_SET).join(format!("{}-v{}.json", name, version));
 	if !datasets_ledger.exists() {
@@ -75,7 +75,7 @@ pub(crate) async fn read_merged(_store_directory: &PathBuf, ledger_directory: &P
 	Ok(Some(MergedSet::from_vec(datasets, name, version, storable.class_mapper, storable.license_mapper)))
 }
 
-pub(crate) async fn list_raw(_store_directory: &PathBuf, ledger_directory: &PathBuf) -> anyhow::Result<Vec<DsmSets>> {
+pub(crate) async fn list_raw(_store_directory: &Path, ledger_directory: &Path) -> anyhow::Result<Vec<DsmSets>> {
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
 	if !ledger_raw_dir.exists() {
 		return Ok(Vec::new())
@@ -100,7 +100,7 @@ pub(crate) async fn list_raw(_store_directory: &PathBuf, ledger_directory: &Path
 	}
 }
 
-pub(crate) async fn list_merged(_store_directory: &PathBuf, ledger_directory: &PathBuf) -> anyhow::Result<Vec<MergedSet>> {
+pub(crate) async fn list_merged(_store_directory: &Path, ledger_directory: &Path) -> anyhow::Result<Vec<MergedSet>> {
 	let ledger_raw_dir = ledger_directory.join(RAW_SET);
 	let ledger_merged_dir = ledger_directory.join(MERGED_SET);
 	if !ledger_raw_dir.exists() || !ledger_merged_dir.exists() {
@@ -136,7 +136,7 @@ pub(crate) async fn list_merged(_store_directory: &PathBuf, ledger_directory: &P
 	}
 }
 
-pub(crate) async fn store_merged(_store_directory: &PathBuf, ledger_directory: &PathBuf, merged: &MergedSet) -> anyhow::Result<()> {
+pub(crate) async fn store_merged(_store_directory: &Path, ledger_directory: &Path, merged: &MergedSet) -> anyhow::Result<()> {
 	let storable = merged.to_storable();
 	let merged_file = format!("{}-v{}.json", merged.get_name(), merged.get_version());
 	let merged_dir = ledger_directory.join(MERGED_SET);
@@ -157,7 +157,7 @@ pub(crate) async fn store_merged(_store_directory: &PathBuf, ledger_directory: &
 }
 
 #[inline]
-fn read_dsm<T: DeserializeOwned>(path: &PathBuf) -> anyhow::Result<T> {
+fn read_dsm<T: DeserializeOwned>(path: &Path) -> anyhow::Result<T> {
 	let content = match read_to_string(path) {
 		Ok(ctnt) => ctnt,
 		Err(err) => return error(format!("Failed to read datasets {}: {}", path.display(), err))
