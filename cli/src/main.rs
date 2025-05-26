@@ -22,9 +22,7 @@ use crate::store::Store;
 enum Cli {
     Store(Store),
     Gen(Generator),
-
-    #[command(subcommand)]
-    List(List),
+    Ls(List),
 
     #[command(subcommand)]
     Merge(Merge),
@@ -41,7 +39,7 @@ async fn wrapper() -> anyhow::Result<()> {
         Cli::Store(store) => store.execute(&settings).await?,
         Cli::Gen(generator) => generator.execute(&settings).await?,
         Cli::Config(configuration) => configuration.configure(&mut settings)?,
-        Cli::List(ls) => ls.execute(&settings).await?,
+        Cli::Ls(ls) => ls.execute(&settings).await?,
         Cli::Merge(merge) => merge.execute(&settings).await?
     };
     settings.save()?;

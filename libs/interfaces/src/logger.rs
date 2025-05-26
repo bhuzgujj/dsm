@@ -19,10 +19,16 @@ pub fn refresh(settings: &Settings) -> anyhow::Result<()> {
         println!("Failed to create {} directory: {err}", dir.display());
         return Err(anyhow!("Failed to create {} directory: {err}", dir.display()));
     }
+
+    let log_file_path = dsm_dir().join(FILE_NAME);
+    if let Err(err) = OpenOptions::new().create(true).write(true).open(&log_file_path) {
+        println!("Failed to create {}: {err}", &log_file_path.display());
+        return Err(anyhow!("Failed to create {}: {err}", &log_file_path.display()));
+    }
     log::set_max_level(settings.get_log_level());
     #[allow(static_mut_refs)]
     unsafe {
-        LOGGER.file = Some(dsm_dir().join(FILE_NAME));
+        LOGGER.file = Some(log_file_path);
     }
     Ok(())
 }
