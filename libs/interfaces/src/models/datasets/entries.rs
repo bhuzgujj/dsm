@@ -1,6 +1,8 @@
+use crate::logger::error;
 use crate::models::classes::DsmClasses;
 use crate::models::datasets::annotation::DsmAnnotation;
 use crate::models::{ClassMapper, LicenseMapper};
+use log::warn;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -14,7 +16,7 @@ pub struct DsmEntry {
     license: Option<u32>,
     flickr_url: Option<String>,
     coco_url: Option<String>,
-    date_captured: Option<u32>,
+    date_captured: Option<String>,
     annotation: Vec<DsmAnnotation>,
 }
 
@@ -51,8 +53,44 @@ impl DsmEntry {
         &self.annotation
     }
 
-    pub fn get_date_captured(&self) -> &Option<u32> {
+    pub fn get_date_captured(&self) -> &Option<String> {
         &self.date_captured
+    }
+
+    pub fn remap(
+        &self,
+        name: &String,
+        class_mapper: &ClassMapper,
+        licence_mapper: &LicenseMapper,
+        classes: &HashMap<u32, DsmClasses>
+    ) -> anyhow::Result<Self> {
+        let mut new_annotation = Vec::new();
+        for ann in &self.annotation {
+            if let Some(old_class) = classes.get(ann.get_class()) {
+                if let Some(new_class) = class_mapper.get_class_for(&name, old_class) {
+                    new_annotation.push(ann.map_in(*new_class));
+                } else {
+                    warn!("No mapping for annotation ({}: {})", old_class.get_classes_name(), ann.get_class())
+                }
+            } else {
+                return error(format!("Annotation {} no found in original mapping", ann.get_class()))
+            }
+        }
+        let mut licence_new_id = None;
+        if let Some(id) = self.license {
+            licence_new_id = licence_mapper.map_licence_borrow(id, name);
+        }
+        Ok(Self {
+            image_relative_path: self.image_relative_path.clone(),
+            width: self.width,
+            height: self.height,
+            file_name: self.file_name.clone(),
+            license: licence_new_id.copied(),
+            flickr_url: self.flickr_url.clone(),
+            coco_url: self.coco_url.clone(),
+            date_captured: self.date_captured.clone(),
+            annotation: new_annotation,
+        })
     }
 
     pub fn map_in(
@@ -61,7 +99,7 @@ impl DsmEntry {
         version: String,
         class_mapper: &ClassMapper,
         licence_mapper: &LicenseMapper,
-        classes: HashMap<u32, DsmClasses>,
+        classes: HashMap<u32, DsmClasses>
     ) -> Self {
         let prefix = format!("{}-v{}", name, version);
         let mut new_annotation = Vec::new();
@@ -80,11 +118,12 @@ impl DsmEntry {
             image_relative_path: self.image_relative_path.clone(),
             width: self.width,
             height: self.height,
-            file_name: format!("{}-{}", prefix, self.file_name.clone()),
+            file_name: 
+                format!("{}-{}", prefix, self.file_name.clone()),
             license: licence_new_id.copied(),
             flickr_url: self.flickr_url.clone(),
             coco_url: self.coco_url.clone(),
-            date_captured: self.date_captured,
+            date_captured: self.date_captured.clone(),
             annotation: new_annotation,
         }
     }
@@ -98,7 +137,7 @@ pub struct DsmEntryBuilder {
     license: Option<u32>,
     flickr_url: Option<String>,
     coco_url: Option<String>,
-    date_captured: Option<u32>,
+    date_captured: Option<String>,
     annotation: Vec<DsmAnnotation>,
 }
 
@@ -132,7 +171,7 @@ impl DsmEntryBuilder {
         self
     }
 
-    pub fn set_date_captured(mut self, date_captured: Option<u32>) -> Self {
+    pub fn set_date_captured(mut self, date_captured: Option<String>) -> Self {
         self.date_captured = date_captured;
         self
     }

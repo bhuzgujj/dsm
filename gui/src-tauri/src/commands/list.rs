@@ -11,7 +11,7 @@ pub async fn list_merged(state: State<'_, Mutex<Settings>>) -> Result<Vec<Merged
 		ledger_directory: state.get_ledger_path(),
 		store_directory: state.get_store_path(),
 	};
-	Ok(storage.list_merged().await.unwrap_or_else(|e| {
+	Ok(storage.list().await.unwrap_or_else(|e| {
 		error!("Error listing datasets: {}", e);
 		Vec::new()
 	}))
@@ -24,7 +24,7 @@ pub async fn list_raw(state: State<'_, Mutex<Settings>>) -> Result<Vec<DsmSets>,
 		ledger_directory: state.get_ledger_path(),
 		store_directory: state.get_store_path(),
 	};
-	Ok(storage.list_raw().await.unwrap_or_else(|e| {
+	Ok(storage.list().await.unwrap_or_else(|e| {
 		error!("Error listing datasets: {}", e);
 		Vec::new()
 	}))

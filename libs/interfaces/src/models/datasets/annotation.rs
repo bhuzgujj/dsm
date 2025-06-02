@@ -9,8 +9,8 @@ pub struct DsmAnnotation {
 	height: f64,
 	segmentation: Vec<f64>,
 	iscrowd: u32,
-	occluded: bool,
-	rotation: u32
+	occluded: Option<bool>,
+	rotation: Option<f64>
 }
 
 impl DsmAnnotation {
@@ -75,11 +75,11 @@ impl DsmAnnotation {
 		&self.iscrowd
 	}
 
-	pub fn get_occluded(&self) -> &bool {
+	pub fn get_occluded(&self) -> &Option<bool> {
 		&self.occluded
 	}
 	
-	pub fn get_rotation(&self) -> &u32 {
+	pub fn get_rotation(&self) -> &Option<f64> {
 		&self.rotation
 	}
 }
@@ -92,8 +92,8 @@ pub struct DsmAnnotationBuilder {
 	height: f64,
 	segmentation: Vec<f64>,
 	iscrowd: u32,
-	occluded: bool,
-	rotation: u32
+	occluded: Option<bool>,
+	rotation: Option<f64>
 }
 
 impl DsmAnnotationBuilder {
@@ -112,8 +112,8 @@ impl DsmAnnotationBuilder {
 			height,
 			segmentation: Vec::new(),
 			iscrowd: 0,
-			occluded: false,
-			rotation: 0
+			occluded: None,
+			rotation: None
 		}
 	}
 
@@ -127,12 +127,12 @@ impl DsmAnnotationBuilder {
 		self
 	}
 
-	pub fn set_occluded(mut self, occluded: bool) -> Self {
+	pub fn set_occluded(mut self, occluded: Option<bool>) -> Self {
 		self.occluded = occluded;
 		self
 	}
 
-	pub fn set_rotation(mut self, rotation: u32) -> Self {
+	pub fn set_rotation(mut self, rotation: Option<f64>) -> Self {
 		self.rotation = rotation;
 		self
 	}

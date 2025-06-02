@@ -1,15 +1,18 @@
-mod store;
-mod format;
 mod configuration;
+mod format;
 mod generator;
 mod list;
 mod merge;
+mod store;
+mod mapping;
 
 use clap::Parser;
+use interfaces::logger;
+use mapping::Mapping;
+use storage::Storage;
 use std::fs::create_dir_all;
 
-use interfaces::logger;
-use interfaces::models::Settings;
+use interfaces::models::{DsmSets, Settings};
 
 use crate::configuration::Configuration;
 use crate::generator::Generator;
@@ -23,11 +26,15 @@ enum Cli {
     Store(Store),
     Gen(Generator),
     Ls(List),
+    
+    #[command(subcommand)]
+    Map(Mapping),
 
     #[command(subcommand)]
     Merge(Merge),
 
-    Config(Configuration)
+    Config(Configuration),
+    Try,
 }
 
 async fn wrapper() -> anyhow::Result<()> {
@@ -40,7 +47,13 @@ async fn wrapper() -> anyhow::Result<()> {
         Cli::Gen(generator) => generator.execute(&settings).await?,
         Cli::Config(configuration) => configuration.configure(&mut settings)?,
         Cli::Ls(ls) => ls.execute(&settings).await?,
-        Cli::Merge(merge) => merge.execute(&settings).await?
+        Cli::Merge(merge) => merge.execute(&settings).await?,
+        Cli::Map(map) => map.execute(&settings).await?,
+        Cli::Try => {
+            let remote = settings.get_remotes().get("my_account").unwrap();
+            Storage::Remote { service: remote.clone() }
+                .read::<DsmSets>("".to_string(), "1".to_string()).await?;
+        }
     };
     settings.save()?;
     Ok(())
@@ -50,6 +63,6 @@ async fn wrapper() -> anyhow::Result<()> {
 async fn main() -> anyhow::Result<()> {
     match wrapper().await {
         Ok(()) => Ok(()),
-        Err(_) => Ok(())
+        Err(_) => Ok(()),
     }
 }

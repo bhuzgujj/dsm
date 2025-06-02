@@ -10,12 +10,11 @@ use std::str::FromStr;
 use interfaces::logger::error;
 use interfaces::paths::write_to_file;
 
-pub(crate) fn read(refs: &Path, datasets_name: &String, datasets_version: &String, root: &Path, classes: &HashMap<u32, DsmClasses>) -> anyhow::Result<Vec<DsmEntry>> {
+pub(crate) fn read(refs: &Path, root: &Path, classes: &HashMap<u32, DsmClasses>) -> anyhow::Result<Vec<DsmEntry>> {
 	let content = match read_to_string(refs) {
 		Ok(ctnt) => ctnt,
 		Err(err) => return error(format!("Could not read '{}': {}", refs.display(), err))
 	};
-	let version = format!("v{}", datasets_version);
 	let mut entries = Vec::new();
 	for line in content.lines() {
 		let image_relative_path = strip_prefix(line.trim());
@@ -42,7 +41,7 @@ pub(crate) fn read(refs: &Path, datasets_name: &String, datasets_version: &Strin
 		}
 		entries.push(DsmEntryBuilder::new(
 				images_path.file_name().unwrap().to_str().unwrap().to_string(),
-				PathBuf::from(&datasets_name).join(&version).join(image_relative_path),
+				PathBuf::from(&image_relative_path),
 				img_width,
 				img_height,
 			)
@@ -68,14 +67,14 @@ fn parse_annotation(entry: &str, classes: &HashMap<u32, DsmClasses>, img_width: 
 	Ok(DsmAnnotationBuilder::builder(class_id, x, y, width, height).build())
 }
 
-pub(crate) fn write(store_path: &Path, root: &Path, sets_name: &String, dataset_entry: &Vec<DsmEntry>) -> anyhow::Result<String> {
+pub(crate) fn write(input: &Path, output: &Path, sets_name: &String, dataset_entry: &Vec<DsmEntry>) -> anyhow::Result<String> {
 	let dir = format!("obj_{sets_name}_data");
-	let img_dir=  root.join(&dir);
+	let img_dir=  output.join(&dir);
 	if let Err(err) = create_dir_all(&img_dir) {
 		return error(format!("Failed to create dir {}: {}", img_dir.display(), err))
 	}
 	let mut sets = Vec::new();
-	let data_dir = store_path;
+	let data_dir = input;
 	for entry in dataset_entry {
 		let new_image_name = entry.get_file_name();
 		sets.push(format!("{}/{}", dir.clone(), new_image_name.clone()));
@@ -114,6 +113,6 @@ pub(crate) fn write(store_path: &Path, root: &Path, sets_name: &String, dataset_
 		)?;
 	}
 	let set_file = format!("{sets_name}.txt");
-	write_to_file(&root.join(&set_file), sets.join("\n"), true, true)?;
+	write_to_file(&output.join(&set_file), sets.join("\n"), true, true)?;
 	Ok(set_file)
 }

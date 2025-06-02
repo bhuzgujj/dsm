@@ -4,5 +4,6 @@ use serde::{Deserialize, Serialize};
 pub enum DsmDataForm {
 	Yolo1_1,
 	Coco1_0,
-	Custom(String)
+	Custom(String),
+	Unknown
 }

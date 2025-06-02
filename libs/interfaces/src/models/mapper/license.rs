@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use log::trace;
 use serde::{Deserialize, Serialize};
-use crate::models::licence::DsmLicense;
+use crate::models::{licence::DsmLicense, DsmSets};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LicenseMapper {
@@ -38,7 +38,40 @@ impl LicenseMapper {
 		self.mapping.get(&set_name).and_then(|map| map.get(&id))
 	}
 
+	pub(crate) fn map_licence_borrow(&self, id: u32, set_name: &String) -> Option<&u32> {
+		self.mapping.get(set_name).and_then(|map| map.get(&id))
+	}
+
 	pub(crate) fn get_licences(&self) -> &HashMap<u32, DsmLicense> {
 		&self.licences
+	}
+}
+
+impl From<&DsmSets> for LicenseMapper {
+	fn from(dataset: &DsmSets) -> Self {
+		let licences = dataset.get_license().clone();
+		let mut mapper = Self { 
+			current_id: licences.len() as u32,
+			licences,
+			mapping: HashMap::new(),
+		};
+		for (id, licence) in dataset.get_license() {
+			mapper.add_licence(id.clone(), dataset.get_name().clone(), licence.clone());
+		}
+		mapper
+	}
+}
+impl From<&mut DsmSets> for LicenseMapper {
+	fn from(dataset: &mut DsmSets) -> Self {
+		let licences = dataset.get_license().clone();
+		let mut mapper = Self { 
+			current_id: licences.len() as u32,
+			licences,
+			mapping: HashMap::new(),
+		};
+		for (id, licence) in dataset.get_license() {
+			mapper.add_licence(id.clone(), dataset.get_name().clone(), licence.clone());
+		}
+		mapper
 	}
 }

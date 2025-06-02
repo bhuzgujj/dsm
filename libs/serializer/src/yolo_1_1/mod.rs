@@ -24,7 +24,7 @@ pub(crate) fn read(root: &Path, name: Option<String>, version: String, formatter
 			.into(),
 	);
 	for (key, value) in obj_data.get_sets() {
-		let entries = data_entries::read(&root.join(value), &new_name, &version, root, &classes)?;
+		let entries = data_entries::read(&root.join(value), root, &classes)?;
 		if sets.contains_key(key) {
 			return Err(anyhow::anyhow!("duplicated set: {}", key))
 		}
@@ -39,19 +39,19 @@ pub(crate) fn read(root: &Path, name: Option<String>, version: String, formatter
 	Ok(vec![DsmSets::new(metadata, sets)])
 }
 
-pub(crate) fn write(store_path: &Path, root: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
-	create_dir_all(root)?;
-	obj_names::write(root, datasets.get_classes().clone())?;
+pub(crate) fn write(input: &Path, output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
+	create_dir_all(output)?;
+	obj_names::write(output, datasets.get_classes().clone())?;
 	let mut sets = HashMap::new();
 	for (key, value) in datasets.get_entries() {
 		sets.insert(key.clone(), data_entries::write(
-			store_path,
-			root,
+			input,
+			output,
 			key,
 			value
 		)?);
 	}
-	ObjData::new(datasets.get_classes().len() as u32, sets).write(root)?;
+	ObjData::new(datasets.get_classes().len() as u32, sets).write(output)?;
 	Ok(())
 }
 

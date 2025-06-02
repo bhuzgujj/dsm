@@ -1,3 +1,6 @@
+pub mod remotes;
+
+use std::collections::HashMap;
 use std::{
     fs::read_to_string,
     str::FromStr,
@@ -7,6 +10,7 @@ use log::{trace, LevelFilter};
 use serde::{Deserialize, Serialize};
 use crate::logger::error;
 use crate::paths::{dsm_dir, write_to_file};
+use remotes::Remote;
 
 const SETTINGS_FILENAME: &str = "settings.toml";
 const STORE: &str = "datasets-store";
@@ -17,6 +21,7 @@ pub struct Settings {
     log_level: String,
     ledger_path: String,
     store_path: String,
+    remotes: HashMap<String, Remote>
 }
 
 impl Default for Settings {
@@ -25,6 +30,7 @@ impl Default for Settings {
             log_level: LevelFilter::Info.to_string(),
             ledger_path: dsm_dir().join(LEDGER_DIRECTORY).to_string_lossy().to_string(),
             store_path: dsm_dir().join(STORE).to_string_lossy().to_string(),
+            remotes: HashMap::new(),
         }
     }
 }
@@ -36,6 +42,10 @@ impl Settings {
 
     pub fn set_log_level(&mut self, log_level: LevelFilter) {
         self.log_level = log_level.to_string();
+    }
+
+    pub fn get_remotes(&mut self) -> &mut HashMap<String, Remote> {
+        &mut self.remotes
     }
 
     pub fn get_store_path(&self) -> PathBuf {
@@ -66,5 +76,9 @@ impl Settings {
         };
         trace!("Saving settings \n\"\"\" Path: '{}'\n{}\n\"\"\"", settings_filename.display(), content);
         write_to_file(&settings_filename, content, true, true)
+    }
+
+    pub fn get_remote(&self, name: String) -> Option<&Remote> {
+        self.remotes.get(&name)
     }
 }

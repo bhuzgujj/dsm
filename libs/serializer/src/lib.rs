@@ -33,11 +33,11 @@ impl DataForm {
 		}
 	}
 
-	pub fn write(&self, path: &Path, store_path: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
-		debug!("Reading files format '{}' at '{}'", &path.canonicalize()?.to_str().unwrap_or("<Unknown path>"), &self);
+	pub fn write(&self, output: &Path, input: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
+		debug!("Reading files format '{}' at '{}'", &input.canonicalize()?.to_str().unwrap_or("<Unknown path>"), &self);
 		match self {
-			DataForm::Yolo1_1 => yolo_1_1::write(store_path, path, datasets),
-			DataForm::Coco1_0 => coco_1_0::write(store_path, path, datasets),
+			DataForm::Yolo1_1 => yolo_1_1::write(input, output, datasets),
+			DataForm::Coco1_0 => coco_1_0::write(input, output, datasets),
 			DataForm::Custom(_) => todo!("Custom format are not supported yet")
 		}
 	}

@@ -5,7 +5,7 @@ members = [
     "libs/serializer",
     "libs/storage",
     "gui/src-tauri",
-    "cli",
+    "cli"
 ]
 
 [workspace.dependencies]
@@ -17,14 +17,26 @@ storage = { path = "./libs/storage" }
 # External
 anyhow = "1.0.98"
 
+azure_core = "0.21.0"
+azure_identity = "0.21.0"
+azure_storage = "0.21.0"
+azure_storage_blobs = "0.21.0"
+azure_storage_datalake = "0.21.0"
+azure_security_keyvault_secrets = "0.3.0"
+
 chrono = "0.4.41"
 clap = { version = "4.5.38", features = ["derive"] }
+colored = "3.0.0"
 
 dirs = "6.0.0"
+
+futures = "0.3"
 
 image = "0.25.6"
 
 log = "0.4.27"
+
+reqwest = "0.12.15"
 
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"

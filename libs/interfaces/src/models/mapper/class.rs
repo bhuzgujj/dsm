@@ -1,13 +1,13 @@
-use crate::models::classes::DsmClasses;
+use crate::models::{classes::DsmClasses, DsmSets};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, vec};
 use log::trace;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClassMapper {
-	pub classes: HashMap<String, u32>,
-	pub mapping: HashMap<String, Vec<String>>,
-	pub custom: Option<HashMap<String, Custom>>,
+	classes: HashMap<String, u32>,
+	mapping: HashMap<String, Vec<String>>,
+	custom: Option<HashMap<String, Custom>>,
 }
 
 impl ClassMapper {
@@ -31,6 +31,31 @@ impl ClassMapper {
 			}
 		}
 		None
+	}
+
+	pub(crate) fn get_dsm_classes(&self) -> HashMap<u32, DsmClasses> {
+		self.classes.iter().fold(HashMap::<u32, DsmClasses>::new(), |mut acc, (class, index)| {
+			acc.insert(*index, DsmClasses::new(class.clone(), None));
+			acc
+		})
+	}
+}
+
+impl From<&DsmSets> for ClassMapper {
+	fn from(value: &DsmSets) -> Self {
+		let mut classes = HashMap::new();
+		let mut mapping = HashMap::new();
+		for (index, class) in value.get_classes() {
+			let name = class.get_subclass().clone()
+				.unwrap_or(class.get_classes_name().clone());
+			classes.insert(name.clone(), *index);
+			mapping.insert(name.clone(), vec![name]);
+		}
+		Self { 
+			classes, 
+			mapping, 
+			custom: None
+		}
 	}
 }
 

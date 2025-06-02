@@ -12,6 +12,7 @@ pub struct DsmMetaData {
     contributor: String,
     date_created: String,
     description: String,
+    is_incomplete: bool,
     url: String,
     year: String,
     formatter: DsmDataForm,
@@ -63,6 +64,10 @@ impl DsmMetaData {
     pub fn get_licenses(&self) -> &HashMap<u32, DsmLicense> {
         &self.licenses
     }
+    
+    pub(crate) fn is_incomplet(&self) -> &bool {
+        &self.is_incomplete
+    }
 }
 
 pub struct DsmMetaDataBuilder {
@@ -74,6 +79,7 @@ pub struct DsmMetaDataBuilder {
     description: String,
     url: String,
     year: String,
+    is_incomplete: bool,
     formatter: DsmDataForm,
     classes: HashMap<u32, DsmClasses>,
     licenses: HashMap<u32, DsmLicense>,
@@ -94,6 +100,7 @@ impl DsmMetaDataBuilder {
             date_created: String::new(),
             description: String::new(),
             url: String::new(),
+            is_incomplete: false,
             year: String::new(),
             formatter,
             classes,
@@ -131,6 +138,16 @@ impl DsmMetaDataBuilder {
         self
     }
 
+    pub fn set_classes(mut self, classes: HashMap<u32, DsmClasses>) -> Self {
+        self.classes = classes;
+        self
+    }
+
+    pub fn set_incomplete(mut self, is_incomplete: bool) -> Self {
+        self.is_incomplete = is_incomplete;
+        self
+    }
+
     pub fn build(self) -> DsmMetaData {
         DsmMetaData {
             name: self.name,
@@ -143,7 +160,27 @@ impl DsmMetaDataBuilder {
             year: self.year,
             formatter: self.formatter,
             classes: self.classes,
+            is_incomplete: self.is_incomplete,
             licenses: self.licenses,
+        }
+    }
+}
+
+impl From<DsmMetaData> for DsmMetaDataBuilder {
+    fn from(value: DsmMetaData) -> Self {
+        Self {
+            name: value.name,
+            version: value.version,
+            subset_version: value.subset_version,
+            contributor: value.contributor,
+            date_created: value.date_created,
+            description: value.description,
+            url: value.url,
+            year: value.year,
+            formatter: value.formatter,
+            classes: value.classes,
+            is_incomplete: value.is_incomplete,
+            licenses: value.licenses,
         }
     }
 }

@@ -72,9 +72,7 @@ impl Sequence {
             }
         }
         let mut data_entries = Vec::new();
-        let path = PathBuf::from(&new_name)
-            .join(format!("v{}", version))
-            .join(IMAGE_PATH)
+        let path = PathBuf::from(&IMAGE_PATH)
             .join(actual_name.clone());
         for imgs in self.images {
             data_entries.push(
@@ -86,9 +84,9 @@ impl Sequence {
                 )
                 .set_license(Some(imgs.license))
                 .set_annotation(annotations.get(&imgs.id).unwrap_or(&Vec::new()).clone())
-                .set_coco_url(Some(imgs.coco_url))
+                .set_coco_url(imgs.coco_url)
                 .set_date_captured(Some(imgs.date_captured))
-                .set_flickr_url(Some(imgs.flickr_url))
+                .set_flickr_url(imgs.flickr_url)
                 .build(),
             )
         }

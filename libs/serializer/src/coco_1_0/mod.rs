@@ -25,35 +25,35 @@ pub(crate) fn read(root: &Path, name: Option<String>, version: String, data_form
 	Ok(datasets)
 }
 
-pub(crate) fn write(store_path: &Path, root: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
-	if let Err(err) = create_dir_all(root.join(ANNOTATION_DIR)) {
-		return error(format!("Failed to create dir {}: {}", root.join(ANNOTATION_DIR).display(), err))
+pub(crate) fn write(input: &Path, output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
+	if let Err(err) = create_dir_all(output.join(ANNOTATION_DIR)) {
+		return error(format!("Failed to create dir {}: {}", output.join(ANNOTATION_DIR).display(), err))
 	}
 	let (sequences, image_map) = Sequence::from_dsm(datasets);
 	for (name, sequence) in sequences {
 		let json = match serde_json::to_string_pretty(&sequence) {
 			Ok(ctnt) => ctnt,
-			Err(err) => return error(format!("Could not serialize Sequence '{}': {}", root.join(IMAGE_PATH).join(&name).display(), err))
+			Err(err) => return error(format!("Could not serialize Sequence '{}': {}", output.join(IMAGE_PATH).join(&name).display(), err))
 		};
 		write_to_file(
-			&root.join(ANNOTATION_DIR).join(format!("instances_{}.json", name)),
+			&output.join(ANNOTATION_DIR).join(format!("instances_{}.json", name)),
 			json,
 			true,
 			true,
 		)?;
-		if let Err(err) = create_dir_all(root.join(IMAGE_PATH).join(&name)) {
-			return error(format!("Failed to create dir {}: {}", root.join(IMAGE_PATH).join(&name).display(), err))
+		if let Err(err) = create_dir_all(output.join(IMAGE_PATH).join(&name)) {
+			return error(format!("Failed to create dir {}: {}", output.join(IMAGE_PATH).join(&name).display(), err))
 		}
 		for image in sequence.images {
 			if let Some(img) = image_map.get(&image.file_name) {
 				if let Err(err) = copy(
-					store_path.join(img),
-					root.join(IMAGE_PATH).join(&name).join(&image.file_name)
+					input.join(img),
+					output.join(IMAGE_PATH).join(&name).join(&image.file_name)
 				) {
 					return error(format!(
 						"Failed to copy '{}' to '{}': {}",
-						store_path.join(img).display(),
-						root.join(IMAGE_PATH).join(&name).join(image.file_name).display(),
+						input.join(img).display(),
+						output.join(IMAGE_PATH).join(&name).join(image.file_name).display(),
 						err
 					))
 				}

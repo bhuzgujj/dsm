@@ -44,7 +44,7 @@ impl New {
 			let version = splits[1];
 			let local_set = storage.read(name.to_string(), version.to_string()).await?;
 			if let Some(local_set) = local_set {
-				datasets.insert(name.to_string(), local_set);
+				datasets.insert(sets_label.clone(), local_set);
 			} else {
 				return error(format!("Could not find {}", sets_label));
 			}
@@ -58,7 +58,7 @@ impl New {
 			Err(err) => return error(format!("Could not deserialize toml mapping file '{}': {err}", &self.mapping_file.display()))
 		};
 		let merge_set = MergedSet::new(datasets, self.name.clone(), self.version.clone(),  mapping);
-		storage.store_merged(&merge_set).await?;
+		storage.ledge(&merge_set).await?;
 
 		Ok(())
 	}

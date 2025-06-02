@@ -1,4 +1,3 @@
-use crate::models::classes::DsmClasses;
 use crate::models::entries::DsmEntry;
 use crate::models::metadata::DsmMetaDataBuilder;
 use crate::models::storable_merged::StorableMerged;
@@ -70,15 +69,12 @@ impl MergedSet {
 	}
 
 	pub fn to_dataset(&self, form: DsmDataForm) -> anyhow::Result<DsmSets> {
+		let classes = self.class_mapper.get_dsm_classes();
 		let metadata = DsmMetaDataBuilder::new(
 			self.name.clone(),
 			self.version.clone(),
 			form,
-			self.class_mapper.classes.iter().fold(HashMap::new(), |mut acc, (class, index)| {
-				acc.insert(*index, DsmClasses::new(class.clone(), None));
-				acc
-			}),
-
+			classes
 		)
 			.set_date_created(self.date_created.clone())
 			.set_licenses(self.license_mapper.get_licences().clone())

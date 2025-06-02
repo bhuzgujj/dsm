@@ -98,7 +98,8 @@ fn log(record: &Record) -> String {
 }
 
 #[inline]
-pub fn error<T>(message: String) -> anyhow::Result<T> {
-    error!("{}", &message);
-    Err(anyhow!(message))
+pub fn error<T, S: ToString>(message: S) -> anyhow::Result<T> {
+    let msg = message.to_string();
+    error!("{}", &msg);
+    Err(anyhow!(msg))
 }

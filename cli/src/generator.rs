@@ -1,6 +1,6 @@
 use crate::format::Format;
 use clap::Args;
-use interfaces::models::Settings;
+use interfaces::{logger::error, models::{MergedSet, Settings}};
 use serializer::DataForm;
 use std::path::PathBuf;
 use anyhow::anyhow;
@@ -32,21 +32,25 @@ impl Generator {
 			return Err(anyhow!("Require at least one dataset"));
 		}
 		let formatter: DataForm = self.formats.clone().into();
-		let path = PathBuf::from(&self.path);
 		let storage = Storage::Local {
 			ledger_directory: settings.get_ledger_path(),
 			store_directory: settings.get_store_path(),
 		};
 		let datasets = storage.read(self.datasets.clone(), self.version.clone()).await?;
-		let new_set = if let Some(ds) = datasets {
-			ds
+		let new_set = if let Some(dsm_set) = datasets {
+			dsm_set
 		} else {
-			let merged_set = storage.read_merged(self.datasets.clone(), self.version.clone()).await?
-				.expect("Could not find datasets");
+			let merged_set: MergedSet = match storage.read(self.datasets.clone(), self.version.clone()).await? {
+				Some(val) => val,
+				None => return error("Could not find datasets".to_string()),
+			};
 
 			merged_set.to_dataset(formatter.to_data_form())?
 		};
-		formatter.write(&path, &settings.get_store_path(), &new_set)?;
+		let path = PathBuf::from(&self.path);
+		formatter.write(&path, &settings.get_store_path()
+			.join(new_set.get_name())
+			.join(format!("v{}", new_set.get_version())), &new_set)?;
 		Ok(())
 	}
 }
