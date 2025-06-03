@@ -29,9 +29,11 @@ pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
 }
 
 pub(crate) fn write(root: &Path, classes: HashMap<u32, DsmClasses>) -> anyhow::Result<()> {
-	let vec: Vec<String> = classes.values()
-		.map(|s| s.get_classes_name().clone())
-		.collect();
+	let mut vec: Vec<String> = Vec::with_capacity(classes.capacity());
+	for i in 0..classes.len() {
+		let index = i as u32;
+		vec.push(classes.get(&index).unwrap().get_classes_name().clone());
+	}
 	let path_buf = root.join(FILE_NAME);
 	write_to_file(&path_buf, vec.join("\n"), true, true)
 }
