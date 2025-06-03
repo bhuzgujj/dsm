@@ -1,10 +1,13 @@
 use clap::Args;
 use interfaces::logger::error;
 use interfaces::models::{ClassMapper, MergedSet, Settings};
+use serializer::DataForm;
 use std::collections::HashMap;
 use std::fs::read_to_string;
 use std::path::PathBuf;
 use storage::Storage;
+
+use crate::format::Format;
 
 /// Parse the files in a known standard format
 #[derive(Args, Debug)]
@@ -12,9 +15,13 @@ pub struct New {
 	/// The name of the merged set
 	name: String,
 
-	/// Datasets must be named <NAME>=<VERSION>
+	/// Datasets from the local storage, must be: <NAME>=<VERSION>
 	#[clap(short, long)]
 	datasets: Vec<String>,
+
+	/// Datasets from a path, must be: <FORMAT>:<PATH>
+	#[clap(short, long)]
+	paths: Vec<String>,
 
 	/// Mapping for the classes if needed
 	#[clap(short, long)]
@@ -49,6 +56,20 @@ impl New {
 				return error(format!("Could not find {}", sets_label));
 			}
 		}
+		for path in &self.paths {
+			let splits: Vec<&str> = path.split(':').collect();
+			if splits.len() != 2 {
+				return error(format!("Can only have 1 equals sign in {}", path));
+			}
+			let format: DataForm = Format::from(splits[0].trim().to_string()).into();
+			let dataset_path = PathBuf::from(splits[1].trim());
+			let dataset = format.read(&dataset_path, None, "0".to_string())?;
+			for ds in dataset {
+				storage.store(&ds, &dataset_path).await?;
+				storage.ledge(&ds).await?;
+				datasets.insert(ds.get_name().clone(), ds);
+			}
+		}		
 		let content = match read_to_string(&self.mapping_file) {
 			Ok(content) => content,
 			Err(err) => return error(format!("Could not read file '{}': {err}", &self.mapping_file.display()))
