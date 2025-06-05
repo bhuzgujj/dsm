@@ -65,7 +65,7 @@ impl DsmMetaData {
         &self.licenses
     }
     
-    pub(crate) fn is_incomplet(&self) -> &bool {
+    pub fn is_incomplet(&self) -> &bool {
         &self.is_incomplete
     }
 }

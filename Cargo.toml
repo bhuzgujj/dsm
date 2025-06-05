@@ -5,7 +5,8 @@ members = [
     "libs/serializer",
     "libs/storage",
     "gui/src-tauri",
-    "cli"
+    "cli",
+    "pydsm"
 ]
 
 [workspace.dependencies]
@@ -35,6 +36,8 @@ futures = "0.3"
 image = "0.25.6"
 
 log = "0.4.27"
+
+pyo3 = "0.25.0"
 
 reqwest = "0.12.15"
 
