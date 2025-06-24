@@ -1,6 +1,6 @@
 use std::fs::{copy, create_dir_all};
 use std::path::Path;
-use interfaces::logger::error;
+use interfaces::log_err;
 use interfaces::models::DsmSets;
 use interfaces::models::DsmDataForm;
 use interfaces::paths::write_to_file;
@@ -27,13 +27,13 @@ pub(crate) fn read(root: &Path, name: Option<String>, version: String, data_form
 
 pub(crate) fn write(input: &Path, output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
 	if let Err(err) = create_dir_all(output.join(ANNOTATION_DIR)) {
-		return error(format!("Failed to create dir {}: {}", output.join(ANNOTATION_DIR).display(), err))
+		return log_err!(format!("Failed to create dir {}: {}", output.join(ANNOTATION_DIR).display(), err))
 	}
 	let (sequences, image_map) = Sequence::from_dsm(datasets);
 	for (name, sequence) in sequences {
 		let json = match serde_json::to_string_pretty(&sequence) {
 			Ok(ctnt) => ctnt,
-			Err(err) => return error(format!("Could not serialize Sequence '{}': {}", output.join(IMAGE_PATH).join(&name).display(), err))
+			Err(err) => return log_err!(format!("Could not serialize Sequence '{}': {}", output.join(IMAGE_PATH).join(&name).display(), err))
 		};
 		write_to_file(
 			&output.join(ANNOTATION_DIR).join(format!("instances_{}.json", name)),
@@ -42,7 +42,7 @@ pub(crate) fn write(input: &Path, output: &Path, datasets: &DsmSets) -> anyhow::
 			true,
 		)?;
 		if let Err(err) = create_dir_all(output.join(IMAGE_PATH).join(&name)) {
-			return error(format!("Failed to create dir {}: {}", output.join(IMAGE_PATH).join(&name).display(), err))
+			return log_err!(format!("Failed to create dir {}: {}", output.join(IMAGE_PATH).join(&name).display(), err))
 		}
 		for image in sequence.images {
 			if let Some(img) = image_map.get(&image.file_name) {
@@ -50,15 +50,15 @@ pub(crate) fn write(input: &Path, output: &Path, datasets: &DsmSets) -> anyhow::
 					input.join(img),
 					output.join(IMAGE_PATH).join(&name).join(&image.file_name)
 				) {
-					return error(format!(
+					return log_err!(format!(
 						"Failed to copy '{}' to '{}': {}",
 						input.join(img).display(),
-						output.join(IMAGE_PATH).join(&name).join(image.file_name).display(),
+						output.join(IMAGE_PATH).join(&name).join(image.file_name.clone()).display(),
 						err
 					))
 				}
 			} else {
-				return error(format!("Image does not exist: {}", image.file_name))
+				return log_err!(format!("Image does not exist: {}", image.file_name))
 			}
 		}
 	}

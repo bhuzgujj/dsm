@@ -4,7 +4,7 @@ use crate::models::storable_merged::StorableMerged;
 use crate::models::{ClassMapper, DsmDataForm, DsmSets, LicenseMapper};
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use crate::logger::error;
+use crate::log_err;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct MergedSet {
@@ -97,7 +97,7 @@ impl MergedSet {
 					if let Some(entries) = data_entries.get_mut(name) {
 						entries.push(new_entry);
 					} else {
-						return error(format!("Entries vector for '{name}' has not been inserted"));
+						return log_err!(format!("Entries vector for '{name}' has not been inserted"));
 					}
 				}
 			}
@@ -111,10 +111,10 @@ impl MergedSet {
 	}
 
 	pub fn to_storable(&self) -> StorableMerged {
-		let mut sets = Vec::new();
+		let mut sets = HashMap::new();
 
 		for dataset in &self.datasets {
-			sets.push(format!("{}-v{}.json", dataset.get_name(), dataset.get_version()));
+			sets.insert(format!("{}~{}", dataset.get_name(), dataset.get_version()), dataset.get_metadata().get_location().clone());
 		}
 
 		StorableMerged {

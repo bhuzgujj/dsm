@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fs::read_to_string;
 use std::path::{Path, PathBuf};
 use log::debug;
-use interfaces::logger::error;
+use interfaces::log_err;
 use interfaces::models::classes::DsmClasses;
 use interfaces::paths::write_to_file;
 
@@ -13,7 +13,7 @@ pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
 	let contents = match read_to_string(&path) {
 		Ok(contents) => contents,
 		Err(err) => {
-			return error(format!("Failed to read '{}': {err}", path.display()));
+			return log_err!(format!("Failed to read '{}': {err}", path.display()));
 		}
 	};
 	let mut classes = HashMap::new();

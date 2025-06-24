@@ -3,7 +3,7 @@ use std::fs::{read_to_string};
 use std::path::Path;
 use std::str::FromStr;
 use log::{debug, warn};
-use interfaces::logger::error;
+use interfaces::log_err;
 use interfaces::paths::write_to_file;
 use crate::yolo_1_1::{strip_prefix};
 use crate::yolo_1_1::obj_names;
@@ -42,7 +42,7 @@ impl ObjData {
 		debug!("Reading '{}'", abs_path.display());
 		let contents = match read_to_string(&abs_path) {
 			Ok(contents) => contents,
-			Err(err) => return error(format!("Error reading file '{}': {}", abs_path.display(), err))
+			Err(err) => return log_err!(format!("error! reading file '{}': {}", abs_path.display(), err))
 		};
 		let mut classes: Option<u32> = None;
 		let mut names: Option<String> = None;
@@ -94,10 +94,10 @@ impl ObjData {
 			}
 		}
 		if classes.is_none() {
-			return error(format!("Missing 'classes' in '{}'", abs_path.display()));
+			return log_err!(format!("Missing 'classes' in '{}'", abs_path.display()));
 		}
 		if names.is_none() {
-			return error(format!("Missing 'names' in '{}'", abs_path.display()));
+			return log_err!(format!("Missing 'names' in '{}'", abs_path.display()));
 		}
 		Ok(Self {
 			classes: classes.unwrap_or_else(|| panic!("Missing 'classes' in '{}'", abs_path.display())),

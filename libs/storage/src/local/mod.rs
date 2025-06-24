@@ -5,12 +5,13 @@ use std::{fs::{self, read_to_string}, path::Path};
 
 use serde::{de::DeserializeOwned, Serialize};
 
-use interfaces::logger::error;
+use interfaces::log_err;
 
 use crate::storable::Storable;
 
 pub const RAW_SET: &str = "raw_sets";
 pub const MERGED_SET: &str = "merged_sets";
+pub const SEPARATOR: &str = "~";
 
 pub trait Localable
 where
@@ -48,10 +49,10 @@ fn copy_recursively(src: &Path, dst: &Path) -> anyhow::Result<()> {
 fn read_dsm<T: DeserializeOwned>(path: &Path) -> anyhow::Result<T> {
 	let content = match read_to_string(path) {
 		Ok(ctnt) => ctnt,
-		Err(err) => return error(format!("Failed to read {}: {}", path.display(), err))
+		Err(err) => return log_err!(format!("Failed to read {}: {}", path.display(), err))
 	};
 	match serde_json::from_str(content.as_str()) {
 		Ok(datasets) => Ok(datasets),
-		Err(err) => error(format!("Failed to deserialize {}: {}", path.display(), err))
+		Err(err) => log_err!(format!("Failed to deserialize {}: {}", path.display(), err))
 	}
 }

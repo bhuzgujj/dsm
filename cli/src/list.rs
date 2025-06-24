@@ -90,7 +90,7 @@ impl List {
             let sets = merged_set
                 .get_datasets_include()
                 .iter()
-                .map(|s| format!("{}={}", s.get_name(), s.get_version()))
+                .map(|s| format!("{}~{}", s.get_name(), s.get_version()))
                 .collect::<Vec<String>>();
             let sets = serde_json::to_string(&sets)?;
             println!(

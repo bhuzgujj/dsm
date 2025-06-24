@@ -3,7 +3,7 @@ use crate::coco_1_0::models::category::Category;
 use crate::coco_1_0::models::image::Image;
 use crate::coco_1_0::models::info::Info;
 use crate::coco_1_0::models::license::License;
-use interfaces::logger::error;
+use interfaces::log_err;
 use interfaces::models::entries::{DsmEntry, DsmEntryBuilder};
 use interfaces::models::metadata::{DsmMetaData, DsmMetaDataBuilder};
 use interfaces::models::DsmDataForm;
@@ -182,7 +182,7 @@ impl Sequence {
 fn strip_name(json_name: String) -> anyhow::Result<String> {
     let parts: Vec<&str> = json_name.split(".").collect();
     if parts.len() != 2 {
-        return error(format!("'{json_name}' is not a valid json name"));
+        return log_err!(format!("'{json_name}' is not a valid json name"));
     }
     Ok(parts[0].split('_').next_back().unwrap().to_string())
 }

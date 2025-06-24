@@ -3,7 +3,7 @@ This is a python usable dsm.
 
 ## Setup
 Requires:
-- [Python v3.8.10]()
+- [Python v3.12.5]()
 - [Rust]()
 
 Setup venv

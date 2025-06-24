@@ -5,6 +5,7 @@ mod list;
 mod merge;
 mod store;
 mod mapping;
+mod mutate;
 
 use clap::Parser;
 use interfaces::logger;
@@ -19,19 +20,23 @@ use crate::generator::Generator;
 use crate::list::List;
 use crate::merge::Merge;
 use crate::store::Store;
+use crate::mutate::Mutate;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 enum Cli {
     Store(Store),
     Gen(Generator),
-    Ls(List),
+    List(List),
     
     #[command(subcommand)]
     Map(Mapping),
 
     #[command(subcommand)]
     Merge(Merge),
+
+    #[command(subcommand)]
+    Mutate(Mutate),
 
     Config(Configuration),
     Try,
@@ -46,8 +51,9 @@ async fn wrapper() -> anyhow::Result<()> {
         Cli::Store(store) => store.execute(&settings).await?,
         Cli::Gen(generator) => generator.execute(&settings).await?,
         Cli::Config(configuration) => configuration.configure(&mut settings)?,
-        Cli::Ls(ls) => ls.execute(&settings).await?,
+        Cli::List(ls) => ls.execute(&settings).await?,
         Cli::Merge(merge) => merge.execute(&settings).await?,
+        Cli::Mutate(mutate) => mutate.execute(&settings).await?,
         Cli::Map(map) => map.execute(&settings).await?,
         Cli::Try => {
             let remote = settings.get_remotes().get("my_account").unwrap();

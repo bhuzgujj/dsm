@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs::{read_dir, read_to_string};
 use std::path::PathBuf;
-use interfaces::logger::error;
+use interfaces::log_err;
 use crate::coco_1_0::models::sequence::Sequence;
 
 pub mod info;
@@ -21,7 +21,7 @@ pub(crate) fn read(root: &PathBuf) -> anyhow::Result<HashMap<String, Sequence>> 
 				if let Ok(content) = read_to_string(f.path()) {
 					let sequence: Sequence = match serde_json::from_str(content.as_str()) {
 						Ok(s) => s,
-						Err(err) => return error(format!("Failed to deserialize Sequence '{}': {}", f.path().display(), err))
+						Err(err) => return log_err!(format!("Failed to deserialize Sequence '{}': {}", f.path().display(), err))
 					};
 					sequences.insert(
 						f.file_name().to_string_lossy().to_string(),
@@ -32,7 +32,7 @@ pub(crate) fn read(root: &PathBuf) -> anyhow::Result<HashMap<String, Sequence>> 
 			Ok(sequences)
 		}
 		Err(err) => {
-			error(format!("Failed to read dataset directory '{}': {err}", root.display()))
+			log_err!(format!("Failed to read dataset directory '{}': {err}", root.display()))
 		}
 	}
 }

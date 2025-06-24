@@ -1,10 +1,9 @@
 use crate::format::Format;
 use clap::Args;
-use interfaces::{logger::error, models::{MergedSet, Settings}};
+use interfaces::{log_err, models::{MergedSet, Settings}};
 use serializer::DataForm;
 use std::path::PathBuf;
 use anyhow::anyhow;
-use log::error;
 use storage::Storage;
 
 /// Parse the files in a known standard format
@@ -28,8 +27,7 @@ pub struct Generator {
 impl Generator {
 	pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
 		if self.datasets.is_empty() {
-			error!("Require at least one dataset");
-			return Err(anyhow!("Require at least one dataset"));
+			return log_err!("Require at least one dataset");
 		}
 		let formatter: DataForm = self.formats.clone().into();
 		let storage = Storage::Local {
@@ -42,7 +40,7 @@ impl Generator {
 		} else {
 			let merged_set: MergedSet = match storage.read(self.datasets.clone(), self.version.clone()).await? {
 				Some(val) => val,
-				None => return error("Could not find datasets".to_string()),
+				None => return log_err!("Could not find datasets".to_string()),
 			};
 
 			merged_set.to_dataset(formatter.to_data_form())?

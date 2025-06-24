@@ -7,13 +7,13 @@ use std::collections::HashMap;
 use std::fs::{copy, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use interfaces::logger::error;
+use interfaces::log_err;
 use interfaces::paths::write_to_file;
 
 pub(crate) fn read(refs: &Path, root: &Path, classes: &HashMap<u32, DsmClasses>) -> anyhow::Result<Vec<DsmEntry>> {
 	let content = match read_to_string(refs) {
 		Ok(ctnt) => ctnt,
-		Err(err) => return error(format!("Could not read '{}': {}", refs.display(), err))
+		Err(err) => return log_err!(format!("Could not read '{}': {}", refs.display(), err))
 	};
 	let mut entries = Vec::new();
 	for line in content.lines() {
@@ -21,13 +21,13 @@ pub(crate) fn read(refs: &Path, root: &Path, classes: &HashMap<u32, DsmClasses>)
 		let images_path = root.join(&image_relative_path);
 		let (img_width, img_height) = match image_dimensions(&images_path) {
 			Ok((w, h)) => (w, h),
-			Err(err) => return error(format!("Could not read image '{}': {}", images_path.display(), err))
+			Err(err) => return log_err!(format!("Could not read image '{}': {}", images_path.display(), err))
 		};
 		let mut annotation_path = images_path.clone();
 		annotation_path.set_extension("txt");
 		let annotations_file = match read_to_string(annotation_path) {
 			Ok(ctnt) => ctnt,
-			Err(err) => return error(format!("Could not read '{}': {}", refs.display(), err))
+			Err(err) => return log_err!(format!("Could not read '{}': {}", refs.display(), err))
 		};
 		let mut annotations = Vec::new();
 		for annotation in annotations_file.lines() {
@@ -35,7 +35,7 @@ pub(crate) fn read(refs: &Path, root: &Path, classes: &HashMap<u32, DsmClasses>)
 			if !annotation.is_empty() {
 				annotations.push(match parse_annotation(annotation, classes, img_width, img_height) {
 					Ok(annot) => annot,
-					Err(err) => return error(format!("Could not parse annotation '{}': {}", annotation, err))
+					Err(err) => return log_err!(format!("Could not parse annotation '{}': {}", annotation, err))
 				});
 			}
 		}
@@ -71,7 +71,7 @@ pub(crate) fn write(input: &Path, output: &Path, sets_name: &String, dataset_ent
 	let dir = format!("obj_{sets_name}_data");
 	let img_dir=  output.join(&dir);
 	if let Err(err) = create_dir_all(&img_dir) {
-		return error(format!("Failed to create dir {}: {}", img_dir.display(), err))
+		return log_err!(format!("Failed to create dir {}: {}", img_dir.display(), err))
 	}
 	let mut sets = Vec::new();
 	let data_dir = input;
@@ -82,7 +82,7 @@ pub(crate) fn write(input: &Path, output: &Path, sets_name: &String, dataset_ent
 			data_dir.join(entry.get_image_relative_path()),
 			img_dir.join(new_image_name)
 		) {
-			return error(format!(
+			return log_err!(format!(
 				"Failed to copy '{}' to '{}': {}",
 				data_dir.join(entry.get_image_relative_path()).display(),
 				img_dir.join(new_image_name).display(),
@@ -92,7 +92,7 @@ pub(crate) fn write(input: &Path, output: &Path, sets_name: &String, dataset_ent
 
 		let (img_width, img_height) = match image_dimensions(img_dir.join(new_image_name)) {
 			Ok((w, h)) => (w, h),
-			Err(err) => return error(format!("Could not read image '{}': {}", img_dir.join(new_image_name).display(), err))
+			Err(err) => return log_err!(format!("Could not read image '{}': {}", img_dir.join(new_image_name).display(), err))
 		};
 
 		let mut annotation_file = PathBuf::from(entry.get_file_name().as_str());

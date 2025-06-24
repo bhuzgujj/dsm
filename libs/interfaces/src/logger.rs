@@ -97,9 +97,22 @@ fn log(record: &Record) -> String {
     )
 }
 
-#[inline]
-pub fn error<T, S: ToString>(message: S) -> anyhow::Result<T> {
-    let msg = message.to_string();
-    error!("{}", &msg);
-    Err(anyhow!(msg))
+/// This macro Log and return an anyhow error of the type of the caller
+/// 
+/// Usage:
+/// ```
+/// fn errored(value: String) -> anyhow<String> {
+///     if value.is_empty() {
+///         return log_err!("Value must not be empty"); // This does return
+///     }
+///     return Ok(value)
+/// }
+/// ```
+///
+#[macro_export]
+macro_rules! log_err {
+    ($message:expr) => {{
+        log::error!("{}", $message);
+        Err(anyhow::anyhow!($message))
+    }};
 }

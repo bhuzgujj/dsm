@@ -3,12 +3,14 @@ use serde::{Deserialize, Serialize};
 use crate::models::form::DsmDataForm;
 use crate::models::datasets::classes::DsmClasses;
 use crate::models::datasets::licence::DsmLicense;
+use crate::models::DsmLocation;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DsmMetaData {
     name: String,
     version: String,
     subset_version: Option<String>,
+    location: DsmLocation,
     contributor: String,
     date_created: String,
     description: String,
@@ -18,6 +20,7 @@ pub struct DsmMetaData {
     formatter: DsmDataForm,
     classes: HashMap<u32, DsmClasses>,
     licenses: HashMap<u32, DsmLicense>,
+    contained_in_merged: Vec<String>
 }
 
 impl DsmMetaData {
@@ -35,6 +38,10 @@ impl DsmMetaData {
     
     pub fn get_subset_version(&self) -> &Option<String> {
         &self.subset_version
+    }
+    
+    pub fn get_location(&self) -> &DsmLocation {
+        &self.location
     }
 
     pub fn get_contributor(&self) -> &String {
@@ -68,12 +75,17 @@ impl DsmMetaData {
     pub fn is_incomplet(&self) -> &bool {
         &self.is_incomplete
     }
+    
+    pub fn get_contained_in_merged(&self) -> &Vec<String> {
+        &self.contained_in_merged
+    }
 }
 
 pub struct DsmMetaDataBuilder {
     name: String,
     version: String,
     subset_version: Option<String>,
+    location: DsmLocation,
     contributor: String,
     date_created: String,
     description: String,
@@ -83,6 +95,7 @@ pub struct DsmMetaDataBuilder {
     formatter: DsmDataForm,
     classes: HashMap<u32, DsmClasses>,
     licenses: HashMap<u32, DsmLicense>,
+    contained_in_merged: Vec<String>,
 }
 
 impl DsmMetaDataBuilder {
@@ -96,6 +109,7 @@ impl DsmMetaDataBuilder {
             name,
             version,
             subset_version: None,
+            location: DsmLocation::Local,
             contributor: String::new(),
             date_created: String::new(),
             description: String::new(),
@@ -104,8 +118,14 @@ impl DsmMetaDataBuilder {
             year: String::new(),
             formatter,
             classes,
-            licenses: HashMap::new()
+            licenses: HashMap::new(),
+            contained_in_merged: Vec::new()
         }
+    }
+
+    pub fn set_location(mut self, location: DsmLocation) -> Self {
+        self.location = location;
+        self
     }
 
     pub fn set_contributor(mut self, contributor: String) -> Self {
@@ -148,11 +168,25 @@ impl DsmMetaDataBuilder {
         self
     }
 
+    pub fn set_contained_in_merged(mut self, contained_in_merged: Vec<String>) -> Self {
+        self.contained_in_merged = contained_in_merged;
+        self
+    }
+    
+    pub fn add_contained_in_merged(mut self, merged: String) -> Self {
+        if self.contained_in_merged.contains(&merged) {
+            return self;
+        }
+        self.contained_in_merged.push(merged);
+        self
+    }
+
     pub fn build(self) -> DsmMetaData {
         DsmMetaData {
             name: self.name,
             version: self.version,
             subset_version: self.subset_version,
+            location: self.location,
             contributor: self.contributor,
             date_created: self.date_created,
             description: self.description,
@@ -162,6 +196,7 @@ impl DsmMetaDataBuilder {
             classes: self.classes,
             is_incomplete: self.is_incomplete,
             licenses: self.licenses,
+            contained_in_merged: self.contained_in_merged
         }
     }
 }
@@ -172,6 +207,7 @@ impl From<DsmMetaData> for DsmMetaDataBuilder {
             name: value.name,
             version: value.version,
             subset_version: value.subset_version,
+            location: value.location,
             contributor: value.contributor,
             date_created: value.date_created,
             description: value.description,
@@ -181,6 +217,7 @@ impl From<DsmMetaData> for DsmMetaDataBuilder {
             classes: value.classes,
             is_incomplete: value.is_incomplete,
             licenses: value.licenses,
+            contained_in_merged: value.contained_in_merged,
         }
     }
 }

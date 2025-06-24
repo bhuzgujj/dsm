@@ -3,7 +3,7 @@ use std::process::Command;
 use azure_storage::StorageCredentials;
 use azure_storage_datalake::prelude::DataLakeClient;
 use futures::StreamExt;
-use interfaces::{logger::error};
+use interfaces::log_err;
 use serde::de::DeserializeOwned;
 
 use crate::storable::Storable;
@@ -84,7 +84,7 @@ impl AzureClientWrapper {
         }
         let bearer_token = match &self.access_token {
             Some(at) => at.accessToken.clone(),
-            None => return error(format!("Could not get an access token")),
+            None => return log_err!(format!("Could not get an access token")),
         };
         let store_credentials = StorageCredentials::bearer_token(bearer_token);
         let client = DataLakeClient::new(self.storage_account.clone(), store_credentials);
@@ -100,7 +100,7 @@ impl AzureClientWrapper {
                         println!("P: {}", p.name);
                     }
                 },
-                Err(err) => log::error!("Err: {}", err),
+                Err(err) => return log_err!(format!("Err: {}", err)),
             }
         }
 

@@ -8,7 +8,7 @@ use std::{
 use std::path::PathBuf;
 use log::{trace, LevelFilter};
 use serde::{Deserialize, Serialize};
-use crate::logger::error;
+use crate::log_err;
 use crate::paths::{dsm_dir, write_to_file};
 use remotes::Remote;
 
@@ -72,7 +72,7 @@ impl Settings {
         let settings_filename = dsm_dir().join(SETTINGS_FILENAME);
         let content = match toml::to_string(self) {
             Ok(ctnt) => ctnt,
-            Err(err) => return error(format!("Could not serialize in toml settings: {err}"))
+            Err(err) => return log_err!(format!("Could not serialize in toml settings: {err}"))
         };
         trace!("Saving settings \n\"\"\" Path: '{}'\n{}\n\"\"\"", settings_filename.display(), content);
         write_to_file(&settings_filename, content, true, true)

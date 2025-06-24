@@ -1,4 +1,4 @@
-use crate::logger::error;
+use crate::log_err;
 use crate::models::classes::DsmClasses;
 use crate::models::datasets::annotation::DsmAnnotation;
 use crate::models::{ClassMapper, LicenseMapper};
@@ -73,7 +73,7 @@ impl DsmEntry {
                     warn!("No mapping for annotation ({}: {})", old_class.get_classes_name(), ann.get_class())
                 }
             } else {
-                return error(format!("Annotation {} no found in original mapping", ann.get_class()))
+                return log_err!(format!("Annotation {} no found in original mapping", ann.get_class()))
             }
         }
         let mut licence_new_id = None;

@@ -1,7 +1,7 @@
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use crate::logger::error;
+use crate::log_err;
 
 const DSM_DIR: &str = ".dsm";
 
@@ -22,9 +22,9 @@ pub fn write_to_file(file_path: &Path, content: String, truncate: bool, create: 
         Ok(mut file) => {
             match file.write_all(content.as_bytes()) {
                 Ok(_) => Ok(()),
-                Err(err) => error(format!("Failed to write '{}': {err}", file_path.display()))
+                Err(err) => log_err!(format!("Failed to write '{}': {err}", file_path.display()))
             }
         }
-        Err(err) => error(format!("Failed to open file '{}': {err}", file_path.display()))
+        Err(err) => log_err!(format!("Failed to open file '{}': {err}", file_path.display()))
     }
 }

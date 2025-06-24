@@ -1,7 +1,7 @@
 use std::{fs::read_to_string, path::PathBuf};
 
 use clap::Args;
-use interfaces::{logger::error, models::{ClassMapper, Settings}};
+use interfaces::{log_err, models::{ClassMapper, Settings}};
 use serializer::DataForm;
 
 use crate::format::Format;
@@ -34,11 +34,11 @@ impl Untrack {
         let iformat: DataForm = Format::from(self.input_format.clone()).into();
 		let content = match read_to_string(&self.mapping_file) {
             Ok(content) => content,
-			Err(err) => return error(format!("Could not read file '{}': {err}", &self.mapping_file.display()))
+			Err(err) => return log_err!(format!("Could not read file '{}': {err}", &self.mapping_file.display()))
 		};
 		let mapping: ClassMapper =  match toml::from_str(&content) {
             Ok(content) => content,
-			Err(err) => return error(format!("Could not deserialize toml mapping file '{}': {err}", &self.mapping_file.display()))
+			Err(err) => return log_err!(format!("Could not deserialize toml mapping file '{}': {err}", &self.mapping_file.display()))
 		};
         let datasets = iformat.read(&self.input_path, None, self.version.clone())?;
         for dataset in datasets {
