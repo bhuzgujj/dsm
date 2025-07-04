@@ -2,16 +2,15 @@ mod configuration;
 mod format;
 mod generator;
 mod list;
+mod mapping;
 mod merge;
 mod store;
-mod mapping;
-mod mutate;
 
 use clap::Parser;
 use interfaces::logger;
 use mapping::Mapping;
-use storage::Storage;
 use std::fs::create_dir_all;
+use storage::Storage;
 
 use interfaces::models::{DsmSets, Settings};
 
@@ -20,7 +19,6 @@ use crate::generator::Generator;
 use crate::list::List;
 use crate::merge::Merge;
 use crate::store::Store;
-use crate::mutate::Mutate;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -28,15 +26,12 @@ enum Cli {
     Store(Store),
     Gen(Generator),
     List(List),
-    
+
     #[command(subcommand)]
     Map(Mapping),
 
     #[command(subcommand)]
     Merge(Merge),
-
-    #[command(subcommand)]
-    Mutate(Mutate),
 
     Config(Configuration),
     Try,
@@ -53,12 +48,14 @@ async fn wrapper() -> anyhow::Result<()> {
         Cli::Config(configuration) => configuration.configure(&mut settings)?,
         Cli::List(ls) => ls.execute(&settings).await?,
         Cli::Merge(merge) => merge.execute(&settings).await?,
-        Cli::Mutate(mutate) => mutate.execute(&settings).await?,
         Cli::Map(map) => map.execute(&settings).await?,
         Cli::Try => {
             let remote = settings.get_remotes().get("my_account").unwrap();
-            Storage::Remote { service: remote.clone() }
-                .read::<DsmSets>("".to_string(), "1".to_string()).await?;
+            Storage::Remote {
+                service: remote.clone(),
+            }
+            .read::<DsmSets>("".to_string(), "1".to_string())
+            .await?;
         }
     };
     settings.save()?;

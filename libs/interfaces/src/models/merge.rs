@@ -68,7 +68,10 @@ impl MergedSet {
         &self.version
     }
 
-    pub fn to_dataset(&self, form: DsmDataForm) -> anyhow::Result<DsmSets> {
+    pub fn to_dataset(
+        &self,
+        form: DsmDataForm,
+    ) -> anyhow::Result<(DsmSets, Option<HashMap<String, String>>)> {
         let classes = self.class_mapper.get_dsm_classes();
         let metadata =
             DsmMetaDataBuilder::new(self.name.clone(), self.version.clone(), form, classes)
@@ -77,6 +80,7 @@ impl MergedSet {
                 .set_description(self.description.clone())
                 .build();
         let mut data_entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
+        let mut rel_path: HashMap<String, String> = HashMap::new();
         for dataset in &self.datasets {
             for (name, entries) in dataset.get_entries() {
                 if !data_entries.contains_key(name) {
@@ -90,6 +94,10 @@ impl MergedSet {
                         &self.license_mapper,
                         dataset.get_classes().clone(),
                     );
+                    rel_path.insert(
+                        new_entry.get_file_name().clone(),
+                        dataset.get_rel_from_storage().clone(),
+                    );
                     if let Some(entries) = data_entries.get_mut(name) {
                         entries.push(new_entry);
                     } else {
@@ -100,8 +108,7 @@ impl MergedSet {
                 }
             }
         }
-
-        Ok(DsmSets::new(metadata, data_entries))
+        Ok((DsmSets::new(metadata, data_entries), Some(rel_path)))
     }
 
     pub fn get_datasets_include(&self) -> &Vec<DsmSets> {

@@ -39,8 +39,8 @@ impl Generator {
         let datasets = storage
             .read(self.datasets.clone(), self.version.clone())
             .await?;
-        let new_set = if let Some(dsm_set) = datasets {
-            dsm_set
+        let (new_set, image_rel_path_mapping) = if let Some(dsm_set) = datasets {
+            (dsm_set, None)
         } else {
             let merged_set: MergedSet = match storage
                 .read(self.datasets.clone(), self.version.clone())
@@ -55,11 +55,9 @@ impl Generator {
         let path = PathBuf::from(&self.path);
         formatter.write(
             &path,
-            &settings
-                .get_store_path()
-                .join(new_set.get_name())
-                .join(format!("v{}", new_set.get_version())),
+            &settings.get_store_path(),
             &new_set,
+            image_rel_path_mapping,
         )?;
         Ok(())
     }

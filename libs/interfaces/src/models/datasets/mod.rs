@@ -101,11 +101,15 @@ impl DsmSets {
             }
             new_entries.insert(name.clone(), subset);
         }
-        Ok(Self { 
+        Ok(Self {
             metadata: DsmMetaDataBuilder::from(self.metadata.clone())
                 .set_classes(map.get_dsm_classes())
-                .build(), 
-            entries: new_entries 
+                .build(),
+            entries: new_entries,
         })
+    }
+
+    pub fn get_rel_from_storage(&self) -> String {
+        format!("{}/{}", self.get_name(), self.get_version())
     }
 }
