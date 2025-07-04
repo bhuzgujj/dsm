@@ -12,9 +12,12 @@ use crate::format::Format;
 
 /// Parse the files in a known standard format
 #[derive(Args, Debug)]
-pub struct New {
+pub struct Add {
+    /// Merge set to add datasets to from, must be: <NAME>=<VERSION>
+    from_set: String,
+
     /// The name of the merged set
-    name: String,
+    version: String,
 
     /// Datasets from the local storage, must be: <NAME>=<VERSION>
     #[clap(short, long)]
@@ -24,22 +27,63 @@ pub struct New {
     #[clap(short, long)]
     paths: Vec<String>,
 
-    /// Mapping for the classes if needed
+    /// Updated mapping file (default keep previous)
     #[clap(short, long)]
-    mapping_file: PathBuf,
-
-    /// The version of the merged set
-    #[clap(short, long, default_value = "1")]
-    version: String,
+    mapping_file: Option<PathBuf>,
 }
 
-impl New {
+impl Add {
     pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
         let mut datasets = HashMap::new();
         let storage = Storage::Local {
             ledger_directory: settings.get_ledger_path(),
             store_directory: settings.get_store_path(),
         };
+        let splits: Vec<&str> = self.from_set.split('=').collect();
+        if splits.len() != 2 {
+            return log_err!(format!("Can only have 1 equals sign in {}", self.from_set));
+        }
+        let merged_name = splits[0];
+        let merged_version = splits[1];
+        let mut mapping: ClassMapper;
+        let merged = storage
+            .read::<MergedSet>(merged_name.to_string(), merged_version.to_string())
+            .await?;
+        if let Some(m) = merged {
+            for dsm in m.get_datasets_include() {
+                datasets.insert(
+                    format!(
+                        "{}={}",
+                        dsm.get_metadata().get_name(),
+                        dsm.get_metadata().get_version()
+                    ),
+                    dsm.clone(),
+                );
+            }
+            mapping = m.get_mapping().clone();
+        } else {
+            return log_err!(format!("Could not find {merged_name} v{merged_version}"));
+        }
+        if let Some(mapping_path) = &self.mapping_file {
+            let content = match read_to_string(&mapping_path) {
+                Ok(content) => content,
+                Err(err) => {
+                    return log_err!(format!(
+                        "Could not read file '{}': {err}",
+                        &mapping_path.display()
+                    ))
+                }
+            };
+            mapping = match toml::from_str(&content) {
+                Ok(content) => content,
+                Err(err) => {
+                    return log_err!(format!(
+                        "Could not deserialize toml mapping file '{}': {err}",
+                        &mapping_path.display()
+                    ))
+                }
+            };
+        }
         for sets_label in self.datasets.iter() {
             if datasets.contains_key(sets_label) {
                 return log_err!(format!("Cannot have twice the same dataset {}", sets_label));
@@ -71,27 +115,9 @@ impl New {
                 datasets.insert(ds.get_name().clone(), ds);
             }
         }
-        let content = match read_to_string(&self.mapping_file) {
-            Ok(content) => content,
-            Err(err) => {
-                return log_err!(format!(
-                    "Could not read file '{}': {err}",
-                    &self.mapping_file.display()
-                ))
-            }
-        };
-        let mapping: ClassMapper = match toml::from_str(&content) {
-            Ok(content) => content,
-            Err(err) => {
-                return log_err!(format!(
-                    "Could not deserialize toml mapping file '{}': {err}",
-                    &self.mapping_file.display()
-                ))
-            }
-        };
         let merge_set = MergedSet::new(
             datasets.clone(),
-            self.name.clone(),
+            merged_name.to_string(),
             self.version.clone(),
             mapping,
         );
