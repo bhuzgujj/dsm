@@ -17,7 +17,12 @@ pub struct Add {
     /// Merge set to add datasets to from, must be: <NAME>=<VERSION>
     from_set: String,
 
+    /// The name of the new set (default will be the previous name)
+    #[clap(short, long)]
+    name: Option<String>,
+
     /// The version of the new set
+    #[clap(short, long)]
     version: String,
 
     /// Datasets from the local storage, must be: <NAME>=<VERSION>
@@ -72,7 +77,12 @@ impl Add {
         extract_dsm_from_storage(&self.datasets, &mut datasets, &storage).await?;
         extract_dsm_from_path(&self.paths, &mut datasets, &storage).await?;
 
-        let merge_set = MergedSet::new(datasets.clone(), merged_name.to_string(), self.version.clone(), mapping);
+        let merge_set = MergedSet::new(
+            datasets.clone(),
+            self.name.clone().unwrap_or(merged_name.to_string()),
+            self.version.clone(),
+            mapping
+        );
         storage.ledge(&merge_set).await?;
 
         add_merge_link_to(&datasets, storage, merge_set).await

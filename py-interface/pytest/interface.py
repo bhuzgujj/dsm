@@ -21,10 +21,12 @@ async def main():
     ])
 
     # Take a merge set an create a new version adding datasets to it
-    await pyidsm.merge_on("mergy", "1", "2", None, [
+    await pyidsm.merge_on("mergy", "1", "lol", "2", None, [
         ("yolo", "2"),
     ])
+
     for sets in await pyidsm.list():
         print(sets.metadata.name, sets.metadata.version)
+
 
 asyncio.run(main())

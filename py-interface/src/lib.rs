@@ -86,7 +86,7 @@ async fn new_merge(name: String, version: String, mapping_path: String, dataset_
 }
 
 #[pyfunction]
-async fn merge_on(name: String, base_version: String, new_version: String, mapping_path: Option<String>, dataset_to_add: Vec<(String, String)>) -> anyhow::Result<()> {
+async fn merge_on(name: String, base_version: String, new_name: Option<String>, new_version: String, mapping_path: Option<String>, dataset_to_add: Vec<(String, String)>) -> anyhow::Result<()> {
     let settings = init()?;
     let storage = Storage::Local {
         ledger_directory: settings.get_ledger_path(),
@@ -111,7 +111,7 @@ async fn merge_on(name: String, base_version: String, new_version: String, mappi
         None => previous_merged_set.get_mapping().clone(),
         Some(mapping) => ClassMapper::read_from_file(Path::new(&mapping))?,
     };
-    save_merge_set(name, new_version, storage, datasets, mapping).await?;
+    save_merge_set(new_name.unwrap_or(name), new_version, storage, datasets, mapping).await?;
     Ok(())
 }
 
