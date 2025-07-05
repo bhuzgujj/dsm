@@ -1,13 +1,12 @@
 mod local;
-mod remote;
 mod storable;
 
-use std::collections::HashMap;
-use interfaces::models::remotes::Remote;
-use local::Localable;
-use std::path::{Path, PathBuf};
-use interfaces::models::{DsmSets, MergedSet};
 use interfaces::models::metadata::DsmMetaDataBuilder;
+use interfaces::models::remotes::Remote;
+use interfaces::models::{DsmSets, MergedSet};
+use local::Localable;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
 pub enum Storage {
     Local {
@@ -31,7 +30,7 @@ impl Storage {
                 store_directory,
             } => datasets.store(store_directory, datasets_path),
 
-            Storage::Remote { service } => remote::store::<T>(service, datasets).await,
+            Storage::Remote { service: _ } => todo!("remote::store::<T>(service, datasets).await"),
         }
     }
 
@@ -42,7 +41,7 @@ impl Storage {
                 store_directory: _store_directory,
             } => datasets.ledge(ledger_directory),
 
-            Storage::Remote { service } => remote::ledge::<T>(service, datasets).await,
+            Storage::Remote { service: _ } => todo!("remote::ledge::<T>(service, datasets).await"),
         }
     }
 
@@ -57,7 +56,7 @@ impl Storage {
                 store_directory: _store_directory,
             } => T::read(ledger_directory, name, version),
 
-            Storage::Remote { service } => remote::read::<T>(service, name, version).await,
+            Storage::Remote { service: _ } => todo!("remote::read::<T>(service, name, version).await"),
         }
     }
 
@@ -68,17 +67,23 @@ impl Storage {
                 store_directory: _store_directory,
             } => T::list(ledger_directory),
 
-            Storage::Remote { service } => remote::list::<T>(service).await,
+            Storage::Remote { service: _ } => todo!("remote::list::<T>(service).await"),
         }
     }
 }
 
-pub async fn add_merge_link_to(datasets: &HashMap<String, DsmSets>, storage: Storage, merge_set: MergedSet) -> anyhow::Result<()> {
+pub async fn add_merge_link_to(
+    datasets: &HashMap<String, DsmSets>,
+    storage: Storage,
+    merge_set: MergedSet,
+) -> anyhow::Result<()> {
     for set in datasets.values() {
         let merged_key = format!("{}~{}", merge_set.get_name(), merge_set.get_version());
         let builder = DsmMetaDataBuilder::from(set.get_metadata().clone())
             .add_contained_in_merged(merged_key);
-        storage.ledge(&DsmSets::new(builder.build(), set.get_entries().clone())).await?;
+        storage
+            .ledge(&DsmSets::new(builder.build(), set.get_entries().clone()))
+            .await?;
     }
     Ok(())
 }

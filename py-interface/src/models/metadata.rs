@@ -28,25 +28,27 @@ pub struct PyMetaData {
     year: String,
     #[pyo3(get, set)]
     formatter: String,
+    #[pyo3(get, set)]
     classes: HashMap<u32, PyClasses>,
+    #[pyo3(get, set)]
     licenses: HashMap<u32, PyLicense>,
 }
 
 impl DsmToPy<PyMetaData> for DsmMetaData {
     fn to_py(&self) -> PyMetaData {
-        PyMetaData { 
+        PyMetaData {
             name: self.get_name().clone(),
             version: self.get_version().clone(),
-            subset_version: self.get_subset_version().clone(), 
+            subset_version: self.get_subset_version().clone(),
             contributor: self.get_contributor().clone(),
             date_created: self.get_date_created().clone(),
             description: self.get_description().clone(),
-            is_incomplete: *self.is_incomplet(), 
+            is_incomplete: *self.is_incomplet(),
             url: self.get_url().clone(),
             year: self.get_year().clone(),
             formatter: self.get_formatter().to_string(),
             classes: self.get_classes().to_py(),
-            licenses: self.get_licenses().to_py()
+            licenses: self.get_licenses().to_py(),
         }
     }
 }

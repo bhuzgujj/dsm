@@ -1,17 +1,16 @@
 mod add;
 mod new;
 
-use std::collections::HashMap;
-use std::path::PathBuf;
+use crate::format::Format;
 use crate::merge::add::Add;
 use crate::merge::new::New;
 use clap::Subcommand;
 use interfaces::log_err;
-use interfaces::models::{DsmSets, MergedSet, Settings};
-use interfaces::models::metadata::DsmMetaDataBuilder;
+use interfaces::models::{DsmSets, Settings};
 use serializer::DataForm;
+use std::collections::HashMap;
+use std::path::PathBuf;
 use storage::Storage;
-use crate::format::Format;
 
 /// Manage merged sets
 #[derive(Subcommand, Debug)]
@@ -29,7 +28,11 @@ impl Merge {
     }
 }
 
-pub async fn extract_dsm_from_storage(sets_keys: &Vec<String>, datasets: &mut HashMap<String, DsmSets>, storage: &Storage) -> anyhow::Result<()> {
+pub async fn extract_dsm_from_storage(
+    sets_keys: &Vec<String>,
+    datasets: &mut HashMap<String, DsmSets>,
+    storage: &Storage,
+) -> anyhow::Result<()> {
     for sets_label in sets_keys.iter() {
         if datasets.contains_key(sets_label) {
             return log_err!(format!("Cannot have twice the same dataset {}", sets_label));
@@ -50,8 +53,12 @@ pub async fn extract_dsm_from_storage(sets_keys: &Vec<String>, datasets: &mut Ha
     Ok(())
 }
 
-pub async fn extract_dsm_from_path(paths: &Vec<String>, datasets: &mut HashMap<String, DsmSets>, storage: &Storage) -> anyhow::Result<()> {
-    for path in &paths {
+pub async fn extract_dsm_from_path(
+    paths: &Vec<String>,
+    datasets: &mut HashMap<String, DsmSets>,
+    storage: &Storage,
+) -> anyhow::Result<()> {
+    for path in paths {
         let splits: Vec<&str> = path.split(':').collect();
         if splits.len() != 2 {
             return log_err!(format!("Can only have 1 equals sign in {}", path));

@@ -23,12 +23,13 @@ pub struct PyEntry {
     coco_url: Option<String>,
     #[pyo3(get, set)]
     date_captured: Option<String>,
+    #[pyo3(get, set)]
     annotation: Vec<PyAnnotation>,
 }
 
 impl DsmToPy<PyEntry> for DsmEntry {
     fn to_py(&self) -> PyEntry {
-        PyEntry { 
+        PyEntry {
             file_name: self.get_file_name().clone(),
             image_relative_path: self.get_image_relative_path().clone(),
             width: *self.get_width(),

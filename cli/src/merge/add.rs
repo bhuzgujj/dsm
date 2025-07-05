@@ -1,14 +1,10 @@
 use clap::Args;
 use interfaces::log_err;
-use interfaces::models::metadata::DsmMetaDataBuilder;
-use interfaces::models::{ClassMapper, DsmSets, MergedSet, Settings};
-use serializer::DataForm;
+use interfaces::models::{ClassMapper, MergedSet, Settings};
 use std::collections::HashMap;
-use std::fs::read_to_string;
 use std::path::PathBuf;
 use storage::{add_merge_link_to, Storage};
 
-use crate::format::Format;
 use crate::merge::{extract_dsm_from_path, extract_dsm_from_storage};
 
 /// Add datasets to a merge set and create a new version out of it
@@ -81,7 +77,7 @@ impl Add {
             datasets.clone(),
             self.name.clone().unwrap_or(merged_name.to_string()),
             self.version.clone(),
-            mapping
+            mapping,
         );
         storage.ledge(&merge_set).await?;
 

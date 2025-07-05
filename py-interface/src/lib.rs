@@ -16,15 +16,15 @@ fn init() -> anyhow::Result<Settings> {
     Ok(settings)
 }
 
-async fn save_merge_set(name: String, version: String, storage: Storage, mut datasets: HashMap<String, DsmSets>, mapping: ClassMapper) -> anyhow::Result<()> {
-    let merge_set = MergedSet::new(
-        datasets.clone(),
-        name.clone(),
-        version,
-        mapping,
-    );
+async fn save_merge_set(
+    name: String,
+    version: String,
+    storage: Storage,
+    datasets: HashMap<String, DsmSets>,
+    mapping: ClassMapper,
+) -> anyhow::Result<()> {
+    let merge_set = MergedSet::new(datasets.clone(), name.clone(), version, mapping);
     storage.ledge(&merge_set).await?;
-
     add_merge_link_to(&datasets, storage, merge_set).await
 }
 
@@ -62,7 +62,12 @@ async fn store(name: String, version: String, setform: String, path: String) -> 
 }
 
 #[pyfunction]
-async fn new_merge(name: String, version: String, mapping_path: String, dataset_to_add: Vec<(String, String)>) -> anyhow::Result<()> {
+async fn new_merge(
+    name: String,
+    version: String,
+    mapping_path: String,
+    dataset_to_add: Vec<(String, String)>,
+) -> anyhow::Result<()> {
     let settings = init()?;
     let storage = Storage::Local {
         ledger_directory: settings.get_ledger_path(),
@@ -72,7 +77,9 @@ async fn new_merge(name: String, version: String, mapping_path: String, dataset_
     let path = PathBuf::from(mapping_path);
     let mapping = ClassMapper::read_from_file(&path)?;
     for (name, version) in dataset_to_add.iter() {
-        let dsm: DsmSets = storage.read(name.clone(), version.clone()).await?
+        let dsm: DsmSets = storage
+            .read(name.clone(), version.clone())
+            .await?
             .expect(format!("Cannot read dataset {name} {version}").as_str());
         let key = dsm.get_keyed_name();
         if datasets.contains_key(&key) {
@@ -86,20 +93,31 @@ async fn new_merge(name: String, version: String, mapping_path: String, dataset_
 }
 
 #[pyfunction]
-async fn merge_on(name: String, base_version: String, new_name: Option<String>, new_version: String, mapping_path: Option<String>, dataset_to_add: Vec<(String, String)>) -> anyhow::Result<()> {
+async fn merge_on(
+    name: String,
+    base_version: String,
+    new_name: Option<String>,
+    new_version: String,
+    mapping_path: Option<String>,
+    dataset_to_add: Vec<(String, String)>,
+) -> anyhow::Result<()> {
     let settings = init()?;
     let storage = Storage::Local {
         ledger_directory: settings.get_ledger_path(),
         store_directory: settings.get_store_path(),
     };
-    let previous_merged_set: MergedSet = storage.read(name.clone(), base_version.clone()).await?
+    let previous_merged_set: MergedSet = storage
+        .read(name.clone(), base_version.clone())
+        .await?
         .expect(format!("Cannot read dataset {name} {base_version}").as_str());
     let mut datasets = HashMap::new();
     for dsm in previous_merged_set.get_datasets_include() {
         datasets.insert(dsm.get_keyed_name(), dsm.clone());
     }
     for (name, version) in dataset_to_add.iter() {
-        let dsm: DsmSets = storage.read(name.clone(), version.clone()).await?
+        let dsm: DsmSets = storage
+            .read(name.clone(), version.clone())
+            .await?
             .expect(format!("Cannot read dataset {name} {version}").as_str());
         let key = dsm.get_keyed_name();
         if datasets.contains_key(&key) {
@@ -111,7 +129,14 @@ async fn merge_on(name: String, base_version: String, new_name: Option<String>, 
         None => previous_merged_set.get_mapping().clone(),
         Some(mapping) => ClassMapper::read_from_file(Path::new(&mapping))?,
     };
-    save_merge_set(new_name.unwrap_or(name), new_version, storage, datasets, mapping).await?;
+    save_merge_set(
+        new_name.unwrap_or(name),
+        new_version,
+        storage,
+        datasets,
+        mapping,
+    )
+    .await?;
     Ok(())
 }
 
