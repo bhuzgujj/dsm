@@ -10,7 +10,7 @@ Setup venv
 ```
 python -m venv .venv
 ./.venv/Scripts/activate
-python -r requirements.txt
+pip install -r requirements.txt
 ```
 
 Installing maturin

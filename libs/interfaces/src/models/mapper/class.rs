@@ -1,7 +1,10 @@
 use crate::models::{classes::DsmClasses, DsmSets};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, vec};
+use std::path::Path;
 use log::trace;
+use crate::log_err;
+use crate::paths::read_from_file;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClassMapper {
@@ -11,6 +14,19 @@ pub struct ClassMapper {
 }
 
 impl ClassMapper {
+	pub fn read_from_file(file_path: &Path) -> anyhow::Result<ClassMapper> {
+		let content = read_from_file(&file_path)?;
+		match toml::from_str(&content) {
+			Ok(mapping) => Ok(mapping),
+			Err(err) => {
+				log_err!(format!(
+                    "Could not deserialize toml mapping file '{}': {err}",
+                    &file_path.display()
+                ))
+			}
+		}
+	}
+
 	pub(crate) fn get_class_for(&self, name: &String, class: &DsmClasses) -> Option<&u32> {
 		if let Some(custom) = &self.custom {
 			if let Some(k) = custom.get(name) {

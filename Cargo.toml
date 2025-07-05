@@ -6,7 +6,7 @@ members = [
     "libs/storage",
     "gui/src-tauri",
     "cli",
-    "pydsm"
+    "py-interface"
 ]
 
 [workspace.dependencies]

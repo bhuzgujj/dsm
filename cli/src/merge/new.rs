@@ -4,7 +4,6 @@ use interfaces::models::metadata::DsmMetaDataBuilder;
 use interfaces::models::{ClassMapper, DsmSets, MergedSet, Settings};
 use serializer::DataForm;
 use std::collections::HashMap;
-use std::fs::read_to_string;
 use std::path::PathBuf;
 use storage::Storage;
 
@@ -68,27 +67,10 @@ impl New {
             for ds in dataset {
                 storage.store(&ds, &dataset_path).await?;
                 storage.ledge(&ds).await?;
-                datasets.insert(ds.get_name().clone(), ds);
+                datasets.insert(ds.get_keyed_name(), ds);
             }
         }
-        let content = match read_to_string(&self.mapping_file) {
-            Ok(content) => content,
-            Err(err) => {
-                return log_err!(format!(
-                    "Could not read file '{}': {err}",
-                    &self.mapping_file.display()
-                ))
-            }
-        };
-        let mapping: ClassMapper = match toml::from_str(&content) {
-            Ok(content) => content,
-            Err(err) => {
-                return log_err!(format!(
-                    "Could not deserialize toml mapping file '{}': {err}",
-                    &self.mapping_file.display()
-                ))
-            }
-        };
+        let mapping = ClassMapper::read_from_file(&self.mapping_file)?;
         let merge_set = MergedSet::new(
             datasets.clone(),
             self.name.clone(),

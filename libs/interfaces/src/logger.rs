@@ -1,11 +1,11 @@
 use crate::models::Settings;
 use crate::paths::dsm_dir;
+use anyhow::anyhow;
 use chrono::Local;
-use log::{error, trace, Log, Metadata, Record};
+use log::{trace, Log, Metadata, Record};
 use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-use anyhow::anyhow;
 
 const FILE_NAME: &str = "dsm.log";
 static mut LOGGER: Logger = Logger { file: None };
@@ -17,13 +17,23 @@ pub fn refresh(settings: &Settings) -> anyhow::Result<()> {
     let dir = dsm_dir();
     if let Err(err) = create_dir_all(&dir) {
         println!("Failed to create {} directory: {err}", dir.display());
-        return Err(anyhow!("Failed to create {} directory: {err}", dir.display()));
+        return Err(anyhow!(
+            "Failed to create {} directory: {err}",
+            dir.display()
+        ));
     }
 
     let log_file_path = dsm_dir().join(FILE_NAME);
-    if let Err(err) = OpenOptions::new().create(true).write(true).open(&log_file_path) {
+    if let Err(err) = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(&log_file_path)
+    {
         println!("Failed to create {}: {err}", &log_file_path.display());
-        return Err(anyhow!("Failed to create {}: {err}", &log_file_path.display()));
+        return Err(anyhow!(
+            "Failed to create {}: {err}",
+            &log_file_path.display()
+        ));
     }
     log::set_max_level(settings.get_log_level());
     #[allow(static_mut_refs)]
@@ -68,10 +78,7 @@ impl Log for Logger {
         println!("{}", record.args());
 
         if let Some(file_path) = &self.file {
-            let mut file = OpenOptions::new()
-                .append(true)
-                .open(file_path)
-                .unwrap();
+            let mut file = OpenOptions::new().append(true).open(file_path).unwrap();
             file.write_all(format!("{}\n", log_line).as_bytes())
                 .expect("Could not write to the log file");
         }
@@ -98,12 +105,12 @@ fn log(record: &Record) -> String {
 }
 
 /// This macro Log and return an anyhow error of the type of the caller
-/// 
+///
 /// Usage:
 /// ```
 /// fn errored(value: String) -> anyhow<String> {
 ///     if value.is_empty() {
-///         return log_err!("Value must not be empty"); // This does return
+///         return log_err!("Value must not be empty");
 ///     }
 ///     return Ok(value)
 /// }

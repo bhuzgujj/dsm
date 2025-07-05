@@ -28,6 +28,14 @@ impl DsmSets {
         self.metadata.get_name()
     }
 
+    pub fn get_keyed_name(&self) -> String {
+        format!(
+            "{}={}",
+            self.metadata.get_name(),
+            self.metadata.get_version()
+        )
+    }
+
     pub fn get_metadata(&self) -> &DsmMetaData {
         &self.metadata
     }

@@ -65,24 +65,7 @@ impl Add {
             return log_err!(format!("Could not find {merged_name} v{merged_version}"));
         }
         if let Some(mapping_path) = &self.mapping_file {
-            let content = match read_to_string(&mapping_path) {
-                Ok(content) => content,
-                Err(err) => {
-                    return log_err!(format!(
-                        "Could not read file '{}': {err}",
-                        &mapping_path.display()
-                    ))
-                }
-            };
-            mapping = match toml::from_str(&content) {
-                Ok(content) => content,
-                Err(err) => {
-                    return log_err!(format!(
-                        "Could not deserialize toml mapping file '{}': {err}",
-                        &mapping_path.display()
-                    ))
-                }
-            };
+            mapping = ClassMapper::read_from_file(&mapping_path)?;
         }
         for sets_label in self.datasets.iter() {
             if datasets.contains_key(sets_label) {

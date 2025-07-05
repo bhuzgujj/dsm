@@ -1,7 +1,7 @@
 use clap::Args;
+use colored::Colorize;
 use interfaces::models::{DsmSets, MergedSet, Settings};
 use storage::Storage;
-use colored::Colorize;
 
 /// Show currently stored sets
 #[derive(Args, Debug)]
@@ -58,13 +58,15 @@ impl List {
                     })
                     .collect::<Vec<_>>(),
             )?;
-			
+
             if *set.is_incomplet() {
                 println!(
                     "{: <30}{: <20}{: <20}{: <50}",
                     cut_string(set.get_name(), 30).as_str().blue(),
                     cut_string(set.get_version(), 20).as_str().blue(),
-                    cut_string(&set.get_entry_count().to_string(), 20).as_str().blue(),
+                    cut_string(&set.get_entry_count().to_string(), 20)
+                        .as_str()
+                        .blue(),
                     classes.as_str().blue()
                 );
             } else {
@@ -106,7 +108,7 @@ impl List {
 
 fn cut_string(string: &String, len: usize) -> String {
     if string.len() >= len {
-        format!("{}...", &string[0..len-4])
+        format!("{}...", &string[0..len - 4])
     } else {
         string.clone()
     }
