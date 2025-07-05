@@ -18,7 +18,6 @@ export class MergedSetsPageComponent {
     selected: MergedSet | null = null
     constructor() {
         listMergedDatasets().then((sets) => {
-            console.log(sets)
             this.datasets = sets
         })
     }

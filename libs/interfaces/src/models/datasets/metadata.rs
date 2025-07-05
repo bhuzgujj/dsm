@@ -1,94 +1,223 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use crate::models::form::DataForm;
+use crate::models::form::DsmDataForm;
 use crate::models::datasets::classes::DsmClasses;
 use crate::models::datasets::licence::DsmLicense;
+use crate::models::DsmLocation;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DsmMetaData {
     name: String,
-    version: u32,
+    version: String,
     subset_version: Option<String>,
+    location: DsmLocation,
+    contributor: String,
+    date_created: String,
+    description: String,
+    is_incomplete: bool,
+    url: String,
+    year: String,
+    formatter: DsmDataForm,
+    classes: HashMap<u32, DsmClasses>,
+    licenses: HashMap<u32, DsmLicense>,
+    contained_in_merged: Vec<String>
+}
+
+impl DsmMetaData {
+    pub fn get_name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn get_version(&self) -> &String {
+        &self.version
+    }
+    
+    pub fn get_classes(&self) -> &HashMap<u32, DsmClasses> {
+        &self.classes
+    }
+    
+    pub fn get_subset_version(&self) -> &Option<String> {
+        &self.subset_version
+    }
+    
+    pub fn get_location(&self) -> &DsmLocation {
+        &self.location
+    }
+
+    pub fn get_contributor(&self) -> &String {
+        &self.contributor
+    }
+
+    pub fn get_date_created(&self) -> &String {
+        &self.date_created
+    }
+
+    pub fn get_description(&self) -> &String {
+        &self.description
+    }
+
+    pub fn get_url(&self) -> &String {
+        &self.url
+    }
+
+    pub fn get_year(&self) -> &String {
+        &self.year
+    }
+
+    pub fn get_formatter(&self) -> &DsmDataForm {
+        &self.formatter
+    }
+
+    pub fn get_licenses(&self) -> &HashMap<u32, DsmLicense> {
+        &self.licenses
+    }
+    
+    pub fn is_incomplet(&self) -> &bool {
+        &self.is_incomplete
+    }
+    
+    pub fn get_contained_in_merged(&self) -> &Vec<String> {
+        &self.contained_in_merged
+    }
+}
+
+pub struct DsmMetaDataBuilder {
+    name: String,
+    version: String,
+    subset_version: Option<String>,
+    location: DsmLocation,
     contributor: String,
     date_created: String,
     description: String,
     url: String,
     year: String,
-    formatter: DataForm,
+    is_incomplete: bool,
+    formatter: DsmDataForm,
     classes: HashMap<u32, DsmClasses>,
     licenses: HashMap<u32, DsmLicense>,
+    contained_in_merged: Vec<String>,
 }
 
-impl DsmMetaData {
+impl DsmMetaDataBuilder {
     pub fn new(
         name: String,
-        version: u32,
-        subset_version: Option<String>,
-        contributor: String,
-        date_created: String,
-        description: String,
-        url: String,
-        year: String,
-        formatter: DataForm,
-        classes: HashMap<u32, DsmClasses>,
-        licenses: HashMap<u32, DsmLicense>
+        version: String,
+        formatter: DsmDataForm,
+        classes: HashMap<u32, DsmClasses>
     ) -> Self {
         Self {
             name,
             version,
-            subset_version,
-            contributor,
-            date_created,
-            description,
-            url,
-            year,
+            subset_version: None,
+            location: DsmLocation::Local,
+            contributor: String::new(),
+            date_created: String::new(),
+            description: String::new(),
+            url: String::new(),
+            is_incomplete: false,
+            year: String::new(),
             formatter,
             classes,
-            licenses,
+            licenses: HashMap::new(),
+            contained_in_merged: Vec::new()
         }
     }
 
-    pub fn get_name(&self) -> String {
-        self.name.clone()
+    pub fn set_location(mut self, location: DsmLocation) -> Self {
+        self.location = location;
+        self
     }
 
-    pub fn get_version(&self) -> u32 {
-        self.version
+    pub fn set_contributor(mut self, contributor: String) -> Self {
+        self.contributor = contributor;
+        self
+    }
+
+    pub fn set_date_created(mut self, date_created: String) -> Self {
+        self.date_created = date_created;
+        self
+    }
+
+    pub fn set_description(mut self, description: String) -> Self {
+        self.description = description;
+        self
+    }
+
+    pub fn set_url(mut self, url: String) -> Self {
+        self.url = url;
+        self
+    }
+
+    pub fn set_year(mut self, year: String) -> Self {
+        self.year = year;
+        self
+    }
+
+    pub fn set_licenses(mut self, licenses: HashMap<u32, DsmLicense>) -> Self {
+        self.licenses = licenses;
+        self
+    }
+
+    pub fn set_classes(mut self, classes: HashMap<u32, DsmClasses>) -> Self {
+        self.classes = classes;
+        self
+    }
+
+    pub fn set_incomplete(mut self, is_incomplete: bool) -> Self {
+        self.is_incomplete = is_incomplete;
+        self
+    }
+
+    pub fn set_contained_in_merged(mut self, contained_in_merged: Vec<String>) -> Self {
+        self.contained_in_merged = contained_in_merged;
+        self
     }
     
-    pub fn get_classes(&self) -> HashMap<u32, DsmClasses> {
-        self.classes.clone()
-    }
-    
-    pub fn get_subset_version(&self) -> Option<String> {
-        self.subset_version.clone()
-    }
-
-    pub fn get_contributor(&self) -> String {
-        self.contributor.clone()
+    pub fn add_contained_in_merged(mut self, merged: String) -> Self {
+        if self.contained_in_merged.contains(&merged) {
+            return self;
+        }
+        self.contained_in_merged.push(merged);
+        self
     }
 
-    pub fn get_date_created(&self) -> String {
-        self.date_created.clone()
+    pub fn build(self) -> DsmMetaData {
+        DsmMetaData {
+            name: self.name,
+            version: self.version,
+            subset_version: self.subset_version,
+            location: self.location,
+            contributor: self.contributor,
+            date_created: self.date_created,
+            description: self.description,
+            url: self.url,
+            year: self.year,
+            formatter: self.formatter,
+            classes: self.classes,
+            is_incomplete: self.is_incomplete,
+            licenses: self.licenses,
+            contained_in_merged: self.contained_in_merged
+        }
     }
+}
 
-    pub fn get_description(&self) -> String {
-        self.description.clone()
-    }
-
-    pub fn get_url(&self) -> String {
-        self.url.clone()
-    }
-
-    pub fn get_year(&self) -> String {
-        self.year.clone()
-    }
-
-    pub fn get_formatter(&self) -> DataForm {
-        self.formatter.clone()
-    }
-
-    pub fn get_licenses(&self) -> &HashMap<u32, DsmLicense> {
-        &self.licenses
+impl From<DsmMetaData> for DsmMetaDataBuilder {
+    fn from(value: DsmMetaData) -> Self {
+        Self {
+            name: value.name,
+            version: value.version,
+            subset_version: value.subset_version,
+            location: value.location,
+            contributor: value.contributor,
+            date_created: value.date_created,
+            description: value.description,
+            url: value.url,
+            year: value.year,
+            formatter: value.formatter,
+            classes: value.classes,
+            is_incomplete: value.is_incomplete,
+            licenses: value.licenses,
+            contained_in_merged: value.contained_in_merged,
+        }
     }
 }

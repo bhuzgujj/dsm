@@ -9,6 +9,7 @@ interfaces.workspace = true
 
 # External
 anyhow.workspace = true
+chrono.workspace = true
 image.workspace = true
 log.workspace = true
 serde = { workspace = true, features = ["derive"] }

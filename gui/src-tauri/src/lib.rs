@@ -1,36 +1,16 @@
-use interfaces::logger;
-use interfaces::models::{DsmSets, MergedSet, Settings};
+mod error;
+mod commands;
+
 use std::fs::create_dir_all;
-use tauri::{Error, Manager, State};
-use log::error;
+
 use tauri::async_runtime::Mutex;
-use storage::Storage;
+use tauri::Manager;
 
-#[tauri::command]
-async fn list_merged_datasets(state: State<'_, Mutex<Settings>>) -> Result<Vec<MergedSet>, Error> {
-    let state = state.lock().await;
-    let storage = Storage::Local {
-        ledger_directory: state.get_ledger_path(),
-        store_directory: state.get_store_path(),
-    };
-    Ok(storage.list_merged().await.unwrap_or_else(|e| {
-        error!("Error listing datasets: {}", e);
-        Vec::new()
-    }))
-}
+use interfaces::logger;
+use interfaces::models::Settings;
 
-#[tauri::command]
-async fn list_raw_datasets(state: State<'_, Mutex<Settings>>) -> Result<Vec<DsmSets>, Error> {
-    let state = state.lock().await;
-    let storage = Storage::Local {
-        ledger_directory: state.get_ledger_path(),
-        store_directory: state.get_store_path(),
-    };
-    Ok(storage.list_raw().await.unwrap_or_else(|e| {
-        error!("Error listing datasets: {}", e);
-        Vec::new()
-    }))
-}
+use crate::commands::*;
+use crate::error::UiError;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -44,16 +24,22 @@ pub fn run() {
                 window.close_devtools();
             }
             let settings = Settings::load();
-            logger::bind_logger(&settings).expect("Could not init the logger");
-            create_dir_all(settings.get_ledger_path()).expect("Could not create the ledger directory");
-            create_dir_all(settings.get_store_path()).expect("Could not create the store directory");
+            if let Err(e) = logger::bind_logger(&settings) {
+                return Err(Box::new(UiError::from(e)))
+            }
+            if let Err(e) = create_dir_all(settings.get_ledger_path()) {
+                return Err(Box::new(UiError::from(e)))
+            }
+            if let Err(e) = create_dir_all(settings.get_store_path()) {
+                return Err(Box::new(UiError::from(e)))
+            }
             app.manage(Mutex::new(settings));
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            list_merged_datasets,
-            list_raw_datasets
+            list_raw,
+            list_merged,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

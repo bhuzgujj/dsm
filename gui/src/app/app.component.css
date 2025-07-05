@@ -1,4 +1,39 @@
+nav {
+    width: auto;
+    padding: 0.25rem;
+    display: flex;
+    justify-content: space-around;
+}
 
+nav > a {
+    background: #333;
+    width: 200px;
+    text-align: center;
+    padding: 0.25rem;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+nav > a:hover {
+    background: #444;
+}
+
+nav > a:active {
+    background: #888;
+}
+
+nav > .is-active {
+    background: #666;
+}
+
+nav > .is-active:hover {
+    background: #777;
+}
+
+nav > .is-active:active {
+    background: #888;
+}
 
 @media (prefers-color-scheme: dark) {
+    /* todo */
 }

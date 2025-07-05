@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use interfaces::models::licence::DsmLicense;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct License {
@@ -8,17 +9,15 @@ pub(crate) struct License {
 }
 
 impl License {
-	pub(crate) fn from_base(id: &u32, license: &interfaces::models::licence::DsmLicense) -> Self {
+	pub(crate) fn from_dsm(id: &u32, license: &DsmLicense) -> Self {
 		Self {
 			id: *id,
 			name: license.name.clone(),
 			url: license.url.clone(),
 		}
 	}
-}
-
-impl License {
-	pub fn to_datasettable(&self) -> interfaces::models::licence::DsmLicense {
-		interfaces::models::licence::DsmLicense::new(self.name.clone(), self.url.clone())
+	
+	pub fn dsm(&self) -> DsmLicense {
+		DsmLicense::new(self.name.clone(), self.url.clone())
 	}
 }

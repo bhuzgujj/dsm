@@ -1,4 +1,8 @@
 <main>
-    <app-navbar></app-navbar>
+    <nav>
+<!--        <a [routerLink]="['/']" [routerLinkActive]="['is-active']">Home</a>-->
+        <a [routerLink]="['/raw-sets']" [routerLinkActive]="['is-active']">Raw Sets</a>
+        <a [routerLink]="['/merged-sets']" [routerLinkActive]="['is-active']">Merged Sets</a>
+    </nav>
     <router-outlet></router-outlet>
 </main>

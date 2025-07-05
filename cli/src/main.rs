@@ -1,14 +1,16 @@
-mod store;
-mod format;
 mod configuration;
+mod format;
 mod generator;
 mod list;
+mod mapping;
 mod merge;
+mod store;
 
 use clap::Parser;
+use interfaces::logger;
+use mapping::Mapping;
 use std::fs::create_dir_all;
 
-use interfaces::logger;
 use interfaces::models::Settings;
 
 use crate::configuration::Configuration;
@@ -22,14 +24,15 @@ use crate::store::Store;
 enum Cli {
     Store(Store),
     Gen(Generator),
+    List(List),
 
     #[command(subcommand)]
-    List(List),
+    Map(Mapping),
 
     #[command(subcommand)]
     Merge(Merge),
 
-    Config(Configuration)
+    Config(Configuration),
 }
 
 async fn wrapper() -> anyhow::Result<()> {
@@ -42,7 +45,8 @@ async fn wrapper() -> anyhow::Result<()> {
         Cli::Gen(generator) => generator.execute(&settings).await?,
         Cli::Config(configuration) => configuration.configure(&mut settings)?,
         Cli::List(ls) => ls.execute(&settings).await?,
-        Cli::Merge(merge) => merge.execute(&settings).await?
+        Cli::Merge(merge) => merge.execute(&settings).await?,
+        Cli::Map(map) => map.execute(&settings).await?,
     };
     settings.save()?;
     Ok(())
@@ -52,6 +56,6 @@ async fn wrapper() -> anyhow::Result<()> {
 async fn main() -> anyhow::Result<()> {
     match wrapper().await {
         Ok(()) => Ok(()),
-        Err(_) => Ok(())
+        Err(_) => Ok(()),
     }
 }

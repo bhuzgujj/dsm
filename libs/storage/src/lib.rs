@@ -1,79 +1,84 @@
-mod files;
+mod local;
+mod remote;
+mod storable;
 
+use std::collections::HashMap;
+use interfaces::models::remotes::Remote;
+use local::Localable;
+use std::path::{Path, PathBuf};
 use interfaces::models::{DsmSets, MergedSet};
-use std::path::PathBuf;
+use interfaces::models::metadata::DsmMetaDataBuilder;
 
 pub enum Storage {
-	Local {
-		ledger_directory: PathBuf,
-		store_directory: PathBuf,
-	},
-	Remote(String)
+    Local {
+        ledger_directory: PathBuf,
+        store_directory: PathBuf,
+    },
+    Remote {
+        service: Remote,
+    },
 }
 
 impl Storage {
-	pub async fn store(&self, datasets: &DsmSets, datasets_path: &PathBuf) -> anyhow::Result<()> {
-		match self {
-			Storage::Local { ledger_directory, store_directory}  => {
-				files::store(store_directory, ledger_directory, datasets_path, datasets).await
-			}
-			Storage::Remote(_) => {
-				todo!()
-			}
-		}
-	}
-	pub async fn store_merged(&self, datasets: &MergedSet) -> anyhow::Result<()> {
-		match self {
-			Storage::Local { ledger_directory, store_directory}  => {
-				files::store_merged(store_directory, ledger_directory, datasets).await
-			}
-			Storage::Remote(_) => {
-				todo!()
-			}
-		}
-	}
+    pub async fn store<T: Localable>(
+        &self,
+        datasets: &T,
+        datasets_path: &Path,
+    ) -> anyhow::Result<()> {
+        match self {
+            Storage::Local {
+                ledger_directory: _ledger_directory,
+                store_directory,
+            } => datasets.store(store_directory, datasets_path),
 
-	pub async fn read(&self, name: String, version: String) -> anyhow::Result<Option<DsmSets>> {
-		match self {
-			Storage::Local{ledger_directory, store_directory} => {
-				files::read_raw(store_directory, ledger_directory, name, version).await
-			}
-			Storage::Remote(_) => {
-				todo!()
-			}
-		}
-	}
+            Storage::Remote { service } => remote::store::<T>(service, datasets).await,
+        }
+    }
 
-	pub async fn read_merged(&self, name: String, version: String) -> anyhow::Result<Option<MergedSet>> {
-		match self {
-			Storage::Local{ledger_directory, store_directory} => {
-				files::read_merged(store_directory, ledger_directory, name, version).await
-			}
-			Storage::Remote(_) => {
-				todo!()
-			}
-		}
-	}
-	
-	pub async fn list_raw(&self) -> anyhow::Result<Vec<DsmSets>> {
-		match self {
-			Storage::Local{ledger_directory, store_directory} => {
-				files::list_raw(store_directory, ledger_directory).await
-			}
-			Storage::Remote(_) => {
-				todo!()
-			}
-		}
-	}
-	
-	pub async fn list_merged(&self) -> anyhow::Result<Vec<MergedSet>> {
-		match self {
-			Storage::Local{ledger_directory, store_directory} => {
-				files::list_merged(store_directory, ledger_directory).await
-			}
-			Storage::Remote(_) => {
-				todo!()
-			}
-		}
-	}
+    pub async fn ledge<T: Localable>(&self, datasets: &T) -> anyhow::Result<()> {
+        match self {
+            Storage::Local {
+                ledger_directory,
+                store_directory: _store_directory,
+            } => datasets.ledge(ledger_directory),
+
+            Storage::Remote { service } => remote::ledge::<T>(service, datasets).await,
+        }
+    }
+
+    pub async fn read<T: Localable>(
+        &self,
+        name: String,
+        version: String,
+    ) -> anyhow::Result<Option<T>> {
+        match self {
+            Storage::Local {
+                ledger_directory,
+                store_directory: _store_directory,
+            } => T::read(ledger_directory, name, version),
+
+            Storage::Remote { service } => remote::read::<T>(service, name, version).await,
+        }
+    }
+
+    pub async fn list<T: Localable>(&self) -> anyhow::Result<Vec<T>> {
+        match self {
+            Storage::Local {
+                ledger_directory,
+                store_directory: _store_directory,
+            } => T::list(ledger_directory),
+
+            Storage::Remote { service } => remote::list::<T>(service).await,
+        }
+    }
+}
+
+pub async fn add_merge_link_to(datasets: &HashMap<String, DsmSets>, storage: Storage, merge_set: MergedSet) -> anyhow::Result<()> {
+    for set in datasets.values() {
+        let merged_key = format!("{}~{}", merge_set.get_name(), merge_set.get_version());
+        let builder = DsmMetaDataBuilder::from(set.get_metadata().clone())
+            .add_contained_in_merged(merged_key);
+        storage.ledge(&DsmSets::new(builder.build(), set.get_entries().clone())).await?;
+    }
+    Ok(())
 }

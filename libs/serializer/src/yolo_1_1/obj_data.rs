@@ -1,9 +1,10 @@
 use std::collections::HashMap;
-use std::fs::{read_to_string, OpenOptions};
-use std::io::Write;
-use std::path::PathBuf;
+use std::fs::{read_to_string};
+use std::path::Path;
 use std::str::FromStr;
-use log::{debug, error, warn};
+use log::{debug, warn};
+use interfaces::log_err;
+use interfaces::paths::write_to_file;
 use crate::yolo_1_1::{strip_prefix};
 use crate::yolo_1_1::obj_names;
 
@@ -24,7 +25,7 @@ impl ObjData {
 		}
 	}
 
-	pub(crate) fn write(&self, root: &PathBuf) -> anyhow::Result<()> {
+	pub(crate) fn write(&self, root: &Path) -> anyhow::Result<()> {
 		let mut content = format!("classes = {}\nnames = {}\n", self.classes, self.names);
 		for (k, v) in self.sets.iter() {
 			content.push_str(&format!("{} = {}\n", k, v));
@@ -33,31 +34,15 @@ impl ObjData {
 			content.push_str(&format!("backup = {}\n", backup));
 		}
 		debug!("Writting to '{}'", root.join(FILE_NAME).display());
-		match OpenOptions::new()
-			.write(true)
-			.create(true)
-			.truncate(true)
-			.open(root.join(FILE_NAME)) {
-			Ok(mut file) => {
-				file.write_all(content.as_bytes())?;
-			}
-			Err(err) => {
-				error!("Error writting to file '{}': {}", root.join(FILE_NAME).display(), err);
-				return Err(err.into());
-			}
-		}
-		Ok(())
+		write_to_file(&root.join(FILE_NAME), content, true, true)
 	}
 
-	pub(crate) fn read(path: &PathBuf) -> anyhow::Result<Self> {
+	pub(crate) fn read(path: &Path) -> anyhow::Result<Self> {
 		let abs_path = path.join(FILE_NAME);
 		debug!("Reading '{}'", abs_path.display());
 		let contents = match read_to_string(&abs_path) {
 			Ok(contents) => contents,
-			Err(err) => {
-				error!("Error reading file '{}': {}", abs_path.display(), err);
-				return Err(err.into());
-			}
+			Err(err) => return log_err!(format!("error! reading file '{}': {}", abs_path.display(), err))
 		};
 		let mut classes: Option<u32> = None;
 		let mut names: Option<String> = None;
@@ -98,7 +83,7 @@ impl ObjData {
 						},
 						_ => {
 							let value = strip_prefix(value);
-							if sets.contains_key(&key.to_string()) {
+							if sets.contains_key(key) {
 								warn!("Duplicate names in line '{}' of '{}'", nline, &abs_path.display());
 							}
 							debug!("'{}' has been read as '{}'", key, value);
@@ -107,6 +92,12 @@ impl ObjData {
 					}
 				}
 			}
+		}
+		if classes.is_none() {
+			return log_err!(format!("Missing 'classes' in '{}'", abs_path.display()));
+		}
+		if names.is_none() {
+			return log_err!(format!("Missing 'names' in '{}'", abs_path.display()));
 		}
 		Ok(Self {
 			classes: classes.unwrap_or_else(|| panic!("Missing 'classes' in '{}'", abs_path.display())),
