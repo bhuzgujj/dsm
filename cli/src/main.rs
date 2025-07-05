@@ -10,9 +10,8 @@ use clap::Parser;
 use interfaces::logger;
 use mapping::Mapping;
 use std::fs::create_dir_all;
-use storage::Storage;
 
-use interfaces::models::{DsmSets, Settings};
+use interfaces::models::Settings;
 
 use crate::configuration::Configuration;
 use crate::generator::Generator;
@@ -34,7 +33,6 @@ enum Cli {
     Merge(Merge),
 
     Config(Configuration),
-    Try,
 }
 
 async fn wrapper() -> anyhow::Result<()> {
@@ -49,14 +47,6 @@ async fn wrapper() -> anyhow::Result<()> {
         Cli::List(ls) => ls.execute(&settings).await?,
         Cli::Merge(merge) => merge.execute(&settings).await?,
         Cli::Map(map) => map.execute(&settings).await?,
-        Cli::Try => {
-            let remote = settings.get_remotes().get("my_account").unwrap();
-            Storage::Remote {
-                service: remote.clone(),
-            }
-            .read::<DsmSets>("".to_string(), "1".to_string())
-            .await?;
-        }
     };
     settings.save()?;
     Ok(())

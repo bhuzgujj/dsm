@@ -2,9 +2,12 @@ mod local;
 mod remote;
 mod storable;
 
+use std::collections::HashMap;
 use interfaces::models::remotes::Remote;
 use local::Localable;
 use std::path::{Path, PathBuf};
+use interfaces::models::{DsmSets, MergedSet};
+use interfaces::models::metadata::DsmMetaDataBuilder;
 
 pub enum Storage {
     Local {
@@ -68,4 +71,14 @@ impl Storage {
             Storage::Remote { service } => remote::list::<T>(service).await,
         }
     }
+}
+
+pub async fn add_merge_link_to(datasets: &HashMap<String, DsmSets>, storage: Storage, merge_set: MergedSet) -> anyhow::Result<()> {
+    for set in datasets.values() {
+        let merged_key = format!("{}~{}", merge_set.get_name(), merge_set.get_version());
+        let builder = DsmMetaDataBuilder::from(set.get_metadata().clone())
+            .add_contained_in_merged(merged_key);
+        storage.ledge(&DsmSets::new(builder.build(), set.get_entries().clone())).await?;
+    }
+    Ok(())
 }

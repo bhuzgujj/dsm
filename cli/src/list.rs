@@ -6,7 +6,8 @@ use storage::Storage;
 /// Show currently stored sets
 #[derive(Args, Debug)]
 pub struct List {
-    #[clap(long, short, default_value = "false")]
+    /// Add azure's sets
+    #[clap(long, default_value = "false")]
     azure_included: bool,
 }
 

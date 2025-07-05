@@ -9,24 +9,38 @@ use serializer::DataForm;
 
 use crate::format::Format;
 
+/// Map a dataset at a path location
 #[derive(Debug, Args)]
 pub struct Untrack {
+    /// Path to the dataset
     #[clap(long)]
     input_path: PathBuf,
 
-    #[clap(long)]
+    /// In which format the files will be read as.
+    /// If it is not a known standard, it will pick a script in scripts directory.
+    /// Standard supported:
+    ///  - coco-1-0
+    ///  - yolo-1-1
+    #[clap(long, verbatim_doc_comment)]
     input_format: String,
 
+    /// Path to the output set
     #[clap(long)]
     output_path: PathBuf,
 
-    #[clap(long)]
+    /// In which format the files will be written into.
+    /// If it is not a known standard, it will pick a script in scripts directory.
+    /// Standard supported:
+    ///  - coco-1-0
+    ///  - yolo-1-1
+    #[clap(long, verbatim_doc_comment)]
     output_format: String,
 
-    /// Datasets registered version
+    /// Datasets version (this is for metadata purposes, can be ignored)
     #[clap(short, long, default_value = "1")]
     version: String,
 
+    /// Mapping for the classes if needed
     #[clap(short, long)]
     mapping_file: PathBuf,
 }

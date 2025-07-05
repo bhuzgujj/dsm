@@ -1,14 +1,13 @@
 mod models;
 
 use interfaces::logger;
-use interfaces::models::metadata::DsmMetaDataBuilder;
 use interfaces::models::{ClassMapper, DsmSets, MergedSet, Settings};
 use pyo3::prelude::*;
 use serializer::DataForm;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
-use storage::Storage;
+use storage::{add_merge_link_to, Storage};
 
 use crate::models::{dataset::PySet, DsmToPy};
 
@@ -26,16 +25,7 @@ async fn save_merge_set(name: String, version: String, storage: Storage, mut dat
     );
     storage.ledge(&merge_set).await?;
 
-    for set in datasets.values() {
-        let builder =
-            DsmMetaDataBuilder::from(set.get_metadata().clone()).add_contained_in_merged(
-                format!("{}~{}", merge_set.get_name(), merge_set.get_version()),
-            );
-        storage
-            .ledge(&DsmSets::new(builder.build(), set.get_entries().clone()))
-            .await?;
-    }
-    Ok(())
+    add_merge_link_to(&datasets, storage, merge_set).await
 }
 
 #[pyfunction]

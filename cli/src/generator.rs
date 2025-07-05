@@ -8,14 +8,19 @@ use serializer::DataForm;
 use std::path::PathBuf;
 use storage::Storage;
 
-/// Create a direvative dataset from storage in a known format
+/// Create a direvative dataset from storage in a known format at the path location
 #[derive(Args, Debug)]
 pub struct Generator {
-    /// In which format the files will be read as
-    formats: String,
-
-    /// Root directory of the files
+    /// Target location for the resulting direvative
     path: String,
+
+    /// In which format the files will be read as.
+    /// If it is not a known standard, it will pick a script in scripts directory.
+    /// Standard supported:
+    ///  - coco-1-0
+    ///  - yolo-1-1
+    #[clap(short, long, verbatim_doc_comment)]
+    formats: String,
 
     /// Datasets to include
     #[clap(short, long)]

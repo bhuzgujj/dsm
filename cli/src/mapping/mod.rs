@@ -4,6 +4,7 @@ use clap::Subcommand;
 use interfaces::models::Settings;
 use untrack::Untrack;
 
+// Map a dataset classes to a mapping file results
 #[derive(Subcommand, Debug)]
 pub enum Mapping {
     Untrack(Untrack)

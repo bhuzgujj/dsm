@@ -1,15 +1,21 @@
 mod add;
 mod new;
 
+use std::collections::HashMap;
+use std::path::PathBuf;
 use crate::merge::add::Add;
 use crate::merge::new::New;
 use clap::Subcommand;
-use interfaces::models::Settings;
+use interfaces::log_err;
+use interfaces::models::{DsmSets, MergedSet, Settings};
+use interfaces::models::metadata::DsmMetaDataBuilder;
+use serializer::DataForm;
+use storage::Storage;
+use crate::format::Format;
 
 /// Manage merged sets
 #[derive(Subcommand, Debug)]
 pub enum Merge {
-    /// Add new merged set
     New(New),
     Add(Add),
 }
@@ -21,4 +27,43 @@ impl Merge {
             Merge::Add(add) => add.execute(settings).await,
         }
     }
+}
+
+pub async fn extract_dsm_from_storage(sets_keys: &Vec<String>, datasets: &mut HashMap<String, DsmSets>, storage: &Storage) -> anyhow::Result<()> {
+    for sets_label in sets_keys.iter() {
+        if datasets.contains_key(sets_label) {
+            return log_err!(format!("Cannot have twice the same dataset {}", sets_label));
+        }
+        let splits: Vec<&str> = sets_label.split('=').collect();
+        if splits.len() != 2 {
+            return log_err!(format!("Can only have 1 equals sign in {}", sets_label));
+        }
+        let name = splits[0];
+        let version = splits[1];
+        let local_set = storage.read(name.to_string(), version.to_string()).await?;
+        if let Some(local_set) = local_set {
+            datasets.insert(sets_label.clone(), local_set);
+        } else {
+            return log_err!(format!("Could not find {}", sets_label));
+        }
+    }
+    Ok(())
+}
+
+pub async fn extract_dsm_from_path(paths: &Vec<String>, datasets: &mut HashMap<String, DsmSets>, storage: &Storage) -> anyhow::Result<()> {
+    for path in &paths {
+        let splits: Vec<&str> = path.split(':').collect();
+        if splits.len() != 2 {
+            return log_err!(format!("Can only have 1 equals sign in {}", path));
+        }
+        let format: DataForm = Format::from(splits[0].trim().to_string()).into();
+        let dataset_path = PathBuf::from(splits[1].trim());
+        let dataset = format.read(&dataset_path, None, "0".to_string())?;
+        for ds in dataset {
+            storage.store(&ds, &dataset_path).await?;
+            storage.ledge(&ds).await?;
+            datasets.insert(ds.get_name().clone(), ds);
+        }
+    }
+    Ok(())
 }

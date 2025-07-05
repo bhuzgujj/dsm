@@ -6,19 +6,19 @@ use std::path::PathBuf;
 use log::{debug};
 use storage::Storage;
 
-/// Parse the files in a known standard format
+/// Parse the files in a known standard format and store the set in a storage
 #[derive(Args, Debug)]
 pub struct Store {
-	/// In which format the files will be read as.
-	/// If it is not a known standard, it will pick a script in scripts directory.
-	/// Standard supported: 
-	///  - coco-1-0
-	///  - yolo-1-1
-	#[clap(verbatim_doc_comment)]
-	formats: String,
-
 	/// Root directory of the files
 	path: String,
+
+	/// In which format the files will be read as.
+	/// If it is not a known standard, it will pick a script in scripts directory.
+	/// Standard supported:
+	///  - coco-1-0
+	///  - yolo-1-1
+	#[clap(short, long, verbatim_doc_comment)]
+	formats: String,
 
 	/// Datasets registered name
 	#[clap(short, long)]

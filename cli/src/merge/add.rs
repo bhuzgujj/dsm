@@ -6,17 +6,18 @@ use serializer::DataForm;
 use std::collections::HashMap;
 use std::fs::read_to_string;
 use std::path::PathBuf;
-use storage::Storage;
+use storage::{add_merge_link_to, Storage};
 
 use crate::format::Format;
+use crate::merge::{extract_dsm_from_path, extract_dsm_from_storage};
 
-/// Parse the files in a known standard format
+/// Add datasets to a merge set and create a new version out of it
 #[derive(Args, Debug)]
 pub struct Add {
     /// Merge set to add datasets to from, must be: <NAME>=<VERSION>
     from_set: String,
 
-    /// The name of the merged set
+    /// The version of the new set
     version: String,
 
     /// Datasets from the local storage, must be: <NAME>=<VERSION>
@@ -67,55 +68,13 @@ impl Add {
         if let Some(mapping_path) = &self.mapping_file {
             mapping = ClassMapper::read_from_file(&mapping_path)?;
         }
-        for sets_label in self.datasets.iter() {
-            if datasets.contains_key(sets_label) {
-                return log_err!(format!("Cannot have twice the same dataset {}", sets_label));
-            }
-            let splits: Vec<&str> = sets_label.split('=').collect();
-            if splits.len() != 2 {
-                return log_err!(format!("Can only have 1 equals sign in {}", sets_label));
-            }
-            let name = splits[0];
-            let version = splits[1];
-            let local_set = storage.read(name.to_string(), version.to_string()).await?;
-            if let Some(local_set) = local_set {
-                datasets.insert(sets_label.clone(), local_set);
-            } else {
-                return log_err!(format!("Could not find {}", sets_label));
-            }
-        }
-        for path in &self.paths {
-            let splits: Vec<&str> = path.split(':').collect();
-            if splits.len() != 2 {
-                return log_err!(format!("Can only have 1 equals sign in {}", path));
-            }
-            let format: DataForm = Format::from(splits[0].trim().to_string()).into();
-            let dataset_path = PathBuf::from(splits[1].trim());
-            let dataset = format.read(&dataset_path, None, "0".to_string())?;
-            for ds in dataset {
-                storage.store(&ds, &dataset_path).await?;
-                storage.ledge(&ds).await?;
-                datasets.insert(ds.get_name().clone(), ds);
-            }
-        }
-        let merge_set = MergedSet::new(
-            datasets.clone(),
-            merged_name.to_string(),
-            self.version.clone(),
-            mapping,
-        );
+
+        extract_dsm_from_storage(&self.datasets, &mut datasets, &storage).await?;
+        extract_dsm_from_path(&self.paths, &mut datasets, &storage).await?;
+
+        let merge_set = MergedSet::new(datasets.clone(), merged_name.to_string(), self.version.clone(), mapping);
         storage.ledge(&merge_set).await?;
 
-        for set in datasets.values() {
-            let builder =
-                DsmMetaDataBuilder::from(set.get_metadata().clone()).add_contained_in_merged(
-                    format!("{}~{}", merge_set.get_name(), merge_set.get_version()),
-                );
-            storage
-                .ledge(&DsmSets::new(builder.build(), set.get_entries().clone()))
-                .await?;
-        }
-
-        Ok(())
+        add_merge_link_to(&datasets, storage, merge_set).await
     }
 }
