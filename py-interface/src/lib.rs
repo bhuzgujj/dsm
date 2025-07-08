@@ -9,6 +9,7 @@ use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
 use storage::{add_merge_link_to, Storage};
 
+use crate::models::merged_set::PyMergedSet;
 use crate::models::{dataset::PySet, DsmToPy};
 
 fn init() -> anyhow::Result<Settings> {
@@ -29,9 +30,21 @@ async fn save_merge_set(
 }
 
 #[pyfunction]
-async fn list() -> anyhow::Result<Vec<PySet>> {
+async fn list_raw_sets() -> anyhow::Result<Vec<PySet>> {
     let settings = init()?;
     let resp: Vec<DsmSets> = Storage::Local {
+        ledger_directory: settings.get_ledger_path(),
+        store_directory: settings.get_store_path(),
+    }
+    .list()
+    .await?;
+    Ok(resp.to_py())
+}
+
+#[pyfunction]
+async fn list_merged_sets() -> anyhow::Result<Vec<PyMergedSet>> {
+    let settings = init()?;
+    let resp: Vec<MergedSet> = Storage::Local {
         ledger_directory: settings.get_ledger_path(),
         store_directory: settings.get_store_path(),
     }
@@ -126,7 +139,7 @@ async fn merge_on(
         datasets.insert(key, dsm);
     }
     let mapping = match mapping_path {
-        None => previous_merged_set.get_mapping().clone(),
+        None => previous_merged_set.get_class_mapping().clone(),
         Some(mapping) => ClassMapper::read_from_file(Path::new(&mapping))?,
     };
     save_merge_set(
@@ -146,7 +159,8 @@ fn pyidsm(module: &Bound<'_, PyModule>) -> PyResult<()> {
     logger::bind_logger(&settings)?;
     create_dir_all(settings.get_ledger_path())?;
     create_dir_all(settings.get_store_path())?;
-    module.add_function(wrap_pyfunction!(list, module)?)?;
+    module.add_function(wrap_pyfunction!(list_raw_sets, module)?)?;
+    module.add_function(wrap_pyfunction!(list_merged_sets, module)?)?;
     module.add_function(wrap_pyfunction!(store, module)?)?;
     module.add_function(wrap_pyfunction!(new_merge, module)?)?;
     module.add_function(wrap_pyfunction!(merge_on, module)?)?;

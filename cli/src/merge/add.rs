@@ -62,7 +62,7 @@ impl Add {
                     dsm.clone(),
                 );
             }
-            mapping = m.get_mapping().clone();
+            mapping = m.get_class_mapping().clone();
         } else {
             return log_err!(format!("Could not find {merged_name} v{merged_version}"));
         }

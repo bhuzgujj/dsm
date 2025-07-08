@@ -10,7 +10,19 @@ use crate::paths::read_from_file;
 pub struct ClassMapper {
 	classes: HashMap<String, u32>,
 	mapping: HashMap<String, Vec<String>>,
-	custom: Option<HashMap<String, Custom>>,
+	custom: Option<HashMap<String, CustomClassMapping>>,
+}
+
+impl ClassMapper {
+	pub fn get_classes(&self) -> &HashMap<String, u32> {
+		&self.classes
+	}
+	pub fn get_mapping(&self) -> &HashMap<String, Vec<String>> {
+		&self.mapping
+	}
+	pub fn get_custom(&self) -> &Option<HashMap<String, CustomClassMapping>> {
+		&self.custom
+	}
 }
 
 impl ClassMapper {
@@ -76,6 +88,6 @@ impl From<&DsmSets> for ClassMapper {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Custom {
+pub struct CustomClassMapping {
 	pub mapping: HashMap<String, String>,
 }

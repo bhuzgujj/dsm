@@ -115,8 +115,20 @@ impl MergedSet {
         &self.datasets
     }
 
-    pub fn get_mapping(&self) -> &ClassMapper {
+    pub fn get_class_mapping(&self) -> &ClassMapper {
         &self.class_mapper
+    }
+
+    pub fn get_license_mapping(&self) -> &LicenseMapper {
+        &self.license_mapper
+    }
+
+    pub fn get_date_created(&self) -> &String {
+        &self.date_created
+    }
+
+    pub fn get_description(&self) -> &String {
+        &self.description
     }
 
     pub fn to_storable(&self) -> StorableMerged {

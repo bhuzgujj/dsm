@@ -53,8 +53,12 @@ impl LicenseMapper {
         self.mapping.get(set_name).and_then(|map| map.get(&id))
     }
 
-    pub(crate) fn get_licences(&self) -> &HashMap<u32, DsmLicense> {
+    pub fn get_licences(&self) -> &HashMap<u32, DsmLicense> {
         &self.licences
+    }
+
+    pub fn get_mapping(&self) -> &HashMap<String, HashMap<u32, u32>> {
+        &self.mapping
     }
 }
 
@@ -72,6 +76,7 @@ impl From<&DsmSets> for LicenseMapper {
         mapper
     }
 }
+
 impl From<&mut DsmSets> for LicenseMapper {
     fn from(dataset: &mut DsmSets) -> Self {
         let licences = dataset.get_license().clone();

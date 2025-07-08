@@ -3,6 +3,7 @@ use std::{cmp::Eq, collections::HashMap, hash::Hash};
 pub mod annotation;
 pub mod classes;
 pub mod dataset;
+pub mod merged_set;
 pub mod entries;
 pub mod licence;
 pub mod metadata;
