@@ -3826,6 +3826,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "interfaces",
+ "log",
  "pyo3",
  "serializer",
  "storage",

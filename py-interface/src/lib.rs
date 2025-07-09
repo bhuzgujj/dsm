@@ -1,6 +1,6 @@
 mod models;
 
-use interfaces::logger;
+use interfaces::{log_err, logger};
 use interfaces::models::{ClassMapper, DsmSets, MergedSet, Settings};
 use pyo3::prelude::*;
 use serializer::DataForm;
@@ -153,12 +153,54 @@ async fn merge_on(
     Ok(())
 }
 
+#[pyfunction]
+async fn generate(name: String, version: String, path: String, format: String) -> anyhow::Result<()> {
+    let settings = init()?;
+    if name.is_empty() {
+        return log_err!("Require at least one dataset");
+    }
+    let formatter: DataForm = match format.as_str() {
+        "yolo-1-1" => DataForm::Yolo1_1,
+        "coco-1-0" => DataForm::Coco1_0,
+        other => DataForm::Custom(other.to_string()),
+    };
+    let storage = Storage::Local {
+        ledger_directory: settings.get_ledger_path(),
+        store_directory: settings.get_store_path(),
+    };
+    let datasets = storage
+        .read(name.clone(), version.clone())
+        .await?;
+    let (new_set, image_rel_path_mapping) = if let Some(dsm_set) = datasets {
+        (dsm_set, None)
+    } else {
+        let merged_set: MergedSet = match storage
+            .read(name.clone(), version.clone())
+            .await?
+        {
+            Some(val) => val,
+            None => return log_err!("Could not find datasets".to_string()),
+        };
+
+        merged_set.to_dataset(formatter.to_data_form())?
+    };
+    let path = PathBuf::from(&path);
+    formatter.write(
+        &path,
+        &settings.get_store_path(),
+        &new_set,
+        image_rel_path_mapping,
+    )?;
+    Ok(())
+}
+
 #[pymodule]
 fn pyidsm(module: &Bound<'_, PyModule>) -> PyResult<()> {
     let settings = init()?;
     logger::bind_logger(&settings)?;
     create_dir_all(settings.get_ledger_path())?;
     create_dir_all(settings.get_store_path())?;
+    module.add_function(wrap_pyfunction!(generate, module)?)?;
     module.add_function(wrap_pyfunction!(list_raw_sets, module)?)?;
     module.add_function(wrap_pyfunction!(list_merged_sets, module)?)?;
     module.add_function(wrap_pyfunction!(store, module)?)?;
