@@ -7,15 +7,13 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use interfaces::log_err;
 
-use crate::storable::Storable;
-
 pub const RAW_SET: &str = "raw_sets";
 pub const MERGED_SET: &str = "merged_sets";
 pub const SEPARATOR: &str = "~";
 
 pub trait Localable
 where
-    Self: DeserializeOwned + Serialize + Storable,
+    Self: DeserializeOwned + Serialize,
 {
     fn ledge(&self, ledger_directory: &Path) -> anyhow::Result<()>;
     fn store(

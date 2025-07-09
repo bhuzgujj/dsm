@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use interfaces::models::MergedSet;
 use pyo3::pyclass;
 
@@ -7,7 +9,7 @@ use crate::models::{classes::PyClassesMapping, dataset::PySet, licence::PyLicens
 #[derive(Debug, Clone)]
 pub struct PyMergedSet {
     #[pyo3(get, set)]
-    datasets: Vec<PySet>,
+    datasets: HashMap<String, Vec<PySet>>,
     #[pyo3(get, set)]
     name: String,
     #[pyo3(get, set)]

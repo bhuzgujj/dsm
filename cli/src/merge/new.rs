@@ -13,11 +13,11 @@ pub struct New {
     #[clap(short, long)]
     name: String,
 
-    /// Datasets from the local storage, must be: <NAME>=<VERSION>
+    /// Datasets from the local storage, must be: <NAME>=<VERSION>=<ASSIGN_GROUP>
     #[clap(short, long)]
     datasets: Vec<String>,
 
-    /// Datasets from a path, must be: <FORMAT>:<PATH>
+    /// Datasets from a path, must be: <FORMAT>:<PATH>:<ASSIGN_GROUP>
     #[clap(short, long)]
     paths: Vec<String>,
 
@@ -44,7 +44,6 @@ impl New {
         let mapping = ClassMapper::read_from_file(&self.mapping_file)?;
         let merge_set = MergedSet::new(datasets.clone(), self.name.clone(), self.version.clone(), mapping);
         storage.ledge(&merge_set).await?;
-
 
         add_merge_link_to(&datasets, storage, merge_set).await
     }

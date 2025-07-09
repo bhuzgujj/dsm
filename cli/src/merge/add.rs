@@ -21,11 +21,11 @@ pub struct Add {
     #[clap(short, long)]
     version: String,
 
-    /// Datasets from the local storage, must be: <NAME>=<VERSION>
+    /// Datasets from the local storage, must be: <NAME>=<VERSION>=<ASSIGN_GROUP>
     #[clap(short, long)]
     datasets: Vec<String>,
 
-    /// Datasets from a path, must be: <FORMAT>:<PATH>
+    /// Datasets from a path, must be: <FORMAT>:<PATH>:<ASSIGN_GROUP>
     #[clap(short, long)]
     paths: Vec<String>,
 
@@ -52,15 +52,17 @@ impl Add {
             .read::<MergedSet>(merged_name.to_string(), merged_version.to_string())
             .await?;
         if let Some(m) = merged {
-            for dsm in m.get_datasets_include() {
-                datasets.insert(
-                    format!(
-                        "{}={}",
-                        dsm.get_metadata().get_name(),
-                        dsm.get_metadata().get_version()
-                    ),
-                    dsm.clone(),
-                );
+            for (group, dsms) in m.get_datasets_include() {
+                for dsm in dsms {
+                    datasets.insert(
+                        format!(
+                            "{}={}",
+                            dsm.get_metadata().get_name(),
+                            dsm.get_metadata().get_version()
+                        ),
+                        (group.clone(), dsm.clone()),
+                    );
+                }
             }
             mapping = m.get_class_mapping().clone();
         } else {

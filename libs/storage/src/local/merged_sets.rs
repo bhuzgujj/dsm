@@ -45,9 +45,9 @@ impl Localable for MergedSet {
         }
         let storable: StorableMerged = read_dsm(&datasets_ledger)?;
 
-        let mut datasets: Vec<DsmSets> = Vec::new();
-        for (set, _) in storable.datasets {
-            datasets.push(read_dsm(&ledger_raw_dir.join(format!("{}.json", &set)))?);
+        let mut datasets: Vec<(String, DsmSets)> = Vec::new();
+        for (name, set) in storable.datasets {
+            datasets.push((set.group, read_dsm(&ledger_raw_dir.join(format!("{}.json", &name)))?));
         }
         Ok(Some(MergedSet::from_vec(datasets, name, version, storable.class_mapper, storable.license_mapper)))
     }
@@ -67,10 +67,11 @@ impl Localable for MergedSet {
                     if path.is_dir() {
                         continue;
                     }
+                    
                     let storable_set: StorableMerged = read_dsm(&path)?;
                     let mut datasets = Vec::new();
-                    for (set, _) in storable_set.datasets {
-                        datasets.push(read_dsm(&ledger_raw_dir.join(format!("{}.json", set)))?);
+                    for (set, group) in storable_set.datasets {
+                        datasets.push((group.group.clone(), read_dsm(&ledger_raw_dir.join(format!("{}.json", set)))?));
                     }
                     mergedsets.push(MergedSet::from_vec(
                         datasets,

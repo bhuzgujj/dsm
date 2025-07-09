@@ -1,5 +1,4 @@
 mod local;
-mod storable;
 
 use interfaces::models::metadata::DsmMetaDataBuilder;
 use interfaces::models::remotes::Remote;
@@ -73,11 +72,11 @@ impl Storage {
 }
 
 pub async fn add_merge_link_to(
-    datasets: &HashMap<String, DsmSets>,
+    datasets: &HashMap<String, (String, DsmSets)>,
     storage: Storage,
     merge_set: MergedSet,
 ) -> anyhow::Result<()> {
-    for set in datasets.values() {
+    for (_, set) in datasets.values() {
         let merged_key = format!("{}~{}", merge_set.get_name(), merge_set.get_version());
         let builder = DsmMetaDataBuilder::from(set.get_metadata().clone())
             .add_contained_in_merged(merged_key);

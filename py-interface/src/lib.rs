@@ -21,7 +21,7 @@ async fn save_merge_set(
     name: String,
     version: String,
     storage: Storage,
-    datasets: HashMap<String, DsmSets>,
+    datasets: HashMap<String, (String, DsmSets)>,
     mapping: ClassMapper,
 ) -> anyhow::Result<()> {
     let merge_set = MergedSet::new(datasets.clone(), name.clone(), version, mapping);
@@ -79,7 +79,7 @@ async fn new_merge(
     name: String,
     version: String,
     mapping_path: String,
-    dataset_to_add: Vec<(String, String)>,
+    dataset_to_add: Vec<(String, String, String)>,
 ) -> anyhow::Result<()> {
     let settings = init()?;
     let storage = Storage::Local {
@@ -89,7 +89,7 @@ async fn new_merge(
     let mut datasets = HashMap::new();
     let path = PathBuf::from(mapping_path);
     let mapping = ClassMapper::read_from_file(&path)?;
-    for (name, version) in dataset_to_add.iter() {
+    for (name, version, group) in dataset_to_add.iter() {
         let dsm: DsmSets = storage
             .read(name.clone(), version.clone())
             .await?
@@ -98,7 +98,7 @@ async fn new_merge(
         if datasets.contains_key(&key) {
             return Err(anyhow::anyhow!("Duplicate dataset name for {name}"));
         }
-        datasets.insert(key, dsm);
+        datasets.insert(key, (group.clone(), dsm));
     }
 
     save_merge_set(name, version, storage, datasets, mapping).await?;
@@ -112,7 +112,7 @@ async fn merge_on(
     new_name: Option<String>,
     new_version: String,
     mapping_path: Option<String>,
-    dataset_to_add: Vec<(String, String)>,
+    dataset_to_add: Vec<(String, String, String)>,
 ) -> anyhow::Result<()> {
     let settings = init()?;
     let storage = Storage::Local {
@@ -124,10 +124,12 @@ async fn merge_on(
         .await?
         .expect(format!("Cannot read dataset {name} {base_version}").as_str());
     let mut datasets = HashMap::new();
-    for dsm in previous_merged_set.get_datasets_include() {
-        datasets.insert(dsm.get_keyed_name(), dsm.clone());
+    for (group, dsms) in previous_merged_set.get_datasets_include() {
+        for dsm in dsms {
+            datasets.insert(dsm.get_keyed_name(), (group.clone(), dsm.clone()));
+        }
     }
-    for (name, version) in dataset_to_add.iter() {
+    for (name, version, group) in dataset_to_add.iter() {
         let dsm: DsmSets = storage
             .read(name.clone(), version.clone())
             .await?
@@ -136,7 +138,7 @@ async fn merge_on(
         if datasets.contains_key(&key) {
             return Err(anyhow::anyhow!("Duplicate dataset name for {name}"));
         }
-        datasets.insert(key, dsm);
+        datasets.insert(key, (group.clone(), dsm));
     }
     let mapping = match mapping_path {
         None => previous_merged_set.get_class_mapping().clone(),

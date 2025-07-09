@@ -7,7 +7,13 @@ use serde::{Deserialize, Serialize};
 pub struct StorableMerged {
 	pub name: String,
 	pub version: String,
-	pub datasets: HashMap<String, DsmLocation>,
+	pub datasets: HashMap<String, GroupSet>,
 	pub class_mapper: ClassMapper,
 	pub license_mapper: LicenseMapper
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GroupSet {
+	pub location: DsmLocation,
+	pub group: String
 }
