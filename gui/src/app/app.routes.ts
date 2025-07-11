@@ -10,5 +10,9 @@ export const routes: Routes = [
     {
         path: "merged-sets",
         component: MergedSetsPageComponent
-    }
+    },
+    {
+        path: '**',
+        component: RawSetsPageComponent
+    },
 ];

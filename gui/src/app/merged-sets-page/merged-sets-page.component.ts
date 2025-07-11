@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {NgForOf, NgIf} from "@angular/common";
-import {DsmSets, MergedSet} from "../../backend.types";
-import {listMergedDatasets, listRawDatasets} from "../../backend";
+import {MergedSet} from "../../backend.types";
+import {listMergedDatasets} from "../../backend";
 
 @Component({
   selector: 'app-merged-sets-page',
