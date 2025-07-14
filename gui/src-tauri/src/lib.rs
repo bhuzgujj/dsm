@@ -1,5 +1,6 @@
-mod error;
 mod commands;
+mod error;
+mod models;
 
 use std::fs::create_dir_all;
 
@@ -15,6 +16,7 @@ use crate::error::UiError;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         //.plugin(tauri_plugin_updater::Builder::new().build()) TODO
         .setup(|app| {
             #[cfg(debug_assertions)] // only include this code on debug builds
@@ -25,13 +27,13 @@ pub fn run() {
             }
             let settings = Settings::load();
             if let Err(e) = logger::bind_logger(&settings) {
-                return Err(Box::new(UiError::from(e)))
+                return Err(Box::new(UiError::from(e)));
             }
             if let Err(e) = create_dir_all(settings.get_ledger_path()) {
-                return Err(Box::new(UiError::from(e)))
+                return Err(Box::new(UiError::from(e)));
             }
             if let Err(e) = create_dir_all(settings.get_store_path()) {
-                return Err(Box::new(UiError::from(e)))
+                return Err(Box::new(UiError::from(e)));
             }
             app.manage(Mutex::new(settings));
             Ok(())
@@ -40,6 +42,11 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             list_raw,
             list_merged,
+            store_raw_set,
+            merge_new,
+            get_merged_set,
+            get_raw_set,
+            generate_merged_set,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

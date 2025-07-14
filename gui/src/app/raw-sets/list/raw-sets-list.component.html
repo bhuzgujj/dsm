@@ -1,0 +1,34 @@
+<h1 class="text-xl">Raw Sets</h1>
+<table class="w-full">
+    <tr>
+        <th class="bg-gray-600 p-2 rounded-l-md w-2/6 text-left">Name</th>
+        <th class="bg-gray-600 p-2 w-1/6">Version</th>
+        <th class="bg-gray-600 p-2 w-1/6">Images</th>
+        <th class="bg-gray-600 p-2 rounded-r-md w-2/6">Classes</th>
+    </tr>
+    <ng-container *ngIf="datasets.length > 0">
+        <ng-container *ngFor="let dataset of datasets">
+            <tr>
+                <td class="p-0.5"></td>
+            </tr>
+            <tr (click)="select(dataset)" class="bg-gray-700 hover:bg-gray-600">
+                <td class="p-2 rounded-l-md">{{dataset.metadata.name}}</td>
+                <td class="p-2 text-center">v{{dataset.metadata.version}}</td>
+                <td class="p-2 text-center">
+                    {{countImage(dataset)}}
+                </td>
+                <td class="p-2 text-center rounded-r-md">
+                    {{formatClasses(dataset)}}
+                </td>
+            </tr>
+        </ng-container>
+    </ng-container>
+    <ng-container *ngIf="datasets.length === 0">
+        <tr>
+            <td class="p-0.5"></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="bg-gray-700 p-2 rounded-md text-center text-gray-300">None</td>
+        </tr>
+    </ng-container>
+</table>

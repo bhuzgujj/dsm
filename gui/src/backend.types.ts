@@ -1,11 +1,11 @@
 export type DsmSets = {
     metadata: DsmMetaData,
-    entries: {[key: string]: DsmEntry[]},
+    entries: { [key: string]: DsmEntry[] },
 }
 
 export type DsmMetaData = {
     name: string,
-    version: number,
+    version: string,
     subset_version: string | null,
     contributor: string,
     date_created: string,
@@ -13,8 +13,8 @@ export type DsmMetaData = {
     url: string,
     year: string,
     formatter: string,
-    classes: {[key: number]: DsmClasses},
-    licenses: {[key: number]: DsmLicense},
+    classes: { [key: number]: DsmClasses },
+    licenses: { [key: number]: DsmLicense },
 }
 
 export type DsmClasses = {
@@ -57,9 +57,9 @@ export type DsmEntry = {
 }
 
 export type MergedSet = {
-    datasets: DsmSets[],
+    datasets: { [key: string]: DsmSets[] },
     name: string,
-    version: number,
+    version: string,
     class_mapper: ClassMapper,
     license_mapper: LicenseMapper,
     date_created: string,
@@ -67,17 +67,23 @@ export type MergedSet = {
 }
 
 export type ClassMapper = {
-    classes: Map<string, number>,
-    mapping: Map<string, string[]>,
-    custom: Map<string, Custom> | null,
+    classes: { [key: string]: number },
+    mapping: { [key: string]: string[] },
+    custom: { [key: string]: Custom } | null,
 }
 
 export type LicenseMapper = {
     current_id: number,
-    licences: Map<number, DsmLicense>,
-    mapping: Map<string, Map<number, number>>,
+    licences: { [key: number]: DsmLicense },
+    mapping: { [key: string]: { [key: number]: number } },
 }
 
 export type Custom = {
-    mapping: Map<string, string>,
+    mapping: { [key: string]: string },
+}
+
+export type IncludedSet = {
+    names: string,
+    version: string,
+    group: string
 }

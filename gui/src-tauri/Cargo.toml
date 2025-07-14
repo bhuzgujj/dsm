@@ -33,3 +33,4 @@ tauri = { version = "2", features = [] }
 # Plugins
 tauri-plugin-opener = "2"
 tauri-plugin-updater = "2"
+tauri-plugin-dialog = "2"

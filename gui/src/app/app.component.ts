@@ -11,8 +11,7 @@ import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
     RouterLink,
     RouterLinkActive
   ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  templateUrl: './app.component.html'
 })
 export class AppComponent {
 }
