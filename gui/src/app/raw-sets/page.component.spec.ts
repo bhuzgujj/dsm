@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RawSetsPageComponent } from './raw-sets-page.component';
+import { RawSetsPageComponent } from './page.component';
 
 describe('RawSetsPageComponent', () => {
   let component: RawSetsPageComponent;
@@ -10,8 +10,8 @@ describe('RawSetsPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [RawSetsPageComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(RawSetsPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

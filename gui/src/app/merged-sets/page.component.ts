@@ -1,0 +1,26 @@
+import { Component } from '@angular/core';
+import { RouterLink, RouterOutlet } from '@angular/router';
+
+@Component({
+    selector: 'app-merged-sets-page',
+    standalone: true,
+    imports: [
+        RouterOutlet,
+        RouterLink
+    ],
+    template: `
+        <div class="flex flex-col bg-gray-800 m-2 p-2 rounded-md">
+            <div class="flex justify-center space-x-2 bg-gray-700 mb-2 p-2 rounded-md">
+                <a [routerLink]="['/merged-sets/create']" class="bg-green-600 hover:bg-green-400 py-1 px-10 rounded-md">
+                    New
+                </a>
+                <a [routerLink]="['/merged-sets']" class="bg-blue-600 hover:bg-blue-400 py-1 px-10 rounded-md">
+                    List
+                </a>
+            </div>
+            <router-outlet></router-outlet>
+        </div>
+    `
+})
+export class MergedSetsPageComponent {
+}

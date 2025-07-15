@@ -1,13 +1,13 @@
 import { Routes } from "@angular/router";
-import { RawSetsPageComponent } from "./raw-sets/raw-sets-page.component";
-import { MergedSetsPageComponent } from "./merged-sets/merged-sets-page.component";
-import { RawSetsListComponent } from "./raw-sets/list/raw-sets-list.component";
-import { RawSetsCreateComponent } from "./raw-sets/create/raw-sets-create.component";
-import { HomePageComponent } from "./home/home.component";
-import { RawSetsDetailsComponent } from "./raw-sets/details/raw-sets-details.component";
-import { MergedSetsListComponent } from "./merged-sets/list/merged-sets-list.component";
-import { MergedSetsCreateComponent } from "./merged-sets/create/merged-sets-create.component";
-import { MergedSetsDetailsComponent } from "./merged-sets/details/merged-sets-details.component";
+import { RawSetsPageComponent } from "./raw-sets/page.component";
+import { MergedSetsPageComponent } from "./merged-sets/page.component";
+import { RawSetsListComponent } from "./raw-sets/list.component";
+import { RawSetsCreateComponent } from "./raw-sets/create.component";
+import { HomePageComponent } from "./home/page.component";
+import { RawSetsDetailsComponent } from "./raw-sets/details.component";
+import { MergedSetsListComponent } from "./merged-sets/list.component";
+import { MergedSetsCreateComponent } from "./merged-sets/create/create.component";
+import { MergedSetsDetailsComponent } from "./merged-sets/details.component";
 
 export const routes: Routes = [
     {

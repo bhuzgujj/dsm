@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MergedSetsPageComponent } from './merged-sets-page.component';
+import { MergedSetsPageComponent } from './page.component';
 
 describe('MergedSetsPageComponent', () => {
   let component: MergedSetsPageComponent;
@@ -10,8 +10,8 @@ describe('MergedSetsPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MergedSetsPageComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(MergedSetsPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
