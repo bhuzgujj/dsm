@@ -23,7 +23,7 @@ type Mapping = {
         <div class="w-full flex flex-col bg-gray-700 p-2 rounded-md">
             <h1 class="text-xl">Create Merged Sets</h1>
             <label class="text-gray-400 italic">Base Merged Set</label>
-            <select [(ngModel)]="mergedSets" class="bg-gray-900 p-2 rounded-md">
+            <select [(ngModel)]="baseSet" class="bg-gray-900 p-2 rounded-md" (ngModelChange)="selectMerged()">
                 <option [ngValue]="null" class="text-gray-400 italic">Create new set</option>
                 <option *ngFor="let merged of mergedSets" [ngValue]="merged">{{merged.name}}
                     v{{merged.version}}
@@ -36,7 +36,8 @@ type Mapping = {
             <br>
 
             <label class="text-gray-400 italic">Version</label>
-            <input [(ngModel)]="version" class="bg-gray-900 p-2 rounded-md" type="text" />
+            <p *ngIf="this.versionError.length > 0" class="text-red-500">{{this.versionError}}</p>
+            <input [(ngModel)]="version" (ngModelChange)="verifyVersion($event)" class="bg-gray-900 p-2 rounded-md" type="text" />
             <br>
 
             <h1 class="text-xl">Included sets</h1>
@@ -170,7 +171,8 @@ type Mapping = {
                 </div>
             </div>
             <br>
-            <button (click)="store()" class="bg-green-600 hover:bg-green-300 p-2 rounded-md">Merge</button>
+            <button *ngIf="!isValide()" class="bg-gray-600 text-gray-400 p-2 rounded-md">Merge</button>
+            <button *ngIf="isValide()" (click)="store()" class="bg-green-600 hover:bg-green-300 p-2 rounded-md">Merge</button>
         </div>
     `
 })
@@ -184,6 +186,7 @@ export class MergedSetsCreateComponent {
 
     name = "";
     version = "";
+    versionError = "";
 
     // Sub form
     inputGroup = "";
@@ -198,8 +201,42 @@ export class MergedSetsCreateComponent {
         listRawDatasets().then((sets) => this.rawSets = sets);
     }
 
-    selectMerged(merged: MergedSet) {
-        this.baseSet = merged;
+    verifyVersion(newVersion: string) {
+        for (const mergedSets of this.mergedSets) {
+            if (mergedSets.name === this.name && mergedSets.version === newVersion) {
+                this.versionError = `"${this.name}" already has a version "${newVersion}"`;
+                return;
+            }
+        }
+        this.versionError = "";
+    }
+
+    selectMerged() {
+        if (this.baseSet != null) {
+            const base = this.baseSet!;
+            this.included.splice(0, this.included.length);
+            this.groups.splice(0, this.groups.length);
+            this.mapping.splice(0, this.mapping.length);
+            this.classes.splice(0, this.classes.length);
+            for (const group in base.datasets) {
+                this.addGroup(group);
+                for (const set of base.datasets[group]) {
+                    this.addSet(group, set);
+                }
+            }
+            this.name = base.name;
+            for (const classes in base.class_mapper.classes) {
+                this.addClasses(classes);
+                for (const from of base.class_mapper.mapping[classes]) {
+                    for (const mapping of this.mapping) {
+                        if (mapping.from === from) {
+                            mapping.to = classes;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     addGroup(group: string) {
@@ -271,6 +308,7 @@ export class MergedSetsCreateComponent {
         for (let index = 0; index < this.classes.length; index++) {
             map.classes[this.classes[index]] = index;
         }
+        console.log(this.mapping, map)
         for (const mapping of this.mapping) {
             if (mapping.to === null || mapping.to === undefined || map.classes[mapping.to] === undefined) {
                 return null;
@@ -299,15 +337,18 @@ export class MergedSetsCreateComponent {
     }
 
     store() {
-        const mapping = this.createMapping();
-        if (mapping === null)
-            return;
-        if (this.baseSet !== null) {
-            console.error(this);
-        } else {
-            mergeNew(this.name, this.version, this.included, mapping);
-            window.location.href = `/merged-sets/${this.name}/${this.version}`;
+        if (this.isValide()) {
+            const mapping = this.createMapping()!;
+            mergeNew(this.name, this.version, this.included, mapping)
+                .then(() => {
+                    window.location.href = `/merged-sets/${this.name}/${this.version}`;
+                })
+                .catch(console.error)
         }
+    }
+
+    isValide() {
+        return this.name.length > 0 && this.version.length > 0 && this.groups.length > 0 && this.classes.length > 0 && this.included.length > 0 && this.versionError.length < 1;
     }
 
     protected readonly Object = Object;
