@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ClassMapper, DsmSets, IncludedSet, MergedSet } from "./backend.types";
+import { Actions, ClassMapper, DsmSets, IncludedSet, MergedSet } from "./backend.types";
 
 export function listRawDatasets() {
     return invoke<DsmSets[]>("list_raw", {})
@@ -7,6 +7,10 @@ export function listRawDatasets() {
 
 export function listMergedDatasets() {
     return invoke<MergedSet[]>("list_merged", {})
+}
+
+export function getAllActions() {
+    return invoke<Actions[]>("get_all_actions", {})
 }
 
 export function storeRawSet(

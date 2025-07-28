@@ -13,12 +13,7 @@ pub struct List {
 
 impl List {
     pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
-        let mut sets: Vec<DsmSets> = Storage::Local {
-            ledger_directory: settings.get_ledger_path(),
-            store_directory: settings.get_store_path(),
-        }
-        .list()
-        .await?;
+        let mut sets: Vec<DsmSets> = Storage::local(settings).list().await?;
 
         if self.azure_included {
             let azure_sets: Vec<DsmSets> = Storage::Remote {
@@ -80,12 +75,7 @@ impl List {
                 );
             }
         }
-        let sets: Vec<MergedSet> = Storage::Local {
-            ledger_directory: settings.get_ledger_path(),
-            store_directory: settings.get_store_path(),
-        }
-        .list()
-        .await?;
+        let sets: Vec<MergedSet> = Storage::local(settings).list().await?;
         println!();
         println!("{: <30}{: <20}{: <50}", "Set name", "Version", "Sets");
         println!("{:=<30}{:=<20}{:=<50}", "", "", "");

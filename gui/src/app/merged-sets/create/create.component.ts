@@ -303,9 +303,10 @@ export class MergedSetsCreateComponent {
         if (mapping === null)
             return;
         if (this.baseSet !== null) {
-            console.log(this)
+            console.error(this);
         } else {
-            mergeNew(this.name, this.version, this.included, mapping)
+            mergeNew(this.name, this.version, this.included, mapping);
+            window.location.href = `/merged-sets/${this.name}/${this.version}`;
         }
     }
 

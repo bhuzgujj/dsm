@@ -1,9 +1,11 @@
+mod actions;
 mod generate;
 mod get;
 mod list;
 mod merge;
 mod store;
 
+pub use actions::*;
 pub use generate::*;
 pub use get::*;
 pub use list::*;

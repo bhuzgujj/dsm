@@ -37,10 +37,7 @@ impl Generator {
             return log_err!("Require at least one dataset");
         }
         let formatter: DataForm = Format::from(self.formats.clone()).into();
-        let storage = Storage::Local {
-            ledger_directory: settings.get_ledger_path(),
-            store_directory: settings.get_store_path(),
-        };
+        let storage = Storage::local(settings);
         let datasets = storage
             .read(self.datasets.clone(), self.version.clone())
             .await?;

@@ -1,9 +1,10 @@
 mod local;
 
+use interfaces::models::actions::add_action;
 use interfaces::models::metadata::DsmMetaDataBuilder;
 use interfaces::models::remotes::Remote;
-use interfaces::models::{DsmSets, MergedSet};
-use local::Localable;
+use interfaces::models::{DsmSets, MergedSet, Settings};
+use local::Storable;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -11,6 +12,7 @@ pub enum Storage {
     Local {
         ledger_directory: PathBuf,
         store_directory: PathBuf,
+        action_log_limit: usize,
     },
     Remote {
         service: Remote,
@@ -18,7 +20,17 @@ pub enum Storage {
 }
 
 impl Storage {
-    pub async fn store<T: Localable>(
+    pub fn local(settings: &Settings) -> Self {
+        return Self::Local {
+            ledger_directory: settings.get_ledger_path(),
+            store_directory: settings.get_store_path(),
+            action_log_limit: settings.get_action_count(),
+        };
+    }
+}
+
+impl Storage {
+    pub async fn store<T: Storable>(
         &self,
         datasets: &T,
         datasets_path: &Path,
@@ -27,24 +39,31 @@ impl Storage {
             Storage::Local {
                 ledger_directory: _ledger_directory,
                 store_directory,
+                action_log_limit: _,
             } => datasets.store(store_directory, datasets_path),
 
             Storage::Remote { service: _ } => todo!("remote::store::<T>(service, datasets).await"),
         }
     }
 
-    pub async fn ledge<T: Localable>(&self, datasets: &T) -> anyhow::Result<()> {
+    pub async fn ledge<T: Storable>(&self, datasets: &T) -> anyhow::Result<()> {
         match self {
             Storage::Local {
                 ledger_directory,
                 store_directory: _store_directory,
-            } => datasets.ledge(ledger_directory),
+                action_log_limit,
+            } => {
+                if !datasets.ledge(ledger_directory)? {
+                    add_action(datasets.to_action(), *action_log_limit)?;
+                }
+                Ok(())
+            }
 
             Storage::Remote { service: _ } => todo!("remote::ledge::<T>(service, datasets).await"),
         }
     }
 
-    pub async fn read<T: Localable>(
+    pub async fn read<T: Storable>(
         &self,
         name: String,
         version: String,
@@ -53,17 +72,21 @@ impl Storage {
             Storage::Local {
                 ledger_directory,
                 store_directory: _store_directory,
+                action_log_limit: _,
             } => T::read(ledger_directory, name, version),
 
-            Storage::Remote { service: _ } => todo!("remote::read::<T>(service, name, version).await"),
+            Storage::Remote { service: _ } => {
+                todo!("remote::read::<T>(service, name, version).await")
+            }
         }
     }
 
-    pub async fn list<T: Localable>(&self) -> anyhow::Result<Vec<T>> {
+    pub async fn list<T: Storable>(&self) -> anyhow::Result<Vec<T>> {
         match self {
             Storage::Local {
                 ledger_directory,
                 store_directory: _store_directory,
+                action_log_limit: _,
             } => T::list(ledger_directory),
 
             Storage::Remote { service: _ } => todo!("remote::list::<T>(service).await"),

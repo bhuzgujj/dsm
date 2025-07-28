@@ -1,7 +1,7 @@
 mod models;
 
-use interfaces::{log_err, logger};
 use interfaces::models::{ClassMapper, DsmSets, MergedSet, Settings};
+use interfaces::{log_err, logger};
 use pyo3::prelude::*;
 use serializer::DataForm;
 use std::collections::HashMap;
@@ -32,24 +32,14 @@ async fn save_merge_set(
 #[pyfunction]
 async fn list_raw_sets() -> anyhow::Result<Vec<PySet>> {
     let settings = init()?;
-    let resp: Vec<DsmSets> = Storage::Local {
-        ledger_directory: settings.get_ledger_path(),
-        store_directory: settings.get_store_path(),
-    }
-    .list()
-    .await?;
+    let resp: Vec<DsmSets> = Storage::local(&settings).list().await?;
     Ok(resp.to_py())
 }
 
 #[pyfunction]
 async fn list_merged_sets() -> anyhow::Result<Vec<PyMergedSet>> {
     let settings = init()?;
-    let resp: Vec<MergedSet> = Storage::Local {
-        ledger_directory: settings.get_ledger_path(),
-        store_directory: settings.get_store_path(),
-    }
-    .list()
-    .await?;
+    let resp: Vec<MergedSet> = Storage::local(&settings).list().await?;
     Ok(resp.to_py())
 }
 
@@ -63,10 +53,7 @@ async fn store(name: String, version: String, setform: String, path: String) -> 
     };
     let path = PathBuf::from(path);
     let datasets = formatter.read(&path, Some(name.to_string()), version.to_string())?;
-    let storage = Storage::Local {
-        ledger_directory: settings.get_ledger_path(),
-        store_directory: settings.get_store_path(),
-    };
+    let storage = Storage::local(&settings);
     for dataset in datasets.iter() {
         storage.store(dataset, &path).await?;
         storage.ledge(dataset).await?;
@@ -82,10 +69,7 @@ async fn new_merge(
     dataset_to_add: Vec<(String, String, String)>,
 ) -> anyhow::Result<()> {
     let settings = init()?;
-    let storage = Storage::Local {
-        ledger_directory: settings.get_ledger_path(),
-        store_directory: settings.get_store_path(),
-    };
+    let storage = Storage::local(&settings);
     let mut datasets = HashMap::new();
     let path = PathBuf::from(mapping_path);
     let mapping = ClassMapper::read_from_file(&path)?;
@@ -115,10 +99,7 @@ async fn merge_on(
     dataset_to_add: Vec<(String, String, String)>,
 ) -> anyhow::Result<()> {
     let settings = init()?;
-    let storage = Storage::Local {
-        ledger_directory: settings.get_ledger_path(),
-        store_directory: settings.get_store_path(),
-    };
+    let storage = Storage::local(&settings);
     let previous_merged_set: MergedSet = storage
         .read(name.clone(), base_version.clone())
         .await?
@@ -156,7 +137,12 @@ async fn merge_on(
 }
 
 #[pyfunction]
-async fn generate(name: String, version: String, path: String, format: String) -> anyhow::Result<()> {
+async fn generate(
+    name: String,
+    version: String,
+    path: String,
+    format: String,
+) -> anyhow::Result<()> {
     let settings = init()?;
     if name.is_empty() {
         return log_err!("Require at least one dataset");
@@ -166,20 +152,12 @@ async fn generate(name: String, version: String, path: String, format: String) -
         "coco-1-0" => DataForm::Coco1_0,
         other => DataForm::Custom(other.to_string()),
     };
-    let storage = Storage::Local {
-        ledger_directory: settings.get_ledger_path(),
-        store_directory: settings.get_store_path(),
-    };
-    let datasets = storage
-        .read(name.clone(), version.clone())
-        .await?;
+    let storage = Storage::local(&settings);
+    let datasets = storage.read(name.clone(), version.clone()).await?;
     let (new_set, image_rel_path_mapping) = if let Some(dsm_set) = datasets {
         (dsm_set, None)
     } else {
-        let merged_set: MergedSet = match storage
-            .read(name.clone(), version.clone())
-            .await?
-        {
+        let merged_set: MergedSet = match storage.read(name.clone(), version.clone()).await? {
             Some(val) => val,
             None => return log_err!("Could not find datasets".to_string()),
         };

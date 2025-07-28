@@ -28,6 +28,7 @@ pub async fn merge_new(
     let storage = Storage::Local {
         ledger_directory: state.get_ledger_path(),
         store_directory: state.get_store_path(),
+        action_log_limit: state.get_action_count(),
     };
     for include in included {
         let local_set: Option<DsmSets> = storage

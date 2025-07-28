@@ -33,16 +33,18 @@ pub struct New {
 impl New {
     pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
         let mut datasets = HashMap::new();
-        let storage = Storage::Local {
-            ledger_directory: settings.get_ledger_path(),
-            store_directory: settings.get_store_path(),
-        };
+        let storage = Storage::local(settings);
 
         extract_dsm_from_storage(&self.datasets, &mut datasets, &storage).await?;
         extract_dsm_from_path(&self.paths, &mut datasets, &storage).await?;
 
         let mapping = ClassMapper::read_from_file(&self.mapping_file)?;
-        let merge_set = MergedSet::new(datasets.clone(), self.name.clone(), self.version.clone(), mapping);
+        let merge_set = MergedSet::new(
+            datasets.clone(),
+            self.name.clone(),
+            self.version.clone(),
+            mapping,
+        );
         storage.ledge(&merge_set).await?;
 
         add_merge_link_to(&datasets, storage, merge_set).await

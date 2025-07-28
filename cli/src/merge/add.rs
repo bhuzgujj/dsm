@@ -37,10 +37,7 @@ pub struct Add {
 impl Add {
     pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
         let mut datasets = HashMap::new();
-        let storage = Storage::Local {
-            ledger_directory: settings.get_ledger_path(),
-            store_directory: settings.get_store_path(),
-        };
+        let storage = Storage::local(settings);
         let splits: Vec<&str> = self.from_set.split('=').collect();
         if splits.len() != 2 {
             return log_err!(format!("Can only have 1 equals sign in {}", self.from_set));

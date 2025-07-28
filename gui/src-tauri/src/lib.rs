@@ -46,6 +46,7 @@ pub fn run() {
             merge_new,
             get_merged_set,
             get_raw_set,
+            get_all_actions,
             generate_merged_set,
         ])
         .run(tauri::generate_context!())

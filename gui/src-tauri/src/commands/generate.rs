@@ -20,6 +20,7 @@ pub async fn generate_merged_set(
     let storage = Storage::Local {
         ledger_directory: state.get_ledger_path(),
         store_directory: state.get_store_path(),
+        action_log_limit: state.get_action_count(),
     };
     let formatter: DataForm = DatasetFormat::from(formats).into();
     match storage.read::<MergedSet>(name, version).await? {

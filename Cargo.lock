@@ -2503,6 +2503,7 @@ dependencies = [
  "dirs",
  "log",
  "serde",
+ "serde_json",
  "toml",
 ]
 

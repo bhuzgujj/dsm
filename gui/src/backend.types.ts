@@ -87,3 +87,16 @@ export type IncludedSet = {
     version: string,
     group: string
 }
+
+export type Actions = {
+    name: string,
+    version: string,
+    datasets: SetInfo[],
+    action: string,
+    time: string,
+}
+
+export type SetInfo = {
+    name: string,
+    version: string,
+}

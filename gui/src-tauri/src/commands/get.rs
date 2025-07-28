@@ -13,6 +13,7 @@ pub async fn get_raw_set(
     let storage = Storage::Local {
         ledger_directory: state.get_ledger_path(),
         store_directory: state.get_store_path(),
+        action_log_limit: state.get_action_count(),
     };
     Ok(storage.read(name, version).await.unwrap_or_else(|_| None))
 }
@@ -27,6 +28,7 @@ pub async fn get_merged_set(
     let storage = Storage::Local {
         ledger_directory: state.get_ledger_path(),
         store_directory: state.get_store_path(),
+        action_log_limit: state.get_action_count(),
     };
     Ok(storage.read(name, version).await.unwrap_or_else(|_| None))
 }
