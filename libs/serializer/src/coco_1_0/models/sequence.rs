@@ -28,7 +28,7 @@ impl Sequence {
         self,
         data_form: &DsmDataForm,
         name: &str,
-        version: &String,
+        version: &str,
         subset: String,
         root: &Path,
     ) -> anyhow::Result<DsmSets> {
@@ -36,7 +36,7 @@ impl Sequence {
         let new_name = format!("{}-{}", name, actual_name.clone());
         let metadata: DsmMetaData = DsmMetaDataBuilder::new(
             new_name.clone(),
-            version.clone(),
+            version.to_owned(),
             data_form.clone(),
             self.categories
                 .iter()

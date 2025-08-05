@@ -9,7 +9,7 @@ use crate::paths::{dsm_dir, write_to_file};
 const FILENAME: &str = "actions_logs.json";
 
 pub fn get_actions(limit: usize) -> VecDeque<Action> {
-    if limit <= 0 {
+    if limit == 0 {
         return VecDeque::new();
     }
     let filename = dsm_dir().join(FILENAME);

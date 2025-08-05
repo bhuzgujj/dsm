@@ -89,7 +89,7 @@ impl List {
             let sets = serde_json::to_string(&sets)?;
             println!(
                 "{: <30}{: <20}{: <50}",
-                cut_string(&merged_set.get_name().to_string(), 30),
+                cut_string(merged_set.get_name(), 30),
                 cut_string(merged_set.get_version(), 20),
                 sets
             );

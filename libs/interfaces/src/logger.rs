@@ -26,6 +26,7 @@ pub fn refresh(settings: &Settings) -> anyhow::Result<()> {
     let log_file_path = dsm_dir().join(FILE_NAME);
     if let Err(err) = OpenOptions::new()
         .create(true)
+        .truncate(false)
         .write(true)
         .open(&log_file_path)
     {

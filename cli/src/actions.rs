@@ -13,7 +13,7 @@ impl Actions {
         );
         println!("{:=<10}{:=<30}{:=<20}{:=<30}{:=<50}", "", "", "", "", "");
         let actions = get_actions(settings.get_action_count());
-        if actions.len() == 0 {
+        if actions.is_empty() {
             println!("No actions...");
         } else {
             for action in actions {
