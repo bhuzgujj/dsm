@@ -169,12 +169,7 @@ async fn generate(
         merged_set.to_dataset(formatter.to_data_form())?
     };
     let path = PathBuf::from(&path);
-    formatter.write(
-        &path,
-        &settings.get_store_path(),
-        &new_set,
-        settings.interpreters(),
-    )?;
+    formatter.write(&path, &new_set, settings.interpreters())?;
     Ok(())
 }
 

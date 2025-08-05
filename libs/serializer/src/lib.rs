@@ -55,21 +55,15 @@ impl DataForm {
     pub fn write(
         &self,
         output: &Path,
-        input: &Path,
         datasets: &DsmSets,
         interpreters: &HashMap<String, Interpreter>,
     ) -> anyhow::Result<()> {
-        debug!(
-            "Reading files format '{}' at '{}'",
-            &input.canonicalize()?.to_str().unwrap_or("<Unknown path>"),
-            &self
-        );
         match self {
             DataForm::Yolo1_1 => yolo_1_1::write(output, datasets),
             DataForm::Coco1_0 => coco_1_0::write(output, datasets),
             DataForm::Custom(interpreter) => {
                 if let Some(interpreter) = interpreters.get(interpreter) {
-                    interpreter.write(input, output, &datasets)
+                    interpreter.write(&output, &datasets)
                 } else {
                     log_err!("Unknown interpreter: {interpreter}")
                 }

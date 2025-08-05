@@ -1,8 +1,8 @@
-use std::{path::Path, process::Command};
+use std::{fs, path::Path, process::Command};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{log_err, models::DsmSets};
+use crate::{log_err, models::DsmSets, paths::write_to_file};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Interpreter {
@@ -38,12 +38,16 @@ impl Interpreter {
         }
     }
 
-    pub fn write(&self, input: &Path, output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
+    pub fn write(&self, output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
+        fs::create_dir_all(output)?;
+        let metadata_path = output.join("dsm_metadata.json");
+        let content = serde_json::to_string(datasets)?;
+        write_to_file(&metadata_path, content, true, true)?;
         let result = Command::new(&self.process)
             .args(&self.args)
             .arg("write")
             .arg(output)
-            .arg(input)
+            .arg(metadata_path)
             .output()?;
 
         let output = String::from_utf8(result.stdout)?;
