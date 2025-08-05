@@ -6,11 +6,11 @@ use crate::coco_1_0::models::license::License;
 use interfaces::log_err;
 use interfaces::models::entries::{DsmEntry, DsmEntryBuilder};
 use interfaces::models::metadata::{DsmMetaData, DsmMetaDataBuilder};
-use interfaces::models::DsmDataForm;
 use interfaces::models::DsmSets;
+use interfaces::models::{DsmDataForm, DsmLocation};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub(crate) const IMAGE_PATH: &str = "images";
 
@@ -30,6 +30,7 @@ impl Sequence {
         name: &str,
         version: &String,
         subset: String,
+        root: &Path,
     ) -> anyhow::Result<DsmSets> {
         let actual_name = strip_name(subset)?;
         let new_name = format!("{}-{}", name, actual_name.clone());
@@ -72,8 +73,7 @@ impl Sequence {
             }
         }
         let mut data_entries = Vec::new();
-        let path = PathBuf::from(&IMAGE_PATH)
-            .join(actual_name.clone());
+        let path = PathBuf::from(&IMAGE_PATH).join(actual_name.clone());
         for imgs in self.images {
             data_entries.push(
                 DsmEntryBuilder::new(
@@ -81,6 +81,12 @@ impl Sequence {
                     path.join(&imgs.file_name).clone(),
                     imgs.width,
                     imgs.height,
+                    DsmLocation::Local {
+                        path: root
+                            .to_str()
+                            .expect("Could not stringify the rootpath?")
+                            .to_string(),
+                    },
                 )
                 .set_license(Some(imgs.license))
                 .set_annotation(annotations.get(&imgs.id).unwrap_or(&Vec::new()).clone())
@@ -95,15 +101,12 @@ impl Sequence {
         Ok(DsmSets::new(metadata, entries))
     }
 
-    pub(crate) fn from_dsm(
-        datasets: &DsmSets,
-    ) -> (HashMap<String, Self>, HashMap<String, PathBuf>) {
+    pub(crate) fn from_dsm(datasets: &DsmSets) -> HashMap<String, Self> {
         let mut sequences = HashMap::new();
-        let mut image_map: HashMap<String, PathBuf> = HashMap::new();
         let mut images_index: u32 = 0;
         let mut annotations_index: u32 = 0;
         for (subset, entries) in datasets.get_entries() {
-            let (sequence, images, imgi, anni) = Self::from_parts(
+            let (sequence, imgi, anni) = Self::from_parts(
                 datasets.get_metadata(),
                 entries.clone(),
                 &images_index,
@@ -111,13 +114,10 @@ impl Sequence {
             );
             images_index = imgi;
             annotations_index = anni;
-            for (name, refs) in &images {
-                image_map.insert(name.clone(), refs.clone());
-            }
             sequences.insert(subset.clone(), sequence);
         }
 
-        (sequences, image_map)
+        sequences
     }
 
     fn from_parts(
@@ -125,8 +125,7 @@ impl Sequence {
         entries: Vec<DsmEntry>,
         images_i: &u32,
         annotations_i: &u32,
-    ) -> (Self, HashMap<String, PathBuf>, u32, u32) {
-        let mut image_map = HashMap::new();
+    ) -> (Self, u32, u32) {
         let licenses: Vec<License> = meta_data.get_licenses().clone().iter().fold(
             Vec::new(),
             |mut acc, (index, license)| {
@@ -158,10 +157,6 @@ impl Sequence {
                     annotation,
                 ));
             }
-            image_map.insert(
-                entry.get_file_name().clone(),
-                entry.get_image_relative_path().clone(),
-            );
         }
 
         (
@@ -172,7 +167,6 @@ impl Sequence {
                 images,
                 annotations,
             },
-            image_map,
             images_index,
             annotations_index,
         )

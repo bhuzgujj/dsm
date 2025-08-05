@@ -1,4 +1,4 @@
-use std::fs::{create_dir_all, read_dir};
+use std::{fs::{create_dir_all, read_dir}, path::PathBuf};
 
 use interfaces::{
     log_err,
@@ -55,8 +55,8 @@ impl Storable for MergedSet {
         &self,
         _store_directory: &std::path::Path,
         _originals_path: &std::path::Path,
-    ) -> anyhow::Result<()> {
-        Ok(())
+    ) -> anyhow::Result<PathBuf> {
+        todo!("Not implemented")
     }
 
     fn read(

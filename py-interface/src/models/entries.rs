@@ -10,7 +10,7 @@ pub struct PyEntry {
     #[pyo3(get, set)]
     file_name: String,
     #[pyo3(get, set)]
-    image_relative_path: PathBuf,
+    image_absolute_path: PathBuf,
     #[pyo3(get, set)]
     width: u32,
     #[pyo3(get, set)]
@@ -31,7 +31,7 @@ impl DsmToPy<PyEntry> for DsmEntry {
     fn to_py(&self) -> PyEntry {
         PyEntry {
             file_name: self.get_file_name().clone(),
-            image_relative_path: self.get_image_relative_path().clone(),
+            image_absolute_path: self.get_image_location(),
             width: *self.get_width(),
             height: *self.get_height(),
             license: self.get_license().clone(),

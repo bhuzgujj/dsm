@@ -3,7 +3,7 @@ mod merged_sets;
 
 use std::{
     fs::{self, read_to_string},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use serde::{Serialize, de::DeserializeOwned};
@@ -19,10 +19,8 @@ where
     Self: DeserializeOwned + Serialize,
 {
     fn ledge(&self, ledger_directory: &Path) -> anyhow::Result<bool>;
-    fn store(&self, store_directory: &Path, originals_path: &std::path::Path)
-    -> anyhow::Result<()>;
-    fn read(ledger_directory: &Path, name: String, version: String)
-    -> anyhow::Result<Option<Self>>;
+    fn store(&self, store_directory: &Path, originals_path: &std::path::Path) -> anyhow::Result<PathBuf>;
+    fn read(ledger_directory: &Path, name: String, version: String)-> anyhow::Result<Option<Self>>;
     fn list(ledger_directory: &Path) -> anyhow::Result<Vec<Self>>;
     fn to_action(&self) -> Action;
 }

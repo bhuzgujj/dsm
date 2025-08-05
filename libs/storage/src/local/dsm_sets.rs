@@ -1,9 +1,11 @@
-use std::fs::{create_dir_all, read_dir};
-
 use interfaces::{
     log_err,
     models::{DsmSets, actions::Action},
     paths::write_to_file,
+};
+use std::{
+    fs::{create_dir_all, read_dir},
+    path::PathBuf,
 };
 
 use super::{RAW_SET, SEPARATOR, Storable, copy_recursively, read_dsm};
@@ -40,7 +42,7 @@ impl Storable for DsmSets {
         &self,
         store_directory: &std::path::Path,
         originals_path: &std::path::Path,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<PathBuf> {
         let json_filename = format!("{}{SEPARATOR}{}.json", self.get_name(), self.get_version());
         let store_path = store_directory
             .join(self.get_name())
@@ -63,7 +65,7 @@ impl Storable for DsmSets {
                 err
             ))
         } else {
-            Ok(())
+            Ok(store_path.clone())
         }
     }
 

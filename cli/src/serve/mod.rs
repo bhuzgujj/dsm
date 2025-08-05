@@ -36,7 +36,10 @@ impl Serve {
                     match socket.accept() {
                         Ok((stream, from)) => {
                             let mut session = Session::new(stream, from);
-                            scope.spawn(move || session.process(&settings));
+                            scope.spawn(move || {
+                                session.process(&settings);
+                                session.stop();
+                            });
                         }
                         Err(err) => error!("{err}"),
                     }

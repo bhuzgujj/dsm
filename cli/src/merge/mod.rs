@@ -44,7 +44,8 @@ pub async fn extract_dsm_from_storage(
         let name = splits[0];
         let version = splits[1];
         let group = splits[2];
-        let local_set: Option<DsmSets> = storage.read(name.to_string(), version.to_string()).await?;
+        let local_set: Option<DsmSets> =
+            storage.read(name.to_string(), version.to_string()).await?;
         if let Some(local_set) = local_set {
             datasets.insert(sets_label.clone(), (group.to_string(), local_set));
         } else {
@@ -58,16 +59,22 @@ pub async fn extract_dsm_from_path(
     paths: &Vec<String>,
     datasets: &mut HashMap<String, (String, DsmSets)>,
     storage: &Storage,
+    settings: &Settings,
 ) -> anyhow::Result<()> {
     for path in paths {
         let splits: Vec<&str> = path.split(':').collect();
         if splits.len() != 3 {
             return log_err!(format!("Can only have 2 equals sign in {}", path));
         }
-        let format: DataForm = Format::from(splits[0].trim().to_string()).into();
+        let format: DataForm = Format::try_from(splits[0].trim().to_string())?.into();
         let dataset_path = PathBuf::from(splits[1].trim());
         let group = splits[2];
-        let dataset = format.read(&dataset_path, None, "0".to_string())?;
+        let dataset = format.read(
+            &dataset_path,
+            None,
+            "0".to_string(),
+            settings.interpreters(),
+        )?;
         for ds in dataset {
             storage.store(&ds, &dataset_path).await?;
             storage.ledge(&ds).await?;

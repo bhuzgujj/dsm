@@ -1,7 +1,9 @@
 pub mod actions;
+pub mod interpreter;
 pub mod remotes;
 
 use crate::log_err;
+use crate::models::interpreter::Interpreter;
 use crate::paths::{dsm_dir, write_to_file};
 use log::{trace, LevelFilter};
 use remotes::Remote;
@@ -37,7 +39,11 @@ fn default_remotes() -> HashMap<String, Remote> {
     HashMap::new()
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+fn default_interpreters() -> HashMap<String, Interpreter> {
+    HashMap::new()
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Settings {
     #[serde(default = "default_log_level")]
     log_level: String,
@@ -53,6 +59,9 @@ pub struct Settings {
 
     #[serde(default = "default_remotes")]
     remotes: HashMap<String, Remote>,
+
+    #[serde(default = "default_interpreters")]
+    interpreters: HashMap<String, Interpreter>,
 }
 
 impl Default for Settings {
@@ -63,6 +72,7 @@ impl Default for Settings {
             store_path: default_store_path(),
             action_count: default_action_count(),
             remotes: default_remotes(),
+            interpreters: default_interpreters(),
         }
     }
 }
@@ -78,6 +88,10 @@ impl Settings {
 
     pub fn get_action_count(&self) -> usize {
         self.action_count
+    }
+
+    pub fn interpreters(&self) -> &HashMap<String, Interpreter> {
+        &self.interpreters
     }
 
     pub fn get_store_path(&self) -> PathBuf {

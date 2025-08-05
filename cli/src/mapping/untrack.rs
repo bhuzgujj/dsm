@@ -48,7 +48,7 @@ pub struct Untrack {
 impl Untrack {
     pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
         let _ = settings;
-        let iformat: DataForm = Format::from(self.input_format.clone()).into();
+        let iformat: DataForm = Format::try_from(self.input_format.clone())?.into();
         let content = match read_to_string(&self.mapping_file) {
             Ok(content) => content,
             Err(err) => {
@@ -67,11 +67,21 @@ impl Untrack {
                 ))
             }
         };
-        let datasets = iformat.read(&self.input_path, None, self.version.clone())?;
+        let datasets = iformat.read(
+            &self.input_path,
+            None,
+            self.version.clone(),
+            settings.interpreters(),
+        )?;
         for dataset in datasets {
             let new_ds = dataset.remap(&mapping)?;
-            let oformat: DataForm = Format::from(self.input_format.clone()).into();
-            oformat.write(&self.output_path, &self.input_path, &new_ds, None)?;
+            let oformat: DataForm = Format::try_from(self.input_format.clone())?.into();
+            oformat.write(
+                &self.output_path,
+                &self.input_path,
+                &new_ds,
+                settings.interpreters(),
+            )?;
         }
         Ok(())
     }

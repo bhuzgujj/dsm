@@ -25,13 +25,13 @@ pub async fn generate_merged_set(
     let formatter: DataForm = DatasetFormat::from(formats).into();
     match storage.read::<MergedSet>(name, version).await? {
         Some(merged) => {
-            let (new_set, image_rel_path_mapping) = merged.to_dataset(formatter.to_data_form())?;
+            let new_set = merged.to_dataset(formatter.to_data_form())?;
             let path = PathBuf::from(&path);
             formatter.write(
                 &path,
                 &state.get_store_path(),
                 &new_set,
-                image_rel_path_mapping,
+                state.interpreters(),
             )?;
         }
         None => {}

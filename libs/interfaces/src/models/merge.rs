@@ -111,10 +111,7 @@ impl MergedSet {
         &self.version
     }
 
-    pub fn to_dataset(
-        &self,
-        form: DsmDataForm,
-    ) -> anyhow::Result<(DsmSets, Option<HashMap<String, String>>)> {
+    pub fn to_dataset(&self, form: DsmDataForm) -> anyhow::Result<DsmSets> {
         let classes = self.class_mapper.get_dsm_classes();
         let metadata =
             DsmMetaDataBuilder::new(self.name.clone(), self.version.clone(), form, classes)
@@ -123,7 +120,6 @@ impl MergedSet {
                 .set_description(self.description.clone())
                 .build();
         let mut data_entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
-        let mut rel_path: HashMap<String, String> = HashMap::new();
         for (group, datasets) in &self.datasets {
             if !data_entries.contains_key(group) {
                 data_entries.insert(group.to_string(), Vec::new());
@@ -138,10 +134,6 @@ impl MergedSet {
                             &self.license_mapper,
                             dataset.get_classes().clone(),
                         );
-                        rel_path.insert(
-                            new_entry.get_file_name().clone(),
-                            dataset.get_rel_from_storage().clone(),
-                        );
                         if let Some(entries) = data_entries.get_mut(group) {
                             entries.push(new_entry);
                         } else {
@@ -153,7 +145,7 @@ impl MergedSet {
                 }
             }
         }
-        Ok((DsmSets::new(metadata, data_entries), Some(rel_path)))
+        Ok(DsmSets::new(metadata, data_entries))
     }
 
     pub fn get_datasets_include(&self) -> &HashMap<String, Vec<DsmSets>> {
@@ -183,10 +175,7 @@ impl MergedSet {
             for dataset in datasets {
                 sets.insert(
                     format!("{}~{}", dataset.get_name(), dataset.get_version()),
-                    GroupSet {
-                        location: dataset.get_metadata().get_location().clone(),
-                        group: group.clone()
-                    },
+                    GroupSet::local(group.clone()),
                 );
             }
         }

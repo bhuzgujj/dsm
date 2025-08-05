@@ -11,6 +11,7 @@ pub(crate) struct Annotation {
     pub(crate) area: f64,
     pub(crate) bbox: Vec<f64>,
     pub(crate) iscrowd: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) attributes: Option<Attribute>,
 }
 
@@ -25,12 +26,8 @@ impl Annotation {
         )
         .set_segmentation(self.segmentation.clone())
         .set_iscrowd(self.iscrowd)
-        .set_occluded(self.attributes.clone()
-			.map(|a| a.occluded)
-			.unwrap_or(None))
-        .set_rotation(self.attributes.clone()
-			.map(|a| a.rotation)
-			.unwrap_or(None))
+        .set_occluded(self.attributes.clone().map(|a| a.occluded).unwrap_or(None))
+        .set_rotation(self.attributes.clone().map(|a| a.rotation).unwrap_or(None))
         .build()
     }
 
@@ -48,10 +45,7 @@ impl Annotation {
                 *data_entry.get_height(),
             ],
             iscrowd: *data_entry.get_iscrowd(),
-            attributes: Some(Attribute {
-                occluded: *data_entry.get_occluded(),
-                rotation: *data_entry.get_rotation(),
-            }),
+            attributes: Attribute::new(*data_entry.get_occluded(), *data_entry.get_rotation()),
         }
     }
 }

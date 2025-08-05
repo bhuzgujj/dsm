@@ -4,6 +4,7 @@ use interfaces::log_err;
 use interfaces::models::annotation::{DsmAnnotation, DsmAnnotationBuilder};
 use interfaces::models::classes::DsmClasses;
 use interfaces::models::entries::{DsmEntry, DsmEntryBuilder};
+use interfaces::models::DsmLocation;
 use interfaces::paths::write_to_file;
 use std::collections::HashMap;
 use std::fs::{copy, create_dir_all, read_to_string};
@@ -67,6 +68,9 @@ pub(crate) fn read(
                 PathBuf::from(&image_relative_path),
                 img_width,
                 img_height,
+                DsmLocation::Local {
+                    path: root.to_str().unwrap().to_string(),
+                },
             )
             .set_annotation(annotations)
             .build(),
@@ -101,11 +105,9 @@ fn parse_annotation(
 }
 
 pub(crate) fn write(
-    input: &Path,
     output: &Path,
     sets_name: &String,
     dataset_entry: &Vec<DsmEntry>,
-    image_rel_path: &Option<HashMap<String, String>>,
 ) -> anyhow::Result<String> {
     let dir = format!("obj_{sets_name}_data");
     let img_dir = output.join(&dir);
@@ -117,22 +119,10 @@ pub(crate) fn write(
         ));
     }
     let mut sets = Vec::new();
-    let data_dir = input;
     for entry in dataset_entry {
         let new_image_name = entry.get_file_name();
+        let image_path = entry.get_image_location();
         sets.push(format!("{}/{}", dir.clone(), new_image_name.clone()));
-        let image_path = if let Some(img_rel_path_map) = image_rel_path {
-            if let Some(rel) = img_rel_path_map.get(entry.get_file_name()) {
-                data_dir.join(rel).join(entry.get_image_relative_path())
-            } else {
-                return log_err!(format!(
-                    "{} is not in the mapping to get the path",
-                    entry.get_file_name()
-                ));
-            }
-        } else {
-            data_dir.join(entry.get_image_relative_path())
-        };
         if let Err(err) = copy(&image_path, img_dir.join(new_image_name)) {
             return log_err!(format!(
                 "Failed to copy '{}' to '{}': {}",

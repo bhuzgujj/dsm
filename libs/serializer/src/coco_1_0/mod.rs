@@ -3,7 +3,6 @@ use interfaces::log_err;
 use interfaces::models::DsmDataForm;
 use interfaces::models::DsmSets;
 use interfaces::paths::write_to_file;
-use std::collections::HashMap;
 use std::fs::{copy, create_dir_all};
 use std::path::Path;
 
@@ -26,17 +25,12 @@ pub(crate) fn read(
             .into(),
     );
     for (json, sequence) in sequences {
-        datasets.push(sequence.dsm(&data_form, &new_name, &version, json)?);
+        datasets.push(sequence.dsm(&data_form, &new_name, &version, json, root)?);
     }
     Ok(datasets)
 }
 
-pub(crate) fn write(
-    input: &Path,
-    output: &Path,
-    datasets: &DsmSets,
-    image_rel_path: &Option<HashMap<String, String>>,
-) -> anyhow::Result<()> {
+pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
     if let Err(err) = create_dir_all(output.join(ANNOTATION_DIR)) {
         return log_err!(format!(
             "Failed to create dir {}: {}",
@@ -44,7 +38,7 @@ pub(crate) fn write(
             err
         ));
     }
-    let (sequences, image_map) = Sequence::from_dsm(datasets);
+    let sequences = Sequence::from_dsm(datasets);
     for (name, sequence) in sequences {
         let json = match serde_json::to_string_pretty(&sequence) {
             Ok(ctnt) => ctnt,
@@ -71,37 +65,31 @@ pub(crate) fn write(
                 err
             ));
         }
+
         for image in sequence.images {
-            if let Some(img) = image_map.get(&image.file_name) {
-                let image_path = if let Some(img_rel_path_map) = image_rel_path {
-                    if let Some(rel) = img_rel_path_map.get(&image.file_name) {
-                        input.join(rel).join(img)
-                    } else {
-                        return log_err!(format!(
-                            "{} is not in the mapping to get the path",
-                            &image.file_name
-                        ));
+            for (_, entries) in datasets.get_entries() {
+                for entry in entries {
+                    if image.is_entry(entry) {
+                        let image_path = entry.get_image_location();
+                        if let Err(err) = copy(
+                            &image_path,
+                            output.join(IMAGE_PATH).join(&name).join(&image.file_name),
+                        ) {
+                            return log_err!(format!(
+                                "Failed to copy '{}' to '{}': {}",
+                                image_path.to_string_lossy().to_string(),
+                                output
+                                    .join(IMAGE_PATH)
+                                    .join(&name)
+                                    .join(image.file_name.clone())
+                                    .display(),
+                                err
+                            ));
+                        }
+
+                        break;
                     }
-                } else {
-                    input.join(img)
-                };
-                if let Err(err) = copy(
-                    image_path,
-                    output.join(IMAGE_PATH).join(&name).join(&image.file_name),
-                ) {
-                    return log_err!(format!(
-                        "Failed to copy '{}' to '{}': {}",
-                        input.join(img).display(),
-                        output
-                            .join(IMAGE_PATH)
-                            .join(&name)
-                            .join(image.file_name.clone())
-                            .display(),
-                        err
-                    ));
                 }
-            } else {
-                return log_err!(format!("Image does not exist: {}", image.file_name));
             }
         }
     }

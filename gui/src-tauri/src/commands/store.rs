@@ -24,7 +24,12 @@ pub async fn store_raw_set(
     };
     let path = PathBuf::from(path.clone());
     let formatter: DataForm = DatasetFormat::from(formats).into();
-    let datasets = formatter.read(&path, Some(name.clone()), version.clone())?;
+    let datasets = formatter.read(
+        &path,
+        Some(name.clone()),
+        version.clone(),
+        state.interpreters(),
+    )?;
 
     for dataset in datasets {
         storage.store(&dataset, &path).await?;

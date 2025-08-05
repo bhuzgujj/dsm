@@ -70,7 +70,7 @@ impl Add {
         }
 
         extract_dsm_from_storage(&self.datasets, &mut datasets, &storage).await?;
-        extract_dsm_from_path(&self.paths, &mut datasets, &storage).await?;
+        extract_dsm_from_path(&self.paths, &mut datasets, &storage, &settings).await?;
 
         let merge_set = MergedSet::new(
             datasets.clone(),

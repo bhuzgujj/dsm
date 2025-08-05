@@ -1,3 +1,5 @@
+use interfaces::log_err;
+use interfaces::models::interpreter::Interpreter;
 use interfaces::models::{DsmDataForm, DsmSets};
 use log::debug;
 use std::collections::HashMap;
@@ -30,6 +32,7 @@ impl DataForm {
         path: &Path,
         name: Option<String>,
         version: String,
+        interpreters: &HashMap<String, Interpreter>,
     ) -> anyhow::Result<Vec<DsmSets>> {
         debug!(
             "Reading files format '{}' at '{}'",
@@ -39,7 +42,13 @@ impl DataForm {
         match &self {
             DataForm::Yolo1_1 => yolo_1_1::read(path, name, version, self.clone().into()),
             DataForm::Coco1_0 => coco_1_0::read(path, name, version, self.clone().into()),
-            DataForm::Custom(_) => todo!("Custom format are not supported yet"),
+            DataForm::Custom(interpreter) => {
+                if let Some(interpreter) = interpreters.get(interpreter) {
+                    interpreter.read(path, name, version)
+                } else {
+                    log_err!("Unknown interpreter: {interpreter}")
+                }
+            }
         }
     }
 
@@ -48,7 +57,7 @@ impl DataForm {
         output: &Path,
         input: &Path,
         datasets: &DsmSets,
-        image_rel_path: Option<HashMap<String, String>>,
+        interpreters: &HashMap<String, Interpreter>,
     ) -> anyhow::Result<()> {
         debug!(
             "Reading files format '{}' at '{}'",
@@ -56,9 +65,15 @@ impl DataForm {
             &self
         );
         match self {
-            DataForm::Yolo1_1 => yolo_1_1::write(input, output, datasets, &image_rel_path),
-            DataForm::Coco1_0 => coco_1_0::write(input, output, datasets, &image_rel_path),
-            DataForm::Custom(_) => todo!("Custom format are not supported yet"),
+            DataForm::Yolo1_1 => yolo_1_1::write(output, datasets),
+            DataForm::Coco1_0 => coco_1_0::write(output, datasets),
+            DataForm::Custom(interpreter) => {
+                if let Some(interpreter) = interpreters.get(interpreter) {
+                    interpreter.write(input, output, &datasets)
+                } else {
+                    log_err!("Unknown interpreter: {interpreter}")
+                }
+            }
         }
     }
 
@@ -66,7 +81,7 @@ impl DataForm {
         match self {
             DataForm::Yolo1_1 => DsmDataForm::Yolo1_1,
             DataForm::Coco1_0 => DsmDataForm::Coco1_0,
-            DataForm::Custom(_) => todo!("Custom format are not supported yet"),
+            DataForm::Custom(custom) => DsmDataForm::Custom(custom.clone()),
         }
     }
 }

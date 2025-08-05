@@ -39,20 +39,12 @@ pub(crate) fn read(
     Ok(vec![DsmSets::new(metadata, sets)])
 }
 
-pub(crate) fn write(
-    input: &Path,
-    output: &Path,
-    datasets: &DsmSets,
-    image_rel_path: &Option<HashMap<String, String>>,
-) -> anyhow::Result<()> {
+pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
     create_dir_all(output)?;
     obj_names::write(output, datasets.get_classes().clone())?;
     let mut sets = HashMap::new();
     for (key, value) in datasets.get_entries() {
-        sets.insert(
-            key.clone(),
-            data_entries::write(input, output, key, value, &image_rel_path)?,
-        );
+        sets.insert(key.clone(), data_entries::write(output, key, value)?);
     }
     ObjData::new(datasets.get_classes().len() as u32, sets).write(output)?;
     Ok(())

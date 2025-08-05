@@ -36,7 +36,7 @@ impl New {
         let storage = Storage::local(settings);
 
         extract_dsm_from_storage(&self.datasets, &mut datasets, &storage).await?;
-        extract_dsm_from_path(&self.paths, &mut datasets, &storage).await?;
+        extract_dsm_from_path(&self.paths, &mut datasets, &storage, &settings).await?;
 
         let mapping = ClassMapper::read_from_file(&self.mapping_file)?;
         let merge_set = MergedSet::new(

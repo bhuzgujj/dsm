@@ -52,7 +52,12 @@ async fn store(name: String, version: String, setform: String, path: String) -> 
         other => DataForm::Custom(other.to_string()),
     };
     let path = PathBuf::from(path);
-    let datasets = formatter.read(&path, Some(name.to_string()), version.to_string())?;
+    let datasets = formatter.read(
+        &path,
+        Some(name.to_string()),
+        version.to_string(),
+        settings.interpreters(),
+    )?;
     let storage = Storage::local(&settings);
     for dataset in datasets.iter() {
         storage.store(dataset, &path).await?;
@@ -153,9 +158,8 @@ async fn generate(
         other => DataForm::Custom(other.to_string()),
     };
     let storage = Storage::local(&settings);
-    let datasets = storage.read(name.clone(), version.clone()).await?;
-    let (new_set, image_rel_path_mapping) = if let Some(dsm_set) = datasets {
-        (dsm_set, None)
+    let new_set = if let Some(dsm_set) = storage.read(name.clone(), version.clone()).await? {
+        dsm_set
     } else {
         let merged_set: MergedSet = match storage.read(name.clone(), version.clone()).await? {
             Some(val) => val,
@@ -169,7 +173,7 @@ async fn generate(
         &path,
         &settings.get_store_path(),
         &new_set,
-        image_rel_path_mapping,
+        settings.interpreters(),
     )?;
     Ok(())
 }

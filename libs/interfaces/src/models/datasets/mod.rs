@@ -1,5 +1,5 @@
-use crate::models::classes::DsmClasses;
 use crate::models::licence::DsmLicense;
+use crate::models::{classes::DsmClasses, DsmLocation};
 use entries::DsmEntry;
 use metadata::{DsmMetaData, DsmMetaDataBuilder};
 use serde::{Deserialize, Serialize};
@@ -119,5 +119,13 @@ impl DsmSets {
 
     pub fn get_rel_from_storage(&self) -> String {
         format!("{}/{}", self.get_name(), self.get_version())
+    }
+
+    pub fn update_location(&mut self, save_location: DsmLocation) {
+        for (_, entries) in self.entries.iter_mut() {
+            for entry in entries.iter_mut() {
+                entry.update_location(&save_location);
+            }
+        }
     }
 }

@@ -34,7 +34,7 @@ impl Storage {
         &self,
         datasets: &T,
         datasets_path: &Path,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<PathBuf> {
         match self {
             Storage::Local {
                 ledger_directory: _ledger_directory,

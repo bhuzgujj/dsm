@@ -36,13 +36,13 @@ impl Generator {
         if self.datasets.is_empty() {
             return log_err!("Require at least one dataset");
         }
-        let formatter: DataForm = Format::from(self.formats.clone()).into();
+        let formatter: DataForm = Format::try_from(self.formats.clone())?.into();
         let storage = Storage::local(settings);
         let datasets = storage
             .read(self.datasets.clone(), self.version.clone())
             .await?;
-        let (new_set, image_rel_path_mapping) = if let Some(dsm_set) = datasets {
-            (dsm_set, None)
+        let new_set = if let Some(dsm_set) = datasets {
+            dsm_set
         } else {
             let merged_set: MergedSet = match storage
                 .read(self.datasets.clone(), self.version.clone())
@@ -59,7 +59,7 @@ impl Generator {
             &path,
             &settings.get_store_path(),
             &new_set,
-            image_rel_path_mapping,
+            settings.interpreters(),
         )?;
         Ok(())
     }
