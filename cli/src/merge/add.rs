@@ -66,11 +66,11 @@ impl Add {
             return log_err!(format!("Could not find {merged_name} v{merged_version}"));
         }
         if let Some(mapping_path) = &self.mapping_file {
-            mapping = ClassMapper::read_from_file(&mapping_path)?;
+            mapping = ClassMapper::read_from_file(mapping_path)?;
         }
 
         extract_dsm_from_storage(&self.datasets, &mut datasets, &storage).await?;
-        extract_dsm_from_path(&self.paths, &mut datasets, &storage, &settings).await?;
+        extract_dsm_from_path(&self.paths, &mut datasets, &storage, settings).await?;
 
         let merge_set = MergedSet::new(
             datasets.clone(),

@@ -63,7 +63,7 @@ impl DataForm {
             DataForm::Coco1_0 => coco_1_0::write(output, datasets),
             DataForm::Custom(interpreter) => {
                 if let Some(interpreter) = interpreters.get(interpreter) {
-                    interpreter.write(&output, &datasets)
+                    interpreter.write(output, datasets)
                 } else {
                     log_err!("Unknown interpreter: {interpreter}")
                 }

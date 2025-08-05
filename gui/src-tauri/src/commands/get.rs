@@ -15,7 +15,7 @@ pub async fn get_raw_set(
         store_directory: state.get_store_path(),
         action_log_limit: state.get_action_count(),
     };
-    Ok(storage.read(name, version).await.unwrap_or_else(|_| None))
+    Ok(storage.read(name, version).await.unwrap_or(None))
 }
 
 #[tauri::command]
@@ -30,5 +30,5 @@ pub async fn get_merged_set(
         store_directory: state.get_store_path(),
         action_log_limit: state.get_action_count(),
     };
-    Ok(storage.read(name, version).await.unwrap_or_else(|_| None))
+    Ok(storage.read(name, version).await.unwrap_or(None))
 }

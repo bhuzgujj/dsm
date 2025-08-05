@@ -67,7 +67,7 @@ pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
         }
 
         for image in sequence.images {
-            for (_, entries) in datasets.get_entries() {
+            for entries in datasets.get_entries().values() {
                 for entry in entries {
                     if image.is_entry(entry) {
                         let image_path = entry.get_image_location();

@@ -51,7 +51,7 @@ impl Interpreter {
             .output()?;
 
         let output = String::from_utf8(result.stdout)?;
-        if output.len() > 0 {
+        if !output.is_empty() {
             return log_err!(format!("Error from the custom interpreter: {output}"));
         }
         Ok(())

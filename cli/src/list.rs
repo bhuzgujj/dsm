@@ -98,10 +98,10 @@ impl List {
     }
 }
 
-fn cut_string(string: &String, len: usize) -> String {
+fn cut_string(string: &str, len: usize) -> String {
     if string.len() >= len {
         format!("{}...", &string[0..len - 4])
     } else {
-        string.clone()
+        string.to_owned()
     }
 }

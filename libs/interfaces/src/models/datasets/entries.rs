@@ -73,7 +73,7 @@ impl DsmEntry {
         let mut new_annotation = Vec::new();
         for ann in &self.annotation {
             if let Some(old_class) = classes.get(ann.get_class()) {
-                if let Some(new_class) = class_mapper.get_class_for(&name, old_class) {
+                if let Some(new_class) = class_mapper.get_class_for(name, old_class) {
                     new_annotation.push(ann.map_in(*new_class));
                 } else {
                     warn!(

@@ -29,7 +29,7 @@ impl Merge {
 }
 
 pub async fn extract_dsm_from_storage(
-    sets_keys: &Vec<String>,
+    sets_keys: &[String],
     datasets: &mut HashMap<String, (String, DsmSets)>,
     storage: &Storage,
 ) -> anyhow::Result<()> {

@@ -34,7 +34,7 @@ impl DsmToPy<PyEntry> for DsmEntry {
             image_absolute_path: self.get_image_location(),
             width: *self.get_width(),
             height: *self.get_height(),
-            license: self.get_license().clone(),
+            license: *self.get_license(),
             flickr_url: self.get_flickr_url().clone(),
             coco_url: self.get_coco_url().clone(),
             date_captured: self.get_date_captured().clone(),

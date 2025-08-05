@@ -125,7 +125,7 @@ impl MergedSet {
                 data_entries.insert(group.to_string(), Vec::new());
             }
             for dataset in datasets {
-                for (_, entries) in dataset.get_entries() {
+                for entries in dataset.get_entries().values() {
                     for entry in entries {
                         let new_entry = entry.map_in(
                             dataset.get_name().clone(),

@@ -35,9 +35,9 @@ impl DsmToPy<PyAnnotation> for DsmAnnotation {
             width: *self.get_width(),
             height: *self.get_height(),
             segmentation: self.get_segmentation().clone(),
-            iscrowd: self.get_iscrowd().clone(),
-            occluded: self.get_occluded().clone(),
-            rotation: self.get_rotation().clone(),
+            iscrowd: *self.get_iscrowd(),
+            occluded: *self.get_occluded(),
+            rotation: *self.get_rotation(),
         }
     }
 }

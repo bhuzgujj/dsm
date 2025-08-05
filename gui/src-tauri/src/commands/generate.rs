@@ -23,13 +23,10 @@ pub async fn generate_merged_set(
         action_log_limit: state.get_action_count(),
     };
     let formatter: DataForm = DatasetFormat::from(formats).into();
-    match storage.read::<MergedSet>(name, version).await? {
-        Some(merged) => {
-            let new_set = merged.to_dataset(formatter.to_data_form())?;
-            let path = PathBuf::from(&path);
-            formatter.write(&path, &new_set, state.interpreters())?;
-        }
-        None => {}
+    if let Some(merged) = storage.read::<MergedSet>(name, version).await? {
+        let new_set = merged.to_dataset(formatter.to_data_form())?;
+        let path = PathBuf::from(&path);
+        formatter.write(&path, &new_set, state.interpreters())?;
     };
     Ok(())
 }

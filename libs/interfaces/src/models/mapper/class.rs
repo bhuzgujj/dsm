@@ -27,7 +27,7 @@ impl ClassMapper {
 
 impl ClassMapper {
 	pub fn read_from_file(file_path: &Path) -> anyhow::Result<ClassMapper> {
-		let content = read_from_file(&file_path)?;
+		let content = read_from_file(file_path)?;
 		match toml::from_str(&content) {
 			Ok(mapping) => Ok(mapping),
 			Err(err) => {

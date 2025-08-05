@@ -105,7 +105,7 @@ impl DsmSets {
         for (name, entries) in self.get_entries() {
             let mut subset = Vec::new();
             for entry in entries {
-                subset.push(entry.remap(&dataset_name, map, &licence_mapper, &final_map)?);
+                subset.push(entry.remap(dataset_name, map, &licence_mapper, final_map)?);
             }
             new_entries.insert(name.clone(), subset);
         }

@@ -82,7 +82,7 @@ async fn new_merge(
         let dsm: DsmSets = storage
             .read(name.clone(), version.clone())
             .await?
-            .expect(format!("Cannot read dataset {name} {version}").as_str());
+            .unwrap_or_else(|| panic!("Cannot read dataset {name} {version}"));
         let key = dsm.get_keyed_name();
         if datasets.contains_key(&key) {
             return Err(anyhow::anyhow!("Duplicate dataset name for {name}"));
@@ -108,7 +108,7 @@ async fn merge_on(
     let previous_merged_set: MergedSet = storage
         .read(name.clone(), base_version.clone())
         .await?
-        .expect(format!("Cannot read dataset {name} {base_version}").as_str());
+        .unwrap_or_else(|| panic!("Cannot read dataset {name} {base_version}"));
     let mut datasets = HashMap::new();
     for (group, dsms) in previous_merged_set.get_datasets_include() {
         for dsm in dsms {
@@ -119,7 +119,7 @@ async fn merge_on(
         let dsm: DsmSets = storage
             .read(name.clone(), version.clone())
             .await?
-            .expect(format!("Cannot read dataset {name} {version}").as_str());
+            .unwrap_or_else(|| panic!("Cannot read dataset {name} {version}"));
         let key = dsm.get_keyed_name();
         if datasets.contains_key(&key) {
             return Err(anyhow::anyhow!("Duplicate dataset name for {name}"));

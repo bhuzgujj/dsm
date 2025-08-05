@@ -21,11 +21,11 @@ pub enum Storage {
 
 impl Storage {
     pub fn local(settings: &Settings) -> Self {
-        return Self::Local {
+        Self::Local {
             ledger_directory: settings.get_ledger_path(),
             store_directory: settings.get_store_path(),
             action_log_limit: settings.get_action_count(),
-        };
+        }
     }
 }
 

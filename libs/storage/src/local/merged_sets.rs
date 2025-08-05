@@ -134,7 +134,7 @@ impl Storable for MergedSet {
 
     fn to_action(&self) -> Action {
         let mut datasets = Vec::new();
-        for (_, dsms) in self.get_datasets_include() {
+        for dsms in self.get_datasets_include().values() {
             for dsm in dsms {
                 datasets.push(SetInfo::new(
                     dsm.get_name().clone(),

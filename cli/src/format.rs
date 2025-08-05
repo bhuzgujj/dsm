@@ -31,11 +31,11 @@ impl TryFrom<String> for Format {
             "yolo-1-1" => Ok(Format::Yolo1_1),
             s => {
                 let splits: Vec<&str> = s.split(":").collect();
-                return if splits.len() > 1 {
+                if splits.len() > 1 {
                     Ok(Format::Custom(splits[1..].join(":").to_string()))
                 } else {
                     log_err!("Unknown standard: {s}")
-                };
+                }
             }
         }
     }

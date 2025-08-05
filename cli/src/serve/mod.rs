@@ -37,7 +37,7 @@ impl Serve {
                         Ok((stream, from)) => {
                             let mut session = Session::new(stream, from);
                             scope.spawn(move || {
-                                session.process(&settings);
+                                session.process(settings);
                                 session.stop();
                             });
                         }

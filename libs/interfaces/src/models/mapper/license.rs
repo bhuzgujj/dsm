@@ -71,7 +71,7 @@ impl From<&DsmSets> for LicenseMapper {
             mapping: HashMap::new(),
         };
         for (id, licence) in dataset.get_license() {
-            mapper.add_licence(id.clone(), dataset.get_name().clone(), licence.clone());
+            mapper.add_licence(*id, dataset.get_name().clone(), licence.clone());
         }
         mapper
     }
@@ -86,7 +86,7 @@ impl From<&mut DsmSets> for LicenseMapper {
             mapping: HashMap::new(),
         };
         for (id, licence) in dataset.get_license() {
-            mapper.add_licence(id.clone(), dataset.get_name().clone(), licence.clone());
+            mapper.add_licence(*id, dataset.get_name().clone(), licence.clone());
         }
         mapper
     }
