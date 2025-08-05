@@ -3,8 +3,8 @@ This is a python usable dsm.
 
 ## Setup
 Requires:
-- [Python v3.12.5]()
-- [Rust]()
+- [Python v3.12.5](https://www.python.org/downloads/release/python-3125/)
+- [Rust](https://www.rust-lang.org/)
 
 Setup venv
 ```
@@ -13,12 +13,14 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Installing maturin
+## Create python package
 ```sh
-pip install maturin
-```
+# Generate python interfaces for intellisense
+cargo run --bin stub_gen 
 
-## For Development
-```sh
+# Generate development python package
 maturin develop
+
+# Generate python package
+maturin build
 ```
