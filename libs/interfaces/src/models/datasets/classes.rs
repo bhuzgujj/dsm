@@ -11,10 +11,10 @@ impl DsmClasses {
 		Self { class, subclass }
 	}
 	
-	pub fn get_classes_name(&self) -> &String {
+	pub fn class(&self) -> &String {
 		&self.class
 	}
-	pub fn get_subclass(&self) -> &Option<String> {
+	pub fn subclass(&self) -> &Option<String> {
 		&self.subclass
 	}
 }

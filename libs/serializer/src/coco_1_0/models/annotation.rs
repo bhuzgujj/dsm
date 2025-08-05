@@ -35,17 +35,17 @@ impl Annotation {
         Self {
             id,
             image_id,
-            category_id: data_entry.get_class() + 1,
-            segmentation: data_entry.get_segmentation().clone(),
-            area: data_entry.get_area(),
+            category_id: data_entry.class() + 1,
+            segmentation: data_entry.segmentation().clone(),
+            area: data_entry.area(),
             bbox: vec![
-                data_entry.get_x() - (data_entry.get_width() / 2f64),
-                data_entry.get_y() - (data_entry.get_height() / 2f64),
-                *data_entry.get_width(),
-                *data_entry.get_height(),
+                data_entry.x() - (data_entry.width() / 2f64),
+                data_entry.y() - (data_entry.height() / 2f64),
+                *data_entry.width(),
+                *data_entry.height(),
             ],
-            iscrowd: *data_entry.get_iscrowd(),
-            attributes: Attribute::new(*data_entry.get_occluded(), *data_entry.get_rotation()),
+            iscrowd: *data_entry.iscrowd(),
+            attributes: Attribute::new(*data_entry.occluded(), *data_entry.rotation()),
         }
     }
 }

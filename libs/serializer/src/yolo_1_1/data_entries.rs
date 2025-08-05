@@ -120,8 +120,8 @@ pub(crate) fn write(
     }
     let mut sets = Vec::new();
     for entry in dataset_entry {
-        let new_image_name = entry.get_file_name();
-        let image_path = entry.get_image_location();
+        let new_image_name = entry.file_name();
+        let image_path = entry.image_location();
         sets.push(format!("{}/{}", dir.clone(), new_image_name.clone()));
         if let Err(err) = copy(&image_path, img_dir.join(new_image_name)) {
             return log_err!(format!(
@@ -143,7 +143,7 @@ pub(crate) fn write(
             }
         };
 
-        let mut annotation_file = PathBuf::from(entry.get_file_name().as_str());
+        let mut annotation_file = PathBuf::from(entry.file_name().as_str());
         annotation_file.set_extension("txt");
         let new_annotation_name = annotation_file
             .file_name()
@@ -153,7 +153,7 @@ pub(crate) fn write(
         write_to_file(
             &img_dir.join(new_annotation_name),
             entry
-                .get_annotation()
+                .annotation()
                 .iter()
                 .map(|a| a.to_file_percent_str(img_width, img_height))
                 .collect::<Vec<String>>()

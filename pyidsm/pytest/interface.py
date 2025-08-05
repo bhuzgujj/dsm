@@ -25,7 +25,7 @@ async def main():
         ("yolo", "2"),
     ])
 
-    for sets in await pyidsm.list_raw_set():
+    for sets in await pyidsm.list_raw_sets():
         print(sets.metadata.name, sets.metadata.version)
 
     for sets in await pyidsm.list_merged_sets():

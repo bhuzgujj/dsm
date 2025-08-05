@@ -12,16 +12,16 @@ pub struct Store {
     /// Root directory of the files
     path: String,
 
-    ///    In which format the files will be read as.
+    /// In which format the files will be read as.
     ///
-    ///    If it is not a known standard, it will pick a script in scripts directory.
+    /// If it is not a known standard, it will pick a script in scripts directory.
     ///
-    ///    Standard supported:
-    ///    - coco-1-0
-    ///    - yolo-1-1
+    /// Standard supported:
+    /// - coco-1-0
+    /// - yolo-1-1
     ///
-    ///    To use a custom reader, prefix it with custom:<NAME>
-    ///    The name needs to be in the settings
+    /// To use a custom reader, prefix it with custom:<NAME>
+    /// The name needs to be in the settings
     #[clap(short, long, verbatim_doc_comment)]
     formats: String,
 

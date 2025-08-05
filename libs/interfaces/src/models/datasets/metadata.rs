@@ -6,63 +6,63 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DsmMetaData {
-    name: String,
-    version: String,
-    subset_version: Option<String>,
-    contributor: String,
-    date_created: String,
-    description: String,
-    is_incomplete: bool,
-    url: String,
-    year: String,
-    formatter: DsmDataForm,
-    classes: HashMap<u32, DsmClasses>,
-    licenses: HashMap<u32, DsmLicense>,
-    contained_in_merged: Vec<String>,
+    pub name: String,
+    pub version: String,
+    pub subset_version: Option<String>,
+    pub contributor: String,
+    pub date_created: String,
+    pub description: String,
+    pub is_incomplete: bool,
+    pub url: String,
+    pub year: String,
+    pub formatter: DsmDataForm,
+    pub classes: HashMap<u32, DsmClasses>,
+    pub licenses: HashMap<u32, DsmLicense>,
+    pub contained_in_merged: Vec<String>,
 }
 
 impl DsmMetaData {
-    pub fn get_name(&self) -> &String {
+    pub fn name(&self) -> &String {
         &self.name
     }
 
-    pub fn get_version(&self) -> &String {
+    pub fn version(&self) -> &String {
         &self.version
     }
 
-    pub fn get_classes(&self) -> &HashMap<u32, DsmClasses> {
+    pub fn classes(&self) -> &HashMap<u32, DsmClasses> {
         &self.classes
     }
 
-    pub fn get_subset_version(&self) -> &Option<String> {
+    pub fn subset_version(&self) -> &Option<String> {
         &self.subset_version
     }
 
-    pub fn get_contributor(&self) -> &String {
+    pub fn contributor(&self) -> &String {
         &self.contributor
     }
 
-    pub fn get_date_created(&self) -> &String {
+    pub fn date_created(&self) -> &String {
         &self.date_created
     }
 
-    pub fn get_description(&self) -> &String {
+    pub fn description(&self) -> &String {
         &self.description
     }
 
-    pub fn get_url(&self) -> &String {
+    pub fn url(&self) -> &String {
         &self.url
     }
 
-    pub fn get_year(&self) -> &String {
+    pub fn year(&self) -> &String {
         &self.year
     }
 
-    pub fn get_formatter(&self) -> &DsmDataForm {
+    pub fn formatter(&self) -> &DsmDataForm {
         &self.formatter
     }
 
-    pub fn get_licenses(&self) -> &HashMap<u32, DsmLicense> {
+    pub fn licenses(&self) -> &HashMap<u32, DsmLicense> {
         &self.licenses
     }
 
@@ -70,7 +70,7 @@ impl DsmMetaData {
         &self.is_incomplete
     }
 
-    pub fn get_contained_in_merged(&self) -> &Vec<String> {
+    pub fn contained_in_merged(&self) -> &Vec<String> {
         &self.contained_in_merged
     }
 }

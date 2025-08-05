@@ -107,11 +107,11 @@ impl ObjData {
 		})
 	}
 
-	pub(crate) fn get_sets(&self) -> &HashMap<String, String> {
+	pub(crate) fn sets(&self) -> &HashMap<String, String> {
 		&self.sets
 	}
 
-	pub(crate) fn get_names(&self) -> &String {
+	pub(crate) fn names(&self) -> &String {
 		&self.names
 	}
 }

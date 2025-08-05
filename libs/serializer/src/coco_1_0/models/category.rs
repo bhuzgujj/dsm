@@ -12,8 +12,8 @@ impl Category {
 	pub fn from_dsm(classes: &DsmClasses, id: u32) -> Self {
 		Self {
 			id: id + 1,
-			name: classes.get_classes_name().clone(),
-			supercategory: classes.get_subclass().clone().unwrap_or_default(),
+			name: classes.class().clone(),
+			supercategory: classes.subclass().clone().unwrap_or_default(),
 		}
 	}
 

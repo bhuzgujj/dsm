@@ -1,9 +1,10 @@
 use interfaces::models::entries::DsmEntry;
 use pyo3::pyclass;
 use std::path::PathBuf;
-
+use pyo3_stub_gen_derive::gen_stub_pyclass;
 use crate::models::{annotation::PyAnnotation, DsmToPy};
 
+#[gen_stub_pyclass]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PyEntry {
@@ -30,15 +31,15 @@ pub struct PyEntry {
 impl DsmToPy<PyEntry> for DsmEntry {
     fn to_py(&self) -> PyEntry {
         PyEntry {
-            file_name: self.get_file_name().clone(),
-            image_absolute_path: self.get_image_location(),
-            width: *self.get_width(),
-            height: *self.get_height(),
-            license: *self.get_license(),
-            flickr_url: self.get_flickr_url().clone(),
-            coco_url: self.get_coco_url().clone(),
-            date_captured: self.get_date_captured().clone(),
-            annotation: self.get_annotation().to_py(),
+            file_name: self.file_name().clone(),
+            image_absolute_path: self.image_location(),
+            width: *self.width(),
+            height: *self.height(),
+            license: *self.license(),
+            flickr_url: self.flickr_url().clone(),
+            coco_url: self.coco_url().clone(),
+            date_captured: self.date_captured().clone(),
+            annotation: self.annotation().to_py(),
         }
     }
 }

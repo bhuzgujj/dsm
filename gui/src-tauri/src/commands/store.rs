@@ -18,9 +18,9 @@ pub async fn store_raw_set(
 ) -> Result<(), Error> {
     let state = state.lock().await;
     let storage = Storage::Local {
-        ledger_directory: state.get_ledger_path(),
-        store_directory: state.get_store_path(),
-        action_log_limit: state.get_action_count(),
+        ledger_directory: state.ledger_path(),
+        store_directory: state.store_path(),
+        action_log_limit: state.action_count(),
     };
     let path = PathBuf::from(path.clone());
     let formatter: DataForm = DatasetFormat::from(formats).into();

@@ -78,7 +78,7 @@ pub async fn extract_dsm_from_path(
         for ds in dataset {
             storage.store(&ds, &dataset_path).await?;
             storage.ledge(&ds).await?;
-            datasets.insert(ds.get_name().clone(), (group.to_string(), ds));
+            datasets.insert(ds.name().clone(), (group.to_string(), ds));
         }
     }
     Ok(())

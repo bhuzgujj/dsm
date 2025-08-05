@@ -14,13 +14,15 @@ pub struct ClassMapper {
 }
 
 impl ClassMapper {
-	pub fn get_classes(&self) -> &HashMap<String, u32> {
+	pub fn classes(&self) -> &HashMap<String, u32> {
 		&self.classes
 	}
-	pub fn get_mapping(&self) -> &HashMap<String, Vec<String>> {
+
+	pub fn mapping(&self) -> &HashMap<String, Vec<String>> {
 		&self.mapping
 	}
-	pub fn get_custom(&self) -> &Option<HashMap<String, CustomClassMapping>> {
+
+	pub fn custom(&self) -> &Option<HashMap<String, CustomClassMapping>> {
 		&self.custom
 	}
 }
@@ -42,20 +44,20 @@ impl ClassMapper {
 	pub(crate) fn get_class_for(&self, name: &String, class: &DsmClasses) -> Option<&u32> {
 		if let Some(custom) = &self.custom {
 			if let Some(k) = custom.get(name) {
-				if let Some(new_name) =  k.mapping.get(class.get_classes_name()) {
+				if let Some(new_name) =  k.mapping.get(class.class()) {
 					return self.classes.get(new_name);
 				} else {
-					trace!("Custom mapping does not have '{}', will be ignored", class.get_classes_name());
+					trace!("Custom mapping does not have '{}', will be ignored", class.class());
 				}
 			} else {
 				trace!("'{}' does not have a custom mapping", name);
 			}
 		}
 		for (key, map) in self.mapping.iter() {
-			if map.contains(class.get_classes_name()) {
+			if map.contains(class.class()) {
 				return self.classes.get(key);
 			} else {
-				trace!("Could not map '{}' with {key}", class.get_classes_name());
+				trace!("Could not map '{}' with {key}", class.class());
 			}
 		}
 		None
@@ -73,9 +75,9 @@ impl From<&DsmSets> for ClassMapper {
 	fn from(value: &DsmSets) -> Self {
 		let mut classes = HashMap::new();
 		let mut mapping = HashMap::new();
-		for (index, class) in value.get_classes() {
-			let name = class.get_subclass().clone()
-				.unwrap_or(class.get_classes_name().clone());
+		for (index, class) in value.classes() {
+			let name = class.subclass().clone()
+				.unwrap_or(class.class().clone());
 			classes.insert(name.clone(), *index);
 			mapping.insert(name.clone(), vec![name]);
 		}
@@ -89,5 +91,11 @@ impl From<&DsmSets> for ClassMapper {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CustomClassMapping {
-	pub mapping: HashMap<String, String>,
+	mapping: HashMap<String, String>,
+}
+
+impl CustomClassMapping {
+	pub fn mapping(&self) -> &HashMap<String, String> {
+		&self.mapping
+	}
 }

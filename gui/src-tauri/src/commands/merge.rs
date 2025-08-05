@@ -26,9 +26,9 @@ pub async fn merge_new(
     let state = state.lock().await;
     let mut datasets = HashMap::new();
     let storage = Storage::Local {
-        ledger_directory: state.get_ledger_path(),
-        store_directory: state.get_store_path(),
-        action_log_limit: state.get_action_count(),
+        ledger_directory: state.ledger_path(),
+        store_directory: state.store_path(),
+        action_log_limit: state.action_count(),
     };
     for include in included {
         let local_set: Option<DsmSets> = storage
@@ -54,11 +54,11 @@ pub async fn merge_new(
     storage.ledge(&merge_set).await?;
 
     for (_, set) in datasets.values() {
-        let merged_key = format!("{}~{}", merge_set.get_name(), merge_set.get_version());
-        let builder = DsmMetaDataBuilder::from(set.get_metadata().clone())
+        let merged_key = format!("{}~{}", merge_set.name(), merge_set.version());
+        let builder = DsmMetaDataBuilder::from(set.metadata().to_owned())
             .add_contained_in_merged(merged_key);
         storage
-            .ledge(&DsmSets::new(builder.build(), set.get_entries().clone()))
+            .ledge(&DsmSets::new(builder.build(), set.entries().to_owned()))
             .await?;
     }
     Ok(())

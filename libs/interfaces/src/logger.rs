@@ -36,7 +36,7 @@ pub fn refresh(settings: &Settings) -> anyhow::Result<()> {
             &log_file_path.display()
         ));
     }
-    log::set_max_level(settings.get_log_level());
+    log::set_max_level(settings.log_level());
     #[allow(static_mut_refs)]
     unsafe {
         LOGGER.file = Some(log_file_path);

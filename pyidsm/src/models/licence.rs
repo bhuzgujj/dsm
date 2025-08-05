@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use interfaces::models::{licence::DsmLicense, LicenseMapper};
 use pyo3::pyclass;
-
+use pyo3_stub_gen_derive::gen_stub_pyclass;
 use crate::models::DsmToPy;
 
+#[gen_stub_pyclass]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PyLicense {
@@ -16,10 +17,11 @@ pub struct PyLicense {
 
 impl DsmToPy<PyLicense> for DsmLicense {
 	fn to_py(&self) -> PyLicense {
-		PyLicense { name: self.name.clone(), url: self.url.clone() }
+		PyLicense { name: self.name().to_string(), url: self.url().to_string() }
 	}
 }
 
+#[gen_stub_pyclass]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PyLicenseMapping {
@@ -32,8 +34,8 @@ pub struct PyLicenseMapping {
 impl DsmToPy<PyLicenseMapping> for LicenseMapper {
 	fn to_py(&self) -> PyLicenseMapping {
 		PyLicenseMapping { 
-			licences: self.get_licences().to_py(),
-			mapping: self.get_mapping().clone(),
+			licences: self.licences().to_py(),
+			mapping: self.mapping().clone(),
 		 }
 	}
 }

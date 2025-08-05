@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use interfaces::models::metadata::DsmMetaData;
 use pyo3::pyclass;
-
+use pyo3_stub_gen_derive::gen_stub_pyclass;
 use crate::models::{classes::PyClasses, licence::PyLicense, DsmToPy};
 
+#[gen_stub_pyclass]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PyMetaData {
@@ -37,18 +38,18 @@ pub struct PyMetaData {
 impl DsmToPy<PyMetaData> for DsmMetaData {
     fn to_py(&self) -> PyMetaData {
         PyMetaData {
-            name: self.get_name().clone(),
-            version: self.get_version().clone(),
-            subset_version: self.get_subset_version().clone(),
-            contributor: self.get_contributor().clone(),
-            date_created: self.get_date_created().clone(),
-            description: self.get_description().clone(),
+            name: self.name().clone(),
+            version: self.version().clone(),
+            subset_version: self.subset_version().clone(),
+            contributor: self.contributor().clone(),
+            date_created: self.date_created().clone(),
+            description: self.description().clone(),
             is_incomplete: *self.is_incomplet(),
-            url: self.get_url().clone(),
-            year: self.get_year().clone(),
-            formatter: self.get_formatter().to_string(),
-            classes: self.get_classes().to_py(),
-            licenses: self.get_licenses().to_py(),
+            url: self.url().clone(),
+            year: self.year().clone(),
+            formatter: self.formatter().to_string(),
+            classes: self.classes().to_py(),
+            licenses: self.licenses().to_py(),
         }
     }
 }

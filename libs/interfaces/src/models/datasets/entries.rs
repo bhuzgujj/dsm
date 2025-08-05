@@ -23,47 +23,47 @@ pub struct DsmEntry {
 }
 
 impl DsmEntry {
-    pub fn get_image_location(&self) -> PathBuf {
-        self.image_location.get_image(&self.image_relative_path)
+    pub fn image_location(&self) -> PathBuf {
+        self.image_location.image(&self.image_relative_path)
     }
 
-    pub fn get_file_name(&self) -> &String {
+    pub fn file_name(&self) -> &String {
         &self.file_name
     }
 
-    pub fn get_width(&self) -> &u32 {
+    pub fn width(&self) -> &u32 {
         &self.width
     }
 
-    pub fn get_height(&self) -> &u32 {
+    pub fn height(&self) -> &u32 {
         &self.height
     }
 
-    pub fn get_license(&self) -> &Option<u32> {
+    pub fn license(&self) -> &Option<u32> {
         &self.license
     }
 
-    pub fn get_flickr_url(&self) -> &Option<String> {
+    pub fn flickr_url(&self) -> &Option<String> {
         &self.flickr_url
     }
 
-    pub fn get_coco_url(&self) -> &Option<String> {
+    pub fn coco_url(&self) -> &Option<String> {
         &self.coco_url
     }
 
-    pub fn get_annotation(&self) -> &Vec<DsmAnnotation> {
+    pub fn annotation(&self) -> &Vec<DsmAnnotation> {
         &self.annotation
     }
 
-    pub fn get_date_captured(&self) -> &Option<String> {
+    pub fn date_captured(&self) -> &Option<String> {
         &self.date_captured
     }
 
-    pub fn get_original_id(&self) -> &Option<String> {
+    pub fn original_id(&self) -> &Option<String> {
         &self.original_id
     }
 
-    pub fn remap(
+    pub(crate) fn remap(
         &self,
         name: &String,
         class_mapper: &ClassMapper,
@@ -72,20 +72,20 @@ impl DsmEntry {
     ) -> anyhow::Result<Self> {
         let mut new_annotation = Vec::new();
         for ann in &self.annotation {
-            if let Some(old_class) = classes.get(ann.get_class()) {
+            if let Some(old_class) = classes.get(ann.class()) {
                 if let Some(new_class) = class_mapper.get_class_for(name, old_class) {
                     new_annotation.push(ann.map_in(*new_class));
                 } else {
                     warn!(
                         "No mapping for annotation ({}: {})",
-                        old_class.get_classes_name(),
-                        ann.get_class()
+                        old_class.class(),
+                        ann.class()
                     )
                 }
             } else {
                 return log_err!(format!(
                     "Annotation {} no found in original mapping",
-                    ann.get_class()
+                    ann.class()
                 ));
             }
         }
@@ -108,7 +108,7 @@ impl DsmEntry {
         })
     }
 
-    pub fn map_in(
+    pub(crate) fn remap_with_rename(
         &self,
         name: String,
         version: String,
@@ -119,7 +119,7 @@ impl DsmEntry {
         let prefix = format!("{}-v{}", name, version);
         let mut new_annotation = Vec::new();
         for ann in &self.annotation {
-            if let Some(old_class) = classes.get(ann.get_class()) {
+            if let Some(old_class) = classes.get(ann.class()) {
                 if let Some(new_class) = class_mapper.get_class_for(&name, old_class) {
                     new_annotation.push(ann.map_in(*new_class));
                 }

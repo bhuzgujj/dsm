@@ -18,7 +18,7 @@ impl List {
         if self.azure_included {
             let azure_sets: Vec<DsmSets> = Storage::Remote {
                 service: settings
-                    .get_remote(String::from("my_account"))
+                    .remote(String::from("my_account"))
                     .unwrap()
                     .clone(),
             }
@@ -35,21 +35,21 @@ impl List {
         );
         println!("{:=<30}{:=<20}{:=<20}{:=<50}", "", "", "", "");
         for set in sets {
-            let counts = set.get_class_count();
+            let counts = set.class_count();
             let classes = serde_json::to_string(
-                &set.get_classes()
+                &set.classes()
                     .iter()
                     .map(|(k, c)| {
                         let count = counts.get(k).unwrap_or(&0);
-                        if c.get_subclass().clone().is_some_and(|s| !s.is_empty()) {
+                        if c.subclass().clone().is_some_and(|s| !s.is_empty()) {
                             format!(
                                 "{}({}) [{}]",
-                                c.get_classes_name().clone(),
-                                c.get_subclass().clone().unwrap(),
+                                c.class().clone(),
+                                c.subclass().clone().unwrap(),
                                 count
                             )
                         } else {
-                            format!("{} [{}]", c.get_classes_name().clone(), count)
+                            format!("{} [{}]", c.class().clone(), count)
                         }
                     })
                     .collect::<Vec<_>>(),
@@ -58,9 +58,9 @@ impl List {
             if *set.is_incomplet() {
                 println!(
                     "{: <30}{: <20}{: <20}{: <50}",
-                    cut_string(set.get_name(), 30).as_str().blue(),
-                    cut_string(set.get_version(), 20).as_str().blue(),
-                    cut_string(&set.get_entry_count().to_string(), 20)
+                    cut_string(set.name(), 30).as_str().blue(),
+                    cut_string(set.version(), 20).as_str().blue(),
+                    cut_string(&set.entry_count().to_string(), 20)
                         .as_str()
                         .blue(),
                     classes.as_str().blue()
@@ -68,9 +68,9 @@ impl List {
             } else {
                 println!(
                     "{: <30}{: <20}{: <20}{: <50}",
-                    cut_string(set.get_name(), 30),
-                    cut_string(set.get_version(), 20),
-                    cut_string(&set.get_entry_count().to_string(), 20),
+                    cut_string(set.name(), 30),
+                    cut_string(set.version(), 20),
+                    cut_string(&set.entry_count().to_string(), 20),
                     classes
                 );
             }
@@ -81,16 +81,16 @@ impl List {
         println!("{:=<30}{:=<20}{:=<50}", "", "", "");
         for merged_set in sets {
             let sets = merged_set
-                .get_datasets_include()
+                .datasets_include()
                 .iter()
                 .flat_map(|(_, s)| s)
-                .map(|s| format!("{}~{}", s.get_name(), s.get_version()))
+                .map(|s| format!("{}~{}", s.name(), s.version()))
                 .collect::<Vec<String>>();
             let sets = serde_json::to_string(&sets)?;
             println!(
                 "{: <30}{: <20}{: <50}",
-                cut_string(merged_set.get_name(), 30),
-                cut_string(merged_set.get_version(), 20),
+                cut_string(merged_set.name(), 30),
+                cut_string(merged_set.version(), 20),
                 sets
             );
         }

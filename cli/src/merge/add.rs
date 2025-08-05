@@ -49,19 +49,19 @@ impl Add {
             .read::<MergedSet>(merged_name.to_string(), merged_version.to_string())
             .await?;
         if let Some(m) = merged {
-            for (group, dsms) in m.get_datasets_include() {
+            for (group, dsms) in m.datasets_include() {
                 for dsm in dsms {
                     datasets.insert(
                         format!(
                             "{}={}",
-                            dsm.get_metadata().get_name(),
-                            dsm.get_metadata().get_version()
+                            dsm.name(),
+                            dsm.version()
                         ),
                         (group.clone(), dsm.clone()),
                     );
                 }
             }
-            mapping = m.get_class_mapping().clone();
+            mapping = m.class_mapping().clone();
         } else {
             return log_err!(format!("Could not find {merged_name} v{merged_version}"));
         }

@@ -32,7 +32,7 @@ pub(crate) fn write(root: &Path, classes: HashMap<u32, DsmClasses>) -> anyhow::R
 	let mut vec: Vec<String> = Vec::with_capacity(classes.capacity());
 	for i in 0..classes.len() {
 		let index = i as u32;
-		vec.push(classes.get(&index).unwrap().get_classes_name().clone());
+		vec.push(classes.get(&index).unwrap().class().clone());
 	}
 	let path_buf = root.join(FILE_NAME);
 	write_to_file(&path_buf, vec.join("\n"), true, true)

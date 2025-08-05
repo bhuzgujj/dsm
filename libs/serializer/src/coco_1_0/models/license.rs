@@ -12,8 +12,8 @@ impl License {
 	pub(crate) fn from_dsm(id: &u32, license: &DsmLicense) -> Self {
 		Self {
 			id: *id,
-			name: license.name.clone(),
-			url: license.url.clone(),
+			name: license.name().to_string(),
+			url: license.url().to_string(),
 		}
 	}
 	

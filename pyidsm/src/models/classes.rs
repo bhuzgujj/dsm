@@ -2,24 +2,26 @@ use std::collections::HashMap;
 
 use interfaces::models::{classes::DsmClasses, ClassMapper, CustomClassMapping};
 use pyo3::pyclass;
-
+use pyo3_stub_gen_derive::gen_stub_pyclass;
 use crate::models::DsmToPy;
 
+#[gen_stub_pyclass]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PyClasses {
     #[pyo3(get, set)]
-	class: String,
+    name: String,
     #[pyo3(get, set)]
 	subclass: Option<String>,
 }
 
 impl DsmToPy<PyClasses> for DsmClasses {
 	fn to_py(&self) -> PyClasses {
-		PyClasses { class: self.get_classes_name().clone(), subclass: self.get_subclass().clone() }
+		PyClasses { name: self.class().clone(), subclass: self.subclass().clone() }
 	}
 }
 
+#[gen_stub_pyclass]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PyClassesMapping {
@@ -34,13 +36,14 @@ pub struct PyClassesMapping {
 impl DsmToPy<PyClassesMapping> for ClassMapper {
 	fn to_py(&self) -> PyClassesMapping {
 		PyClassesMapping { 
-			classes: self.get_classes().clone(), 
-			mapping: self.get_mapping().clone(), 
-			custom: self.get_custom().to_py() 
+			classes: self.classes().clone(),
+			mapping: self.mapping().clone(),
+			custom: self.custom().to_py()
 		}
 	}
 }
 
+#[gen_stub_pyclass]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PyCustomMap {
@@ -55,7 +58,7 @@ impl DsmToPy<Option<HashMap<String, PyCustomMap>>> for Option<HashMap<String, Cu
 				let mut new_map = HashMap::new();
 				for (key, value) in maps {
 					new_map.insert(key.clone(), PyCustomMap {
-						mapping: value.mapping.clone()
+						mapping: value.mapping().clone()
 					});
 				}
 				Some(new_map)

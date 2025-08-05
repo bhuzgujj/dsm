@@ -11,13 +11,6 @@ interfaces.workspace = true
 anyhow.workspace = true
 
 # Azure
-azure_core.workspace = true
-azure_identity.workspace = true
-azure_security_keyvault_secrets.workspace = true
-azure_storage.workspace = true
-azure_storage_datalake.workspace = true
-azure_storage_blobs.workspace = true
-
 chrono.workspace = true
 
 futures.workspace = true

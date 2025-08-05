@@ -53,25 +53,25 @@ impl LicenseMapper {
         self.mapping.get(set_name).and_then(|map| map.get(&id))
     }
 
-    pub fn get_licences(&self) -> &HashMap<u32, DsmLicense> {
+    pub fn licences(&self) -> &HashMap<u32, DsmLicense> {
         &self.licences
     }
 
-    pub fn get_mapping(&self) -> &HashMap<String, HashMap<u32, u32>> {
+    pub fn mapping(&self) -> &HashMap<String, HashMap<u32, u32>> {
         &self.mapping
     }
 }
 
 impl From<&DsmSets> for LicenseMapper {
     fn from(dataset: &DsmSets) -> Self {
-        let licences = dataset.get_license().clone();
+        let licences = dataset.licenses().clone();
         let mut mapper = Self {
             current_id: licences.len() as u32,
             licences,
             mapping: HashMap::new(),
         };
-        for (id, licence) in dataset.get_license() {
-            mapper.add_licence(*id, dataset.get_name().clone(), licence.clone());
+        for (id, licence) in dataset.licenses() {
+            mapper.add_licence(*id, dataset.name().clone(), licence.clone());
         }
         mapper
     }
@@ -79,14 +79,14 @@ impl From<&DsmSets> for LicenseMapper {
 
 impl From<&mut DsmSets> for LicenseMapper {
     fn from(dataset: &mut DsmSets) -> Self {
-        let licences = dataset.get_license().clone();
+        let licences = dataset.licenses().clone();
         let mut mapper = Self {
             current_id: licences.len() as u32,
             licences,
             mapping: HashMap::new(),
         };
-        for (id, licence) in dataset.get_license() {
-            mapper.add_licence(*id, dataset.get_name().clone(), licence.clone());
+        for (id, licence) in dataset.licenses() {
+            mapper.add_licence(*id, dataset.name().clone(), licence.clone());
         }
         mapper
     }

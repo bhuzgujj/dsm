@@ -14,12 +14,12 @@ pub(crate) struct Info {
 impl Info {
 	pub(crate) fn from_dsm(meta: &DsmMetaData) -> Self {
 		Self {
-			contributor: meta.get_contributor().clone(),
-			date_created: meta.get_date_created().clone(),
-			description: meta.get_description().clone(),
-			url: meta.get_url().clone(),
-			version: meta.get_url().clone(),
-			year: meta.get_year().clone()
+			contributor: meta.contributor().clone(),
+			date_created: meta.date_created().clone(),
+			description: meta.description().clone(),
+			url: meta.url().clone(),
+			version: meta.url().clone(),
+			year: meta.year().clone()
 		}
 	}
 }

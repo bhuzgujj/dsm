@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use interfaces::models::MergedSet;
 use pyo3::pyclass;
-
+use pyo3_stub_gen_derive::gen_stub_pyclass;
 use crate::models::{classes::PyClassesMapping, dataset::PySet, licence::PyLicenseMapping, DsmToPy};
 
+#[gen_stub_pyclass]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PyMergedSet {
@@ -27,13 +28,13 @@ pub struct PyMergedSet {
 impl DsmToPy<PyMergedSet> for MergedSet {
     fn to_py(&self) -> PyMergedSet {
         PyMergedSet {
-            datasets: self.get_datasets_include().to_py(),
-            name: self.get_name().to_string(),
-            version: self.get_version().clone(),
-            class_mapper: self.get_class_mapping().to_py(),
-            license_mapper: self.get_license_mapping().to_py(),
-            date_created: self.get_date_created().clone(),
-            description: self.get_description().clone(),
+            datasets: self.datasets_include().to_py(),
+            name: self.name().to_string(),
+            version: self.version().clone(),
+            class_mapper: self.class_mapping().to_py(),
+            license_mapper: self.license_mapping().to_py(),
+            date_created: self.date_created().clone(),
+            description: self.description().clone(),
         }
     }
 }

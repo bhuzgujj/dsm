@@ -15,8 +15,8 @@ pub mod metadata;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DsmSets {
-    metadata: DsmMetaData,
-    entries: HashMap<String, Vec<DsmEntry>>,
+    pub metadata: DsmMetaData,
+    pub entries: HashMap<String, Vec<DsmEntry>>,
 }
 
 impl DsmSets {
@@ -24,62 +24,58 @@ impl DsmSets {
         Self { metadata, entries }
     }
 
-    pub fn get_name(&self) -> &String {
-        self.metadata.get_name()
+    pub fn name(&self) -> &String {
+        self.metadata.name()
     }
 
-    pub fn get_keyed_name(&self) -> String {
+    pub fn keyed_name(&self) -> String {
         format!(
             "{}={}",
-            self.metadata.get_name(),
-            self.metadata.get_version()
+            self.metadata.name(),
+            self.metadata.version()
         )
     }
 
-    pub fn get_metadata(&self) -> &DsmMetaData {
+    pub fn metadata(&self) -> &DsmMetaData {
         &self.metadata
     }
 
-    pub fn get_license(&self) -> &HashMap<u32, DsmLicense> {
-        self.metadata.get_licenses()
+    pub fn licenses(&self) -> &HashMap<u32, DsmLicense> {
+        self.metadata.licenses()
     }
 
-    pub fn get_version(&self) -> &String {
-        self.metadata.get_version()
+    pub fn version(&self) -> &String {
+        self.metadata.version()
     }
 
-    pub fn get_mut_entries(&mut self) -> &mut HashMap<String, Vec<DsmEntry>> {
+    pub fn entries_mut(&mut self) -> &mut HashMap<String, Vec<DsmEntry>> {
         &mut self.entries
     }
 
-    pub fn get_entries(&self) -> &HashMap<String, Vec<DsmEntry>> {
+    pub fn entries(&self) -> &HashMap<String, Vec<DsmEntry>> {
         &self.entries
     }
 
-    pub fn get_entries_mut(&mut self) -> &mut HashMap<String, Vec<DsmEntry>> {
-        &mut self.entries
-    }
-
-    pub fn get_classes(&self) -> &HashMap<u32, DsmClasses> {
-        self.metadata.get_classes()
+    pub fn classes(&self) -> &HashMap<u32, DsmClasses> {
+        self.metadata.classes()
     }
 
     pub fn is_incomplet(&self) -> &bool {
         self.metadata.is_incomplet()
     }
 
-    pub fn get_class_count(&self) -> HashMap<u32, u32> {
+    pub fn class_count(&self) -> HashMap<u32, u32> {
         let mut class_count: HashMap<u32, u32> = HashMap::new();
         for (_, entry) in self.entries.iter() {
             for entry in entry {
-                for annotation in entry.get_annotation() {
-                    if class_count.contains_key(annotation.get_class()) {
+                for annotation in entry.annotation() {
+                    if class_count.contains_key(annotation.class()) {
                         class_count.insert(
-                            *annotation.get_class(),
-                            class_count.get(annotation.get_class()).unwrap() + 1,
+                            *annotation.class(),
+                            class_count.get(annotation.class()).unwrap() + 1,
                         );
                     } else {
-                        class_count.insert(*annotation.get_class(), 1);
+                        class_count.insert(*annotation.class(), 1);
                     }
                 }
             }
@@ -87,7 +83,7 @@ impl DsmSets {
         class_count
     }
 
-    pub fn get_entry_count(&self) -> u32 {
+    pub fn entry_count(&self) -> u32 {
         let mut class_count: u32 = 0;
         for (_, entry) in self.entries.iter() {
             for _ in entry {
@@ -98,11 +94,11 @@ impl DsmSets {
     }
 
     pub fn remap(&self, map: &ClassMapper) -> anyhow::Result<Self> {
-        let final_map = self.get_classes();
+        let final_map = self.classes();
         let licence_mapper = LicenseMapper::from(self);
-        let dataset_name = self.get_name();
+        let dataset_name = self.name();
         let mut new_entries = HashMap::new();
-        for (name, entries) in self.get_entries() {
+        for (name, entries) in self.entries() {
             let mut subset = Vec::new();
             for entry in entries {
                 subset.push(entry.remap(dataset_name, map, &licence_mapper, final_map)?);
@@ -115,10 +111,6 @@ impl DsmSets {
                 .build(),
             entries: new_entries,
         })
-    }
-
-    pub fn get_rel_from_storage(&self) -> String {
-        format!("{}/{}", self.get_name(), self.get_version())
     }
 
     pub fn update_location(&mut self, save_location: DsmLocation) {

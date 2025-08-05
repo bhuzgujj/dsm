@@ -105,12 +105,12 @@ impl Sequence {
         let mut sequences = HashMap::new();
         let mut images_index: u32 = 0;
         let mut annotations_index: u32 = 0;
-        for (subset, entries) in datasets.get_entries() {
+        for (subset, entries) in datasets.entries() {
             let (sequence, imgi, anni) = Self::from_parts(
-                datasets.get_metadata(),
-                entries.clone(),
-                &images_index,
-                &annotations_index,
+	            datasets.metadata(),
+	            entries.clone(),
+	            &images_index,
+	            &annotations_index,
             );
             images_index = imgi;
             annotations_index = anni;
@@ -126,7 +126,7 @@ impl Sequence {
         images_i: &u32,
         annotations_i: &u32,
     ) -> (Self, u32, u32) {
-        let licenses: Vec<License> = meta_data.get_licenses().clone().iter().fold(
+        let licenses: Vec<License> = meta_data.licenses().clone().iter().fold(
             Vec::new(),
             |mut acc, (index, license)| {
                 acc.push(License::from_dsm(index, license));
@@ -138,7 +138,7 @@ impl Sequence {
         let info: Info = Info::from_dsm(meta_data);
         let categories: Vec<Category> =
             meta_data
-                .get_classes()
+                .classes()
                 .iter()
                 .fold(Vec::new(), |mut acc, (index, class)| {
                     acc.push(Category::from_dsm(class, *index));
@@ -149,7 +149,7 @@ impl Sequence {
         for entry in entries {
             images_index += 1;
             images.push(Image::from_dsm(images_index, &entry));
-            for annotation in entry.get_annotation() {
+            for annotation in entry.annotation() {
                 annotations_index += 1;
                 annotations.push(Annotation::from_dsm(
                     annotations_index,

@@ -78,7 +78,7 @@ impl Default for Settings {
 }
 
 impl Settings {
-    pub fn get_log_level(&self) -> LevelFilter {
+    pub fn log_level(&self) -> LevelFilter {
         LevelFilter::from_str(self.log_level.as_str()).unwrap_or(LevelFilter::Warn)
     }
 
@@ -86,7 +86,7 @@ impl Settings {
         self.log_level = log_level.to_string();
     }
 
-    pub fn get_action_count(&self) -> usize {
+    pub fn action_count(&self) -> usize {
         self.action_count
     }
 
@@ -94,12 +94,12 @@ impl Settings {
         &self.interpreters
     }
 
-    pub fn get_store_path(&self) -> PathBuf {
+    pub fn store_path(&self) -> PathBuf {
         PathBuf::from_str(self.store_path.as_str())
             .unwrap_or_else(|_| panic!("Invalid dataset database location: {}", self.ledger_path))
     }
 
-    pub fn get_ledger_path(&self) -> PathBuf {
+    pub fn ledger_path(&self) -> PathBuf {
         PathBuf::from_str(self.ledger_path.as_str())
             .unwrap_or_else(|_| panic!("Invalid dataset database location: {}", self.ledger_path))
     }
@@ -131,11 +131,7 @@ impl Settings {
         write_to_file(&settings_filename, content, true, true)
     }
 
-    pub fn get_remotes(&mut self) -> &mut HashMap<String, Remote> {
-        &mut self.remotes
-    }
-
-    pub fn get_remote(&self, name: String) -> Option<&Remote> {
+    pub fn remote(&self, name: String) -> Option<&Remote> {
         self.remotes.get(&name)
     }
 }

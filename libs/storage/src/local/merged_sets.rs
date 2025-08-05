@@ -14,21 +14,21 @@ use super::{MERGED_SET, RAW_SET, SEPARATOR, Storable, read_dsm};
 impl Storable for MergedSet {
     fn ledge(&self, ledger_directory: &std::path::Path) -> anyhow::Result<bool> {
         let storable: interfaces::models::StorableMerged = self.to_storable();
-        let merged_file = format!("{}{SEPARATOR}{}.json", self.get_name(), self.get_version());
+        let merged_file = format!("{}{SEPARATOR}{}.json", self.name(), self.version());
         let merged_dir = ledger_directory.join(MERGED_SET);
         let merged_path = merged_dir.join(&merged_file);
         if merged_path.exists() {
             return log_err!(format!(
                 "Merged set '{} v{}' already exists",
-                self.get_name(),
-                self.get_version()
+                self.name(),
+                self.version()
             ));
         }
         if ledger_directory.join(RAW_SET).join(merged_file).exists() {
             return log_err!(format!(
                 "Raw set already exists with '{} v{}'",
-                self.get_name(),
-                self.get_version()
+                self.name(),
+                self.version()
             ));
         }
         if let Err(err) = create_dir_all(&merged_dir) {
@@ -74,18 +74,18 @@ impl Storable for MergedSet {
         let storable: StorableMerged = read_dsm(&datasets_ledger)?;
 
         let mut datasets: Vec<(String, DsmSets)> = Vec::new();
-        for (name, set) in storable.datasets {
+        for (name, set) in storable.datasets() {
             datasets.push((
-                set.group,
+                set.group().to_owned(),
                 read_dsm(&ledger_raw_dir.join(format!("{}.json", &name)))?,
             ));
         }
-        Ok(Some(MergedSet::from_vec(
+        Ok(Some(MergedSet::from_storable(
             datasets,
             name,
             version,
-            storable.class_mapper,
-            storable.license_mapper,
+            storable.class_mapper().to_owned(),
+            storable.license_mapper().to_owned(),
         )))
     }
 
@@ -107,18 +107,18 @@ impl Storable for MergedSet {
 
                     let storable_set: StorableMerged = read_dsm(&path)?;
                     let mut datasets = Vec::new();
-                    for (set, group) in storable_set.datasets {
+                    for (set, group) in storable_set.datasets() {
                         datasets.push((
-                            group.group.clone(),
+                            group.group().to_owned(),
                             read_dsm(&ledger_raw_dir.join(format!("{}.json", set)))?,
                         ));
                     }
-                    mergedsets.push(MergedSet::from_vec(
+                    mergedsets.push(MergedSet::from_storable(
                         datasets,
-                        storable_set.name,
-                        storable_set.version,
-                        storable_set.class_mapper,
-                        storable_set.license_mapper,
+                        storable_set.name().to_owned(),
+                        storable_set.version().to_owned(),
+                        storable_set.class_mapper().to_owned(),
+                        storable_set.license_mapper().to_owned(),
                     ));
                 }
                 Ok(mergedsets)
@@ -134,17 +134,17 @@ impl Storable for MergedSet {
 
     fn to_action(&self) -> Action {
         let mut datasets = Vec::new();
-        for dsms in self.get_datasets_include().values() {
+        for dsms in self.datasets_include().values() {
             for dsm in dsms {
                 datasets.push(SetInfo::new(
-                    dsm.get_name().clone(),
-                    dsm.get_version().clone(),
+                    dsm.name().to_owned(),
+                    dsm.version().to_owned(),
                 ));
             }
         }
         Action::merge(
-            self.get_name().to_string(),
-            self.get_version().clone(),
+            self.name().to_string(),
+            self.version().to_owned(),
             datasets,
         )
     }

@@ -22,9 +22,9 @@ pub enum Storage {
 impl Storage {
     pub fn local(settings: &Settings) -> Self {
         Self::Local {
-            ledger_directory: settings.get_ledger_path(),
-            store_directory: settings.get_store_path(),
-            action_log_limit: settings.get_action_count(),
+            ledger_directory: settings.ledger_path(),
+            store_directory: settings.store_path(),
+            action_log_limit: settings.action_count(),
         }
     }
 }
@@ -100,11 +100,11 @@ pub async fn add_merge_link_to(
     merge_set: MergedSet,
 ) -> anyhow::Result<()> {
     for (_, set) in datasets.values() {
-        let merged_key = format!("{}~{}", merge_set.get_name(), merge_set.get_version());
-        let builder = DsmMetaDataBuilder::from(set.get_metadata().clone())
+        let merged_key = format!("{}~{}", merge_set.name(), merge_set.version());
+        let builder = DsmMetaDataBuilder::from(set.metadata().clone())
             .add_contained_in_merged(merged_key);
         storage
-            .ledge(&DsmSets::new(builder.build(), set.get_entries().clone()))
+            .ledge(&DsmSets::new(builder.build(), set.entries().clone()))
             .await?;
     }
     Ok(())

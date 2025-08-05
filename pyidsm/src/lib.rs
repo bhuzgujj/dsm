@@ -7,10 +7,13 @@ use serializer::DataForm;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
+use pyo3_stub_gen::define_stub_info_gatherer;
+use pyo3_stub_gen_derive::gen_stub_pyfunction;
 use storage::{add_merge_link_to, Storage};
 
 use crate::models::merged_set::PyMergedSet;
 use crate::models::{dataset::PySet, DsmToPy};
+use crate::models::annotation::PyAnnotation;
 
 fn init() -> anyhow::Result<Settings> {
     let settings = Settings::load();
@@ -29,20 +32,23 @@ async fn save_merge_set(
     add_merge_link_to(&datasets, storage, merge_set).await
 }
 
+#[gen_stub_pyfunction]
 #[pyfunction]
 async fn list_raw_sets() -> anyhow::Result<Vec<PySet>> {
-    let settings = init()?;
+    let settings = Settings::load();
     let resp: Vec<DsmSets> = Storage::local(&settings).list().await?;
     Ok(resp.to_py())
 }
 
+#[gen_stub_pyfunction]
 #[pyfunction]
 async fn list_merged_sets() -> anyhow::Result<Vec<PyMergedSet>> {
-    let settings = init()?;
+    let settings = Settings::load();
     let resp: Vec<MergedSet> = Storage::local(&settings).list().await?;
     Ok(resp.to_py())
 }
 
+#[gen_stub_pyfunction]
 #[pyfunction]
 async fn store(name: String, version: String, setform: String, path: String) -> anyhow::Result<()> {
     let settings = init()?;
@@ -66,6 +72,7 @@ async fn store(name: String, version: String, setform: String, path: String) -> 
     Ok(())
 }
 
+#[gen_stub_pyfunction]
 #[pyfunction]
 async fn new_merge(
     name: String,
@@ -83,7 +90,7 @@ async fn new_merge(
             .read(name.clone(), version.clone())
             .await?
             .unwrap_or_else(|| panic!("Cannot read dataset {name} {version}"));
-        let key = dsm.get_keyed_name();
+        let key = dsm.keyed_name();
         if datasets.contains_key(&key) {
             return Err(anyhow::anyhow!("Duplicate dataset name for {name}"));
         }
@@ -94,6 +101,7 @@ async fn new_merge(
     Ok(())
 }
 
+#[gen_stub_pyfunction]
 #[pyfunction]
 async fn merge_on(
     name: String,
@@ -110,9 +118,9 @@ async fn merge_on(
         .await?
         .unwrap_or_else(|| panic!("Cannot read dataset {name} {base_version}"));
     let mut datasets = HashMap::new();
-    for (group, dsms) in previous_merged_set.get_datasets_include() {
+    for (group, dsms) in previous_merged_set.datasets_include() {
         for dsm in dsms {
-            datasets.insert(dsm.get_keyed_name(), (group.clone(), dsm.clone()));
+            datasets.insert(dsm.keyed_name(), (group.clone(), dsm.clone()));
         }
     }
     for (name, version, group) in dataset_to_add.iter() {
@@ -120,14 +128,14 @@ async fn merge_on(
             .read(name.clone(), version.clone())
             .await?
             .unwrap_or_else(|| panic!("Cannot read dataset {name} {version}"));
-        let key = dsm.get_keyed_name();
+        let key = dsm.keyed_name();
         if datasets.contains_key(&key) {
             return Err(anyhow::anyhow!("Duplicate dataset name for {name}"));
         }
         datasets.insert(key, (group.clone(), dsm));
     }
     let mapping = match mapping_path {
-        None => previous_merged_set.get_class_mapping().clone(),
+        None => previous_merged_set.class_mapping().clone(),
         Some(mapping) => ClassMapper::read_from_file(Path::new(&mapping))?,
     };
     save_merge_set(
@@ -141,6 +149,7 @@ async fn merge_on(
     Ok(())
 }
 
+#[gen_stub_pyfunction]
 #[pyfunction]
 async fn generate(
     name: String,
@@ -177,8 +186,9 @@ async fn generate(
 fn pyidsm(module: &Bound<'_, PyModule>) -> PyResult<()> {
     let settings = init()?;
     logger::bind_logger(&settings)?;
-    create_dir_all(settings.get_ledger_path())?;
-    create_dir_all(settings.get_store_path())?;
+    create_dir_all(settings.ledger_path())?;
+    create_dir_all(settings.store_path())?;
+    module.add_class::<PyAnnotation>()?;
     module.add_function(wrap_pyfunction!(generate, module)?)?;
     module.add_function(wrap_pyfunction!(list_raw_sets, module)?)?;
     module.add_function(wrap_pyfunction!(list_merged_sets, module)?)?;
@@ -187,3 +197,5 @@ fn pyidsm(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(merge_on, module)?)?;
     Ok(())
 }
+
+define_stub_info_gatherer!(stub_info);

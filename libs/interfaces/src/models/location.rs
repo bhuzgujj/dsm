@@ -9,7 +9,7 @@ pub enum DsmLocation {
 }
 
 impl DsmLocation {
-    pub fn get_image(&self, rel_path: &PathBuf) -> PathBuf {
+    pub fn image(&self, rel_path: &PathBuf) -> PathBuf {
         match self {
             DsmLocation::Remote { url: _ } => todo!("Remote image not implemented"),
             DsmLocation::Local { path } => PathBuf::from(path).join(rel_path),

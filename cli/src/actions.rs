@@ -12,7 +12,7 @@ impl Actions {
             "Action", "Name", "Version", "Time", "Other"
         );
         println!("{:=<10}{:=<30}{:=<20}{:=<30}{:=<50}", "", "", "", "", "");
-        let actions = get_actions(settings.get_action_count());
+        let actions = get_actions(settings.action_count());
         if actions.is_empty() {
             println!("No actions...");
         } else {

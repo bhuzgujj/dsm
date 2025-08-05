@@ -14,10 +14,6 @@ pub struct DsmAnnotation {
 }
 
 impl DsmAnnotation {
-	pub fn to_file_str(&self) -> String {
-		format!("{} {:.6} {:.6} {:.6} {:.6}", self.class, self.x, self.y, self.width, self.height)
-	}
-
 	pub fn to_file_percent_str(&self, width: u32, height: u32) -> String {
 		format!(
 			"{} {:.6} {:.6} {:.6} {:.6}",
@@ -43,43 +39,45 @@ impl DsmAnnotation {
 		}
 	}
 
-	pub fn get_class(&self) -> &u32 {
+	
+
+	pub fn class(&self) -> &u32 {
 		&self.class
 	}
 
-	pub fn get_x(&self) -> &f64 {
+	pub fn x(&self) -> &f64 {
 		&self.x
 	}
 
-	pub fn get_y(&self) -> &f64 {
+	pub fn y(&self) -> &f64 {
 		&self.y
 	}
 
-	pub fn get_width(&self) -> &f64 {
+	pub fn width(&self) -> &f64 {
 		&self.width
 	}
 
-	pub fn get_height(&self) -> &f64 {
+	pub fn height(&self) -> &f64 {
 		&self.height
 	}
 
-	pub fn get_segmentation(&self) -> &Vec<f64> {
+	pub fn segmentation(&self) -> &Vec<f64> {
 		&self.segmentation
 	}
 
-	pub fn get_area(&self) -> f64 {
+	pub fn area(&self) -> f64 {
 		self.height * self.width
 	}
 
-	pub fn get_iscrowd(&self) -> &u32 {
+	pub fn iscrowd(&self) -> &u32 {
 		&self.iscrowd
 	}
 
-	pub fn get_occluded(&self) -> &Option<bool> {
+	pub fn occluded(&self) -> &Option<bool> {
 		&self.occluded
 	}
 	
-	pub fn get_rotation(&self) -> &Option<f64> {
+	pub fn rotation(&self) -> &Option<f64> {
 		&self.rotation
 	}
 }

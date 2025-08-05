@@ -12,14 +12,14 @@ use super::{RAW_SET, SEPARATOR, Storable, copy_recursively, read_dsm};
 
 impl Storable for DsmSets {
     fn ledge(&self, ledger_directory: &std::path::Path) -> anyhow::Result<bool> {
-        let json_filename = format!("{}{SEPARATOR}{}.json", self.get_name(), self.get_version());
+        let json_filename = format!("{}{SEPARATOR}{}.json", self.name(), self.version());
 
         let content = match serde_json::to_string_pretty(&self) {
             Ok(content) => content,
             Err(err) => {
                 return log_err!(format!(
                     "Failed to serialize datasets {}: {}",
-                    self.get_name(),
+                    self.name(),
                     err
                 ));
             }
@@ -43,10 +43,10 @@ impl Storable for DsmSets {
         store_directory: &std::path::Path,
         originals_path: &std::path::Path,
     ) -> anyhow::Result<PathBuf> {
-        let json_filename = format!("{}{SEPARATOR}{}.json", self.get_name(), self.get_version());
+        let json_filename = format!("{}{SEPARATOR}{}.json", self.name(), self.version());
         let store_path = store_directory
-            .join(self.get_name())
-            .join(self.get_version());
+            .join(self.name())
+            .join(self.version());
         if store_path.exists() {
             return log_err!(format!("Datasets already exists: {json_filename}"));
         }
@@ -112,6 +112,6 @@ impl Storable for DsmSets {
     }
 
     fn to_action(&self) -> Action {
-        Action::store(self.get_name().clone(), self.get_version().clone())
+        Action::store(self.name().clone(), self.version().clone())
     }
 }

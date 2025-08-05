@@ -11,9 +11,9 @@ pub async fn get_raw_set(
 ) -> Result<Option<DsmSets>, Error> {
     let state = state.lock().await;
     let storage = Storage::Local {
-        ledger_directory: state.get_ledger_path(),
-        store_directory: state.get_store_path(),
-        action_log_limit: state.get_action_count(),
+        ledger_directory: state.ledger_path(),
+        store_directory: state.store_path(),
+        action_log_limit: state.action_count(),
     };
     Ok(storage.read(name, version).await.unwrap_or(None))
 }
@@ -26,9 +26,9 @@ pub async fn get_merged_set(
 ) -> Result<Option<MergedSet>, Error> {
     let state = state.lock().await;
     let storage = Storage::Local {
-        ledger_directory: state.get_ledger_path(),
-        store_directory: state.get_store_path(),
-        action_log_limit: state.get_action_count(),
+        ledger_directory: state.ledger_path(),
+        store_directory: state.store_path(),
+        action_log_limit: state.action_count(),
     };
     Ok(storage.read(name, version).await.unwrap_or(None))
 }

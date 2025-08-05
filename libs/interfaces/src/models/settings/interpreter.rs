@@ -13,7 +13,7 @@ pub struct Interpreter {
 impl Interpreter {
     pub fn read(
         &self,
-        path: &std::path::Path,
+        path: &Path,
         name: Option<String>,
         version: String,
     ) -> anyhow::Result<Vec<DsmSets>> {

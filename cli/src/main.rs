@@ -46,8 +46,8 @@ enum Cli {
 async fn main() -> anyhow::Result<()> {
     let mut settings = Settings::load();
     logger::bind_logger(&settings)?;
-    create_dir_all(settings.get_ledger_path())?;
-    create_dir_all(settings.get_store_path())?;
+    create_dir_all(settings.ledger_path())?;
+    create_dir_all(settings.store_path())?;
     match Cli::parse() {
         Cli::Action(action) => action.execute(&settings).await?,
         Cli::Store(store) => store.execute(&settings).await?,

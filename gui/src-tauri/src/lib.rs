@@ -29,10 +29,10 @@ pub fn run() {
             if let Err(e) = logger::bind_logger(&settings) {
                 return Err(Box::new(UiError::from(e)));
             }
-            if let Err(e) = create_dir_all(settings.get_ledger_path()) {
+            if let Err(e) = create_dir_all(settings.ledger_path()) {
                 return Err(Box::new(UiError::from(e)));
             }
-            if let Err(e) = create_dir_all(settings.get_store_path()) {
+            if let Err(e) = create_dir_all(settings.store_path()) {
                 return Err(Box::new(UiError::from(e)));
             }
             app.manage(Mutex::new(settings));

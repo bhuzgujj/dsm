@@ -28,8 +28,8 @@ impl MergedSet {
         let mut datasets: HashMap<String, Vec<DsmSets>> = HashMap::new();
         let mut license_mapper = LicenseMapper::new();
         for (group, dataset) in &sets {
-            for (id, licence) in dataset.get_license() {
-                license_mapper.add_licence(*id, dataset.get_name().clone(), licence.clone());
+            for (id, licence) in dataset.licenses() {
+                license_mapper.add_licence(*id, dataset.name().clone(), licence.clone());
             }
             if let Some(ds) = datasets.get_mut(group) {
                 ds.push(dataset.clone());
@@ -48,7 +48,7 @@ impl MergedSet {
         }
     }
 
-    pub fn from_vec(
+    pub fn from_storable(
         datasets: Vec<(String, DsmSets)>,
         name: String,
         version: String,
@@ -81,10 +81,10 @@ impl MergedSet {
         license_mapper: LicenseMapper,
     ) -> Self {
         let mut map_set: HashMap<String, Vec<DsmSets>> = HashMap::new();
-        for (group, entries) in datasets.get_entries() {
+        for (group, entries) in datasets.entries() {
             let mut sub_entries = HashMap::new();
             sub_entries.insert(group.clone(), entries.clone());
-            let set: DsmSets = DsmSets::new(datasets.get_metadata().clone(), sub_entries);
+            let set: DsmSets = DsmSets::new(datasets.metadata().clone(), sub_entries);
             if let Some(ds) = map_set.get_mut(group) {
                 ds.push(set);
             } else {
@@ -94,8 +94,8 @@ impl MergedSet {
 
         Self {
             datasets: map_set,
-            name: datasets.get_name().clone(),
-            version: datasets.get_version().clone(),
+            name: datasets.name().clone(),
+            version: datasets.version().clone(),
             class_mapper,
             date_created: String::default(),
             description: String::default(),
@@ -103,11 +103,11 @@ impl MergedSet {
         }
     }
 
-    pub fn get_name(&self) -> &str {
+    pub fn name(&self) -> &str {
         &self.name
     }
 
-    pub fn get_version(&self) -> &String {
+    pub fn version(&self) -> &String {
         &self.version
     }
 
@@ -116,7 +116,7 @@ impl MergedSet {
         let metadata =
             DsmMetaDataBuilder::new(self.name.clone(), self.version.clone(), form, classes)
                 .set_date_created(self.date_created.clone())
-                .set_licenses(self.license_mapper.get_licences().clone())
+                .set_licenses(self.license_mapper.licences().clone())
                 .set_description(self.description.clone())
                 .build();
         let mut data_entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
@@ -125,14 +125,14 @@ impl MergedSet {
                 data_entries.insert(group.to_string(), Vec::new());
             }
             for dataset in datasets {
-                for entries in dataset.get_entries().values() {
+                for entries in dataset.entries().values() {
                     for entry in entries {
-                        let new_entry = entry.map_in(
-                            dataset.get_name().clone(),
-                            dataset.get_version().clone(),
+                        let new_entry = entry.remap_with_rename(
+                            dataset.name().clone(),
+                            dataset.version().clone(),
                             &self.class_mapper,
                             &self.license_mapper,
-                            dataset.get_classes().clone(),
+                            dataset.classes().clone(),
                         );
                         if let Some(entries) = data_entries.get_mut(group) {
                             entries.push(new_entry);
@@ -148,23 +148,23 @@ impl MergedSet {
         Ok(DsmSets::new(metadata, data_entries))
     }
 
-    pub fn get_datasets_include(&self) -> &HashMap<String, Vec<DsmSets>> {
+    pub fn datasets_include(&self) -> &HashMap<String, Vec<DsmSets>> {
         &self.datasets
     }
 
-    pub fn get_class_mapping(&self) -> &ClassMapper {
+    pub fn class_mapping(&self) -> &ClassMapper {
         &self.class_mapper
     }
 
-    pub fn get_license_mapping(&self) -> &LicenseMapper {
+    pub fn license_mapping(&self) -> &LicenseMapper {
         &self.license_mapper
     }
 
-    pub fn get_date_created(&self) -> &String {
+    pub fn date_created(&self) -> &String {
         &self.date_created
     }
 
-    pub fn get_description(&self) -> &String {
+    pub fn description(&self) -> &String {
         &self.description
     }
 
@@ -174,18 +174,18 @@ impl MergedSet {
         for (group, datasets) in &self.datasets {
             for dataset in datasets {
                 sets.insert(
-                    format!("{}~{}", dataset.get_name(), dataset.get_version()),
+                    format!("{}~{}", dataset.name(), dataset.version()),
                     GroupSet::local(group.clone()),
                 );
             }
         }
 
-        StorableMerged {
-            name: self.name.clone(),
-            version: self.version.clone(),
-            datasets: sets,
-            class_mapper: self.class_mapper.clone(),
-            license_mapper: self.license_mapper.clone(),
-        }
+        StorableMerged::new(
+            self.name.clone(),
+            self.version.clone(),
+            sets,
+            self.class_mapper.clone(),
+            self.license_mapper.clone(),
+        )
     }
 }
