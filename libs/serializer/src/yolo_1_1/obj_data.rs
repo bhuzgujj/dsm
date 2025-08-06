@@ -31,10 +31,10 @@ impl ObjData {
 	pub(crate) fn write(&self, root: &Path) -> anyhow::Result<()> {
 		let mut content = format!("classes = {}\nnames = {}\n", self.classes, self.names);
 		for (k, v) in self.sets.iter() {
-			content.push_str(&format!("{} = {}\n", k, v));
+			content.push_str(&format!("{k} = {v}\n"));
 		}
 		if let Some(backup) = &self.backup {
-			content.push_str(&format!("backup = {}\n", backup));
+			content.push_str(&format!("backup = {backup}\n"));
 		}
 		debug!("Writting to '{}'", root.join(FILE_NAME).display());
 		write_to_file(&root.join(FILE_NAME), content, true, true)
@@ -79,7 +79,7 @@ impl ObjData {
 									&abs_path.display()
 								);
 							}
-							debug!("'backup' has been read as '{}'", value);
+							debug!("'backup' has been read as '{value}'");
 							backup = Some(value.to_string());
 						},
 						"classes" => {
@@ -90,9 +90,9 @@ impl ObjData {
 									&abs_path.display()
 								);
 							}
-							debug!("'classes' has been read as '{}'", value);
+							debug!("'classes' has been read as '{value}'");
 							classes = Some(u32::from_str(value).unwrap_or_else(|_| {
-								panic!("Invalid class value, '{}' should be a integer!", value)
+								panic!("Invalid class value, '{value}' should be a integer!")
 							}));
 						},
 						"names" => {
@@ -104,7 +104,7 @@ impl ObjData {
 									&abs_path.display()
 								);
 							}
-							debug!("'names' has been read as '{}'", value);
+							debug!("'names' has been read as '{value}'");
 							names = Some(value.to_string());
 						},
 						_ => {
@@ -116,7 +116,7 @@ impl ObjData {
 									&abs_path.display()
 								);
 							}
-							debug!("'{}' has been read as '{}'", key, value);
+							debug!("'{key}' has been read as '{value}'");
 							let _ = sets.insert(key.to_string(), value);
 						},
 					}

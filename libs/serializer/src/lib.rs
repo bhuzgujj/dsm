@@ -21,7 +21,7 @@ impl Display for DataForm {
 		match self {
 			DataForm::Yolo1_1 => write!(f, "Yolo 1.1"),
 			DataForm::Coco1_0 => write!(f, "Coco 1.0"),
-			DataForm::Custom(name) => write!(f, "Custom({})", name),
+			DataForm::Custom(name) => write!(f, "Custom({name})"),
 		}
 	}
 }

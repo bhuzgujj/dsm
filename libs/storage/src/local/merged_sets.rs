@@ -70,7 +70,7 @@ impl Storable for MergedSet {
 		let ledger_raw_dir = ledger_directory.join(RAW_SET);
 		let datasets_ledger = ledger_directory
 			.join(MERGED_SET)
-			.join(format!("{}{SEPARATOR}{}.json", name, version));
+			.join(format!("{name}{SEPARATOR}{version}.json"));
 		if !datasets_ledger.exists() {
 			return Ok(None);
 		}
@@ -113,7 +113,7 @@ impl Storable for MergedSet {
 					for (set, group) in storable_set.datasets() {
 						datasets.push((
 							group.group().to_owned(),
-							read_dsm(&ledger_raw_dir.join(format!("{}.json", set)))?,
+							read_dsm(&ledger_raw_dir.join(format!("{set}.json")))?,
 						));
 					}
 					mergedsets.push(MergedSet::from_storable(

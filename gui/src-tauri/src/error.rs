@@ -9,7 +9,7 @@ pub struct UiError {
 impl From<anyhow::Error> for UiError {
 	fn from(value: anyhow::Error) -> Self {
 		Self {
-			error: format!("{}", value),
+			error: format!("{value}"),
 		}
 	}
 }
@@ -17,7 +17,7 @@ impl From<anyhow::Error> for UiError {
 impl From<std::io::Error> for UiError {
 	fn from(value: std::io::Error) -> Self {
 		Self {
-			error: format!("{}", value),
+			error: format!("{value}"),
 		}
 	}
 }

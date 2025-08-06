@@ -73,7 +73,7 @@ impl Storable for DsmSets {
 		version: String,
 	) -> anyhow::Result<Option<Self>> {
 		let ledger_raw_dir = ledger_directory.join(RAW_SET);
-		let datasets_path = ledger_raw_dir.join(format!("{}{SEPARATOR}{}.json", name, version));
+		let datasets_path = ledger_raw_dir.join(format!("{name}{SEPARATOR}{version}.json"));
 		if !datasets_path.exists() {
 			return Ok(None);
 		}

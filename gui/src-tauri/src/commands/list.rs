@@ -13,7 +13,7 @@ pub async fn list_merged(state: State<'_, Mutex<Settings>>) -> Result<Vec<Merged
 		action_log_limit: state.action_count(),
 	};
 	Ok(storage.list().await.unwrap_or_else(|e| {
-		error!("Error listing datasets: {}", e);
+		error!("Error listing datasets: {e}");
 		Vec::new()
 	}))
 }
@@ -27,7 +27,7 @@ pub async fn list_raw(state: State<'_, Mutex<Settings>>) -> Result<Vec<DsmSets>,
 		action_log_limit: state.action_count(),
 	};
 	Ok(storage.list().await.unwrap_or_else(|e| {
-		error!("Error listing datasets: {}", e);
+		error!("Error listing datasets: {e}");
 		Vec::new()
 	}))
 }

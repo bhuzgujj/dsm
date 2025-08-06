@@ -53,7 +53,7 @@ impl ClassMapper {
 					);
 				}
 			} else {
-				trace!("'{}' does not have a custom mapping", name);
+				trace!("'{name}' does not have a custom mapping");
 			}
 		}
 		for (key, map) in self.mapping.iter() {

@@ -15,7 +15,7 @@ impl Display for DsmDataForm {
 		match self {
 			DsmDataForm::Yolo1_1 => f.write_str("Yolo 1.1"),
 			DsmDataForm::Coco1_0 => f.write_str("Coco 1.0"),
-			DsmDataForm::Custom(c) => f.write_str(format!("Custom({})", c).as_str()),
+			DsmDataForm::Custom(c) => f.write_str(format!("Custom({c})").as_str()),
 			DsmDataForm::Unknown => f.write_str("<Unknown>"),
 		}
 	}

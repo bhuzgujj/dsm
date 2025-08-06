@@ -116,7 +116,7 @@ impl DsmEntry {
 		licence_mapper: &LicenseMapper,
 		classes: HashMap<u32, DsmClasses>,
 	) -> Self {
-		let prefix = format!("{}-v{}", name, version);
+		let prefix = format!("{name}-v{version}");
 		let mut new_annotation = Vec::new();
 		for ann in &self.annotation {
 			if let Some(old_class) = classes.get(ann.class()) {

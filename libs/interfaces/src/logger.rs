@@ -80,7 +80,7 @@ impl Log for Logger {
 
 		if let Some(file_path) = &self.file {
 			let mut file = OpenOptions::new().append(true).open(file_path).unwrap();
-			file.write_all(format!("{}\n", log_line).as_bytes())
+			file.write_all(format!("{log_line}\n").as_bytes())
 				.expect("Could not write to the log file");
 		}
 	}

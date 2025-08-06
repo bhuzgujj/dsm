@@ -53,7 +53,7 @@ pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
 		write_to_file(
 			&output
 				.join(ANNOTATION_DIR)
-				.join(format!("instances_{}.json", name)),
+				.join(format!("instances_{name}.json")),
 			json,
 			true,
 			true,
