@@ -1,0 +1,6 @@
+hard_tabs = true
+match_block_trailing_comma = true
+merge_derives = false
+newline_style = "Unix"
+style_edition = "2021"
+use_field_init_shorthand = true

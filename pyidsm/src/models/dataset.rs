@@ -9,17 +9,17 @@ use pyo3_stub_gen_derive::gen_stub_pyclass;
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct PySet {
-    #[pyo3(get, set)]
-    metadata: PyMetaData,
-    #[pyo3(get, set)]
-    entries: HashMap<String, Vec<PyEntry>>,
+	#[pyo3(get, set)]
+	metadata: PyMetaData,
+	#[pyo3(get, set)]
+	entries: HashMap<String, Vec<PyEntry>>,
 }
 
 impl DsmToPy<PySet> for DsmSets {
-    fn to_py(&self) -> PySet {
-        PySet {
-            metadata: self.metadata().to_py(),
-            entries: self.entries().to_py(),
-        }
-    }
+	fn to_py(&self) -> PySet {
+		PySet {
+			metadata: self.metadata().to_py(),
+			entries: self.entries().to_py(),
+		}
+	}
 }

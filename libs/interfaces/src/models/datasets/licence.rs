@@ -2,20 +2,20 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DsmLicense {
-    name: String,
-    url: String,
+	name: String,
+	url: String,
 }
 
 impl DsmLicense {
-    pub fn new(name: String, url: String) -> Self {
-        Self { name, url }
-    }
+	pub fn new(name: String, url: String) -> Self {
+		Self { name, url }
+	}
 
-    pub fn name(&self) -> &str {
-        &self.name
-    }
+	pub fn name(&self) -> &str {
+		&self.name
+	}
 
-    pub fn url(&self) -> &str {
-        &self.url
-    }
+	pub fn url(&self) -> &str {
+		&self.url
+	}
 }

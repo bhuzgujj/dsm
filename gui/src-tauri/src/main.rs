@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    dataset_manager_lib::run()
+	dataset_manager_lib::run()
 }
