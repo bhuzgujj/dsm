@@ -44,9 +44,7 @@ impl Storable for DsmSets {
         originals_path: &std::path::Path,
     ) -> anyhow::Result<PathBuf> {
         let json_filename = format!("{}{SEPARATOR}{}.json", self.name(), self.version());
-        let store_path = store_directory
-            .join(self.name())
-            .join(self.version());
+        let store_path = store_directory.join(self.name()).join(self.version());
         if store_path.exists() {
             return log_err!(format!("Datasets already exists: {json_filename}"));
         }

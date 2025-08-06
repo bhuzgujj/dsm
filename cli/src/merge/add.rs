@@ -52,11 +52,7 @@ impl Add {
             for (group, dsms) in m.datasets_include() {
                 for dsm in dsms {
                     datasets.insert(
-                        format!(
-                            "{}={}",
-                            dsm.name(),
-                            dsm.version()
-                        ),
+                        format!("{}={}", dsm.name(), dsm.version()),
                         (group.clone(), dsm.clone()),
                     );
                 }

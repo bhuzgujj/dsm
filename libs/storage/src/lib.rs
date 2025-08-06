@@ -101,8 +101,8 @@ pub async fn add_merge_link_to(
 ) -> anyhow::Result<()> {
     for (_, set) in datasets.values() {
         let merged_key = format!("{}~{}", merge_set.name(), merge_set.version());
-        let builder = DsmMetaDataBuilder::from(set.metadata().clone())
-            .add_contained_in_merged(merged_key);
+        let builder =
+            DsmMetaDataBuilder::from(set.metadata().clone()).add_contained_in_merged(merged_key);
         storage
             .ledge(&DsmSets::new(builder.build(), set.entries().clone()))
             .await?;

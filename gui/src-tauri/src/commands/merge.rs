@@ -55,8 +55,8 @@ pub async fn merge_new(
 
     for (_, set) in datasets.values() {
         let merged_key = format!("{}~{}", merge_set.name(), merge_set.version());
-        let builder = DsmMetaDataBuilder::from(set.metadata().to_owned())
-            .add_contained_in_merged(merged_key);
+        let builder =
+            DsmMetaDataBuilder::from(set.metadata().to_owned()).add_contained_in_merged(merged_key);
         storage
             .ledge(&DsmSets::new(builder.build(), set.entries().to_owned()))
             .await?;

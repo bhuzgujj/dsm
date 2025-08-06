@@ -1,8 +1,8 @@
+use crate::models::{annotation::PyAnnotation, DsmToPy};
 use interfaces::models::entries::DsmEntry;
 use pyo3::pyclass;
-use std::path::PathBuf;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
-use crate::models::{annotation::PyAnnotation, DsmToPy};
+use std::path::PathBuf;
 
 #[gen_stub_pyclass]
 #[pyclass]

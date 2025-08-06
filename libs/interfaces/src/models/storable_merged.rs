@@ -13,8 +13,20 @@ pub struct StorableMerged {
 }
 
 impl StorableMerged {
-    pub fn new(name: String, version: String, datasets: HashMap<String, GroupSet>, class_mapper: ClassMapper, license_mapper: LicenseMapper) -> Self {
-        Self { name, version, datasets, class_mapper, license_mapper }
+    pub fn new(
+        name: String,
+        version: String,
+        datasets: HashMap<String, GroupSet>,
+        class_mapper: ClassMapper,
+        license_mapper: LicenseMapper,
+    ) -> Self {
+        Self {
+            name,
+            version,
+            datasets,
+            class_mapper,
+            license_mapper,
+        }
     }
 
     pub fn name(&self) -> &String {

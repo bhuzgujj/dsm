@@ -40,6 +40,9 @@ pub fn write_to_file(
 pub fn read_from_file(file_path: &Path) -> anyhow::Result<String> {
     match read_to_string(file_path) {
         Ok(content) => Ok(content),
-        Err(err) => log_err!(format!("Could not read file '{}': {err}", file_path.display()))
+        Err(err) => log_err!(format!(
+            "Could not read file '{}': {err}",
+            file_path.display()
+        )),
     }
 }

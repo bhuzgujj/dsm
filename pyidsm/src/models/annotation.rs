@@ -1,7 +1,7 @@
+use crate::models::DsmToPy;
 use interfaces::models::annotation::DsmAnnotation;
 use pyo3::pyclass;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
-use crate::models::DsmToPy;
 
 #[gen_stub_pyclass]
 #[pyclass]

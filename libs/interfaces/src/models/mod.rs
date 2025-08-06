@@ -1,15 +1,15 @@
 mod datasets;
-mod settings;
 mod form;
-mod merge;
-mod storable_merged;
-mod mapper;
 mod location;
+mod mapper;
+mod merge;
+mod settings;
+mod storable_merged;
 
 pub use datasets::*;
-pub use mapper::*;
-pub use storable_merged::*;
-pub use merge::*;
 pub use form::*;
-pub use settings::*;
 pub use location::*;
+pub use mapper::*;
+pub use merge::*;
+pub use settings::*;
+pub use storable_merged::*;

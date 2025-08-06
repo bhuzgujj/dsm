@@ -3,9 +3,9 @@ use std::{cmp::Eq, collections::HashMap, hash::Hash};
 pub mod annotation;
 pub mod classes;
 pub mod dataset;
-pub mod merged_set;
 pub mod entries;
 pub mod licence;
+pub mod merged_set;
 pub mod metadata;
 
 pub trait DsmToPy<P> {
@@ -13,9 +13,9 @@ pub trait DsmToPy<P> {
 }
 
 impl<K, P, D> DsmToPy<HashMap<K, P>> for HashMap<K, D>
-where 
+where
     K: Eq + Hash + Clone,
-    D: DsmToPy<P>
+    D: DsmToPy<P>,
 {
     fn to_py(&self) -> HashMap<K, P> {
         let mut result = HashMap::new();
@@ -27,9 +27,9 @@ where
 }
 
 impl<K, P, D> DsmToPy<HashMap<K, P>> for &HashMap<K, D>
-where 
+where
     K: Eq + Hash + Clone,
-    D: DsmToPy<P>
+    D: DsmToPy<P>,
 {
     fn to_py(&self) -> HashMap<K, P> {
         let mut result = HashMap::new();
@@ -41,8 +41,8 @@ where
 }
 
 impl<P, D> DsmToPy<Vec<P>> for Vec<D>
-where 
-    D: DsmToPy<P>
+where
+    D: DsmToPy<P>,
 {
     fn to_py(&self) -> Vec<P> {
         let mut result = Vec::new();

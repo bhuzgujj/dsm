@@ -17,10 +17,7 @@ impl List {
 
         if self.azure_included {
             let azure_sets: Vec<DsmSets> = Storage::Remote {
-                service: settings
-                    .remote(String::from("my_account"))
-                    .unwrap()
-                    .clone(),
+                service: settings.remote(String::from("my_account")).unwrap().clone(),
             }
             .list()
             .await?;

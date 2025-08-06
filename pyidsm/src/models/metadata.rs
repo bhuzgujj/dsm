@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
+use crate::models::{classes::PyClasses, licence::PyLicense, DsmToPy};
 use interfaces::models::metadata::DsmMetaData;
 use pyo3::pyclass;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
-use crate::models::{classes::PyClasses, licence::PyLicense, DsmToPy};
 
 #[gen_stub_pyclass]
 #[pyclass]

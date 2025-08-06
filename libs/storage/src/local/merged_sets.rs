@@ -1,4 +1,7 @@
-use std::{fs::{create_dir_all, read_dir}, path::PathBuf};
+use std::{
+    fs::{create_dir_all, read_dir},
+    path::PathBuf,
+};
 
 use interfaces::{
     log_err,
@@ -142,10 +145,6 @@ impl Storable for MergedSet {
                 ));
             }
         }
-        Action::merge(
-            self.name().to_string(),
-            self.version().to_owned(),
-            datasets,
-        )
+        Action::merge(self.name().to_string(), self.version().to_owned(), datasets)
     }
 }

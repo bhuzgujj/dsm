@@ -29,11 +29,7 @@ impl DsmSets {
     }
 
     pub fn keyed_name(&self) -> String {
-        format!(
-            "{}={}",
-            self.metadata.name(),
-            self.metadata.version()
-        )
+        format!("{}={}", self.metadata.name(), self.metadata.version())
     }
 
     pub fn metadata(&self) -> &DsmMetaData {

@@ -10,4 +10,3 @@ pub enum Remote {
         storage_account: String,
     },
 }
-

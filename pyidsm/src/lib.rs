@@ -3,17 +3,17 @@ mod models;
 use interfaces::models::{ClassMapper, DsmSets, MergedSet, Settings};
 use interfaces::{log_err, logger};
 use pyo3::prelude::*;
+use pyo3_stub_gen::define_stub_info_gatherer;
+use pyo3_stub_gen_derive::gen_stub_pyfunction;
 use serializer::DataForm;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
-use pyo3_stub_gen::define_stub_info_gatherer;
-use pyo3_stub_gen_derive::gen_stub_pyfunction;
 use storage::{add_merge_link_to, Storage};
 
+use crate::models::annotation::PyAnnotation;
 use crate::models::merged_set::PyMergedSet;
 use crate::models::{dataset::PySet, DsmToPy};
-use crate::models::annotation::PyAnnotation;
 
 fn init() -> anyhow::Result<Settings> {
     let settings = Settings::load();
