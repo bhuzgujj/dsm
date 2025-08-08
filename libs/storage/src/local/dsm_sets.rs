@@ -8,7 +8,7 @@ use std::{
 	path::PathBuf,
 };
 
-use super::{copy_recursively, read_dsm, Storable, RAW_SET, SEPARATOR};
+use super::{copy_recursively, read_dsm, Storable, FORMAT_FILE_NAME, RAW_SET, SEPARATOR};
 
 impl Storable for DsmSets {
 	fn ledge(&self, ledger_directory: &std::path::Path) -> anyhow::Result<bool> {
@@ -63,6 +63,12 @@ impl Storable for DsmSets {
 				err
 			))
 		} else {
+			write_to_file(
+				&store_path.join(FORMAT_FILE_NAME),
+				self.metadata.formatter.to_string(),
+				true,
+				true,
+			)?;
 			Ok(store_path.clone())
 		}
 	}

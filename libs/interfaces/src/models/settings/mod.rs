@@ -15,6 +15,11 @@ use std::{fs::read_to_string, str::FromStr};
 const SETTINGS_FILENAME: &str = "settings.toml";
 const STORE: &str = "datasets-store";
 const LEDGER_DIRECTORY: &str = "files-ledger";
+const LEDGER_CURRENT_VERSION: u32 = 1;
+
+fn default_ledger_version() -> u32 {
+	0
+}
 
 fn default_log_level() -> String {
 	LevelFilter::Info.to_string()
@@ -45,6 +50,9 @@ fn default_interpreters() -> HashMap<String, Interpreter> {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Settings {
+	#[serde(default = "default_ledger_version")]
+	ledger_version: u32,
+
 	#[serde(default = "default_log_level")]
 	log_level: String,
 
@@ -67,6 +75,7 @@ pub struct Settings {
 impl Default for Settings {
 	fn default() -> Self {
 		Self {
+			ledger_version: LEDGER_CURRENT_VERSION,
 			log_level: default_log_level(),
 			ledger_path: default_ledger_path(),
 			store_path: default_store_path(),
@@ -84,6 +93,10 @@ impl Settings {
 
 	pub fn set_log_level(&mut self, log_level: LevelFilter) {
 		self.log_level = log_level.to_string();
+	}
+
+	pub fn ledger_version(&self) -> u32 {
+		self.ledger_version
 	}
 
 	pub fn action_count(&self) -> usize {
@@ -134,4 +147,8 @@ impl Settings {
 	pub fn remote(&self, name: String) -> Option<&Remote> {
 		self.remotes.get(&name)
 	}
+}
+
+pub fn requires_migration(current_version: u32) -> bool {
+	current_version == LEDGER_CURRENT_VERSION
 }

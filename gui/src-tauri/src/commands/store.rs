@@ -30,10 +30,7 @@ pub async fn store_raw_set(
 		version.clone(),
 		state.interpreters(),
 	)?;
-
-	for dataset in datasets {
-		storage.store(&dataset, &path).await?;
-		storage.ledge(&dataset).await?;
-	}
+	storage.store(&datasets, &path).await?;
+	storage.ledge(&datasets).await?;
 	Ok(())
 }

@@ -16,7 +16,7 @@ impl Interpreter {
 		path: &Path,
 		name: Option<String>,
 		version: String,
-	) -> anyhow::Result<Vec<DsmSets>> {
+	) -> anyhow::Result<DsmSets> {
 		let new_name = name.clone().unwrap_or(
 			path.file_name()
 				.expect("Could not get the directory name")
@@ -32,7 +32,7 @@ impl Interpreter {
 			.output()?;
 
 		let output = String::from_utf8(result.stdout)?;
-		match serde_json::from_str::<Vec<DsmSets>>(&output) {
+		match serde_json::from_str::<DsmSets>(&output) {
 			Ok(sets) => Ok(sets),
 			Err(_) => log_err!(format!("Error from the custom interpreter: {output}")),
 		}

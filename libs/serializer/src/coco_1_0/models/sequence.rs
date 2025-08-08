@@ -24,83 +24,6 @@ pub(crate) struct Sequence {
 }
 
 impl Sequence {
-	pub(crate) fn dsm(
-		self,
-		data_form: &DsmDataForm,
-		name: &str,
-		version: &str,
-		subset: String,
-		root: &Path,
-	) -> anyhow::Result<DsmSets> {
-		let actual_name = strip_name(subset)?;
-		let new_name = format!("{}-{}", name, actual_name.clone());
-		let metadata: DsmMetaData = DsmMetaDataBuilder::new(
-			new_name.clone(),
-			version.to_owned(),
-			data_form.clone(),
-			self.categories
-				.iter()
-				.fold(HashMap::new(), |mut acc, category| {
-					let _ = acc.insert(category.id, category.dsm());
-					acc
-				}),
-		)
-		.set_contributor(self.info.contributor)
-		.set_date_created(self.info.date_created)
-		.set_licenses(
-			self.licenses
-				.iter()
-				.fold(HashMap::new(), |mut acc, license| {
-					let _ = acc.insert(license.id, license.dsm());
-					acc
-				}),
-		)
-		.set_url(self.info.url)
-		.set_year(self.info.year)
-		.set_description(self.info.description)
-		.build();
-		let mut entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
-		let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::DsmAnnotation>> =
-			HashMap::new();
-		for ann in self.annotations {
-			if let std::collections::hash_map::Entry::Vacant(e) = annotations.entry(ann.image_id) {
-				e.insert(vec![ann.dsm()]);
-			} else {
-				let img = annotations
-					.get_mut(&ann.image_id)
-					.expect("ann.id not found in annotations");
-				img.push(ann.dsm());
-			}
-		}
-		let mut data_entries = Vec::new();
-		let path = PathBuf::from(&IMAGE_PATH).join(actual_name.clone());
-		for imgs in self.images {
-			data_entries.push(
-				DsmEntryBuilder::new(
-					imgs.file_name.clone(),
-					path.join(&imgs.file_name).clone(),
-					imgs.width,
-					imgs.height,
-					DsmLocation::Local {
-						path: root
-							.to_str()
-							.expect("Could not stringify the rootpath?")
-							.to_string(),
-					},
-				)
-				.set_license(Some(imgs.license))
-				.set_annotation(annotations.get(&imgs.id).unwrap_or(&Vec::new()).clone())
-				.set_coco_url(imgs.coco_url)
-				.set_date_captured(Some(imgs.date_captured))
-				.set_flickr_url(imgs.flickr_url)
-				.build(),
-			)
-		}
-		entries.insert(actual_name.clone(), data_entries);
-
-		Ok(DsmSets::new(metadata, entries))
-	}
-
 	pub(crate) fn from_dsm(datasets: &DsmSets) -> HashMap<String, Self> {
 		let mut sequences = HashMap::new();
 		let mut images_index: u32 = 0;
@@ -173,6 +96,125 @@ impl Sequence {
 			annotations_index,
 		)
 	}
+}
+
+pub fn into_dsm(
+	sequences: HashMap<String, Sequence>,
+	data_form: &DsmDataForm,
+	name: &str,
+	version: &str,
+	root: &Path,
+) -> anyhow::Result<DsmSets> {
+	let mut entries = HashMap::new();
+	let mut categories: Vec<Category> = Vec::new();
+	let mut licenses: Vec<License> = Vec::new();
+	let mut contributor: Option<String> = None;
+	let mut date_created: Option<String> = None;
+	let mut url: Option<String> = None;
+	let mut year: Option<String> = None;
+	let mut description: Option<String> = None;
+
+	for (json, sequence) in sequences {
+		let group = strip_name(json)?;
+
+		// TODO: Try to keep the information in both dsm and merged
+		if contributor.is_none() {
+			contributor = Some(sequence.info.contributor.clone());
+		}
+		if date_created.is_none() {
+			date_created = Some(sequence.info.date_created.clone());
+		}
+		if url.is_none() {
+			url = Some(sequence.info.url.clone());
+		}
+		if year.is_none() {
+			year = Some(sequence.info.year.clone());
+		}
+		if description.is_none() {
+			description = Some(sequence.info.description.clone());
+		}
+		entries.insert(group.clone(), into_group_entries(&sequence, &group, root));
+		for licence in sequence.licenses {
+			if !licenses.contains(&licence) {
+				licenses.push(licence.clone());
+			}
+		}
+		for category in sequence.categories {
+			if !categories.contains(&category) {
+				categories.push(category.clone());
+			}
+		}
+	}
+
+	let mut metadata = DsmMetaDataBuilder::new(
+		name.to_string(),
+		version.to_string(),
+		data_form.clone(),
+		categories.iter().fold(HashMap::new(), |mut acc, category| {
+			let _ = acc.insert(category.id, category.dsm());
+			acc
+		}),
+	)
+	.set_licenses(licenses.iter().fold(HashMap::new(), |mut acc, license| {
+		let _ = acc.insert(license.id, license.dsm());
+		acc
+	}));
+	if let Some(contrib) = contributor {
+		metadata = metadata.set_contributor(contrib);
+	}
+	if let Some(date) = date_created {
+		metadata = metadata.set_date_created(date);
+	}
+	if let Some(u) = url {
+		metadata = metadata.set_url(u);
+	}
+	if let Some(y) = year {
+		metadata = metadata.set_year(y);
+	}
+	if let Some(desc) = description {
+		metadata = metadata.set_description(desc);
+	}
+	return Ok(DsmSets::new(metadata.build(), entries));
+}
+
+fn into_group_entries(sequences: &Sequence, group: &String, root: &Path) -> Vec<DsmEntry> {
+	let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::DsmAnnotation>> =
+		HashMap::new();
+	for ann in &sequences.annotations {
+		if let std::collections::hash_map::Entry::Vacant(e) = annotations.entry(ann.image_id) {
+			e.insert(vec![ann.dsm()]);
+		} else {
+			let img = annotations
+				.get_mut(&ann.image_id)
+				.expect("ann.id not found in annotations");
+			img.push(ann.dsm());
+		}
+	}
+	let mut data_entries = Vec::new();
+	let path = PathBuf::from(&IMAGE_PATH).join(group.clone());
+	for imgs in &sequences.images {
+		data_entries.push(
+			DsmEntryBuilder::new(
+				imgs.file_name.clone(),
+				path.join(&imgs.file_name).clone(),
+				imgs.width,
+				imgs.height,
+				DsmLocation::Local {
+					path: root
+						.to_str()
+						.expect("Could not stringify the rootpath?")
+						.to_string(),
+				},
+			)
+			.set_license(Some(imgs.license))
+			.set_annotation(annotations.get(&imgs.id).unwrap_or(&Vec::new()).clone())
+			.set_coco_url(imgs.coco_url.clone())
+			.set_date_captured(Some(imgs.date_captured.clone()))
+			.set_flickr_url(imgs.flickr_url.clone())
+			.build(),
+		)
+	}
+	return data_entries;
 }
 
 fn strip_name(json_name: String) -> anyhow::Result<String> {

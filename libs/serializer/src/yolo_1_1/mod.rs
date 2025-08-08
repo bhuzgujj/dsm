@@ -9,7 +9,6 @@ use interfaces::models::DsmSets;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::Path;
-use std::vec;
 
 const PREFIX: &str = "data/";
 
@@ -18,7 +17,7 @@ pub(crate) fn read(
 	name: Option<String>,
 	version: String,
 	formatter: DsmDataForm,
-) -> anyhow::Result<Vec<DsmSets>> {
+) -> anyhow::Result<DsmSets> {
 	let obj_data = ObjData::read(root)?;
 	let classes = obj_names::read(root.join(obj_data.names()))?;
 	let mut sets = HashMap::new();
@@ -36,7 +35,7 @@ pub(crate) fn read(
 		sets.insert(key.clone(), entries);
 	}
 	let metadata = DsmMetaDataBuilder::new(new_name, version, formatter, classes).build();
-	Ok(vec![DsmSets::new(metadata, sets)])
+	Ok(DsmSets::new(metadata, sets))
 }
 
 pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {

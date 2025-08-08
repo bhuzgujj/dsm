@@ -39,25 +39,23 @@ impl Store {
 		let path = PathBuf::from(self.path.clone());
 		let formatter: DataForm = Format::try_from(self.formats.clone())?.into();
 		debug!("Storing dataset '{}' with '{}'", path.display(), formatter);
-		let mut datasets = formatter.read(
+		let mut dataset = formatter.read(
 			&path,
 			self.name.clone(),
 			self.version.clone(),
 			settings.interpreters(),
 		)?;
 		let storage = Storage::local(settings);
-		for dataset in datasets.iter_mut() {
-			let save_path = storage.store(dataset, &path).await?;
-			let new_location = DsmLocation::Local {
-				path: save_path
-					.canonicalize()?
-					.to_str()
-					.expect("Save path incorrect")
-					.to_string(),
-			};
-			dataset.update_location(new_location);
-			storage.ledge(dataset).await?;
-		}
+		let save_path = storage.store(&dataset, &path).await?;
+		let new_location = DsmLocation::Local {
+			path: save_path
+				.canonicalize()?
+				.to_str()
+				.expect("Save path incorrect")
+				.to_string(),
+		};
+		dataset.update_location(new_location);
+		storage.ledge(&dataset).await?;
 		Ok(())
 	}
 }

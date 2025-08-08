@@ -65,10 +65,8 @@ async fn store(name: String, version: String, setform: String, path: String) -> 
 		settings.interpreters(),
 	)?;
 	let storage = Storage::local(&settings);
-	for dataset in datasets.iter() {
-		storage.store(dataset, &path).await?;
-		storage.ledge(dataset).await?;
-	}
+	storage.store(&datasets, &path).await?;
+	storage.ledge(&datasets).await?;
 	Ok(())
 }
 

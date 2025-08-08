@@ -5,6 +5,7 @@ use interfaces::models::metadata::DsmMetaDataBuilder;
 use interfaces::models::remotes::Remote;
 use interfaces::models::{DsmSets, MergedSet, Settings};
 use local::Storable;
+pub use local::FORMAT_FILE_NAME;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 

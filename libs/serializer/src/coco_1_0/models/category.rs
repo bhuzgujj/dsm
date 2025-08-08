@@ -1,7 +1,8 @@
 use interfaces::models::classes::DsmClasses;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct Category {
 	pub(crate) id: u32,
 	pub(crate) name: String,

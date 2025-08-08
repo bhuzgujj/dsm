@@ -109,7 +109,9 @@ fn log(record: &Record) -> String {
 ///
 /// Usage:
 /// ```
-/// fn errored(value: String) -> anyhow<String> {
+/// use interfaces::log_err;
+///
+/// fn errored(value: String) -> anyhow::Result<String> {
 ///     if value.is_empty() {
 ///         return log_err!("Value must not be empty");
 ///     }

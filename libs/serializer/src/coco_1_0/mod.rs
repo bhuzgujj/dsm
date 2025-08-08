@@ -1,3 +1,4 @@
+use crate::coco_1_0::models::sequence::into_dsm;
 use crate::coco_1_0::models::sequence::{Sequence, IMAGE_PATH};
 use interfaces::log_err;
 use interfaces::models::DsmDataForm;
@@ -15,19 +16,15 @@ pub(crate) fn read(
 	name: Option<String>,
 	version: String,
 	data_form: DsmDataForm,
-) -> anyhow::Result<Vec<DsmSets>> {
+) -> anyhow::Result<DsmSets> {
 	let sequences = models::read(&root.join(ANNOTATION_DIR))?;
-	let mut datasets = Vec::new();
 	let new_name = name.clone().unwrap_or(
 		root.file_name()
 			.expect("Could not get the directory name")
 			.to_string_lossy()
 			.into(),
 	);
-	for (json, sequence) in sequences {
-		datasets.push(sequence.dsm(&data_form, &new_name, &version, json, root)?);
-	}
-	Ok(datasets)
+	into_dsm(sequences, &data_form, &new_name, &version, root)
 }
 
 pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {

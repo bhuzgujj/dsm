@@ -33,7 +33,7 @@ impl DataForm {
 		name: Option<String>,
 		version: String,
 		interpreters: &HashMap<String, Interpreter>,
-	) -> anyhow::Result<Vec<DsmSets>> {
+	) -> anyhow::Result<DsmSets> {
 		debug!(
 			"Reading files format '{}' at '{}'",
 			&path.canonicalize()?.to_str().unwrap_or("<Unknown path>"),
@@ -86,6 +86,16 @@ impl From<DataForm> for DsmDataForm {
 			DataForm::Yolo1_1 => DsmDataForm::Yolo1_1,
 			DataForm::Coco1_0 => DsmDataForm::Coco1_0,
 			DataForm::Custom(f) => DsmDataForm::Custom(f.clone()),
+		}
+	}
+}
+
+impl From<DsmDataForm> for DataForm {
+	fn from(form: DsmDataForm) -> Self {
+		match form {
+			DsmDataForm::Yolo1_1 => DataForm::Yolo1_1,
+			DsmDataForm::Coco1_0 => DataForm::Coco1_0,
+			DsmDataForm::Custom(f) => DataForm::Custom(f.clone()),
 		}
 	}
 }

@@ -13,6 +13,7 @@ use interfaces::{log_err, models::actions::Action};
 pub const RAW_SET: &str = "raw_sets";
 pub const MERGED_SET: &str = "merged_sets";
 pub const SEPARATOR: &str = "~";
+pub const FORMAT_FILE_NAME: &str = "formats.dsm.txt";
 
 pub trait Storable
 where

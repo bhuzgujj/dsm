@@ -73,11 +73,9 @@ impl Untrack {
 			self.version.clone(),
 			settings.interpreters(),
 		)?;
-		for dataset in datasets {
-			let new_ds = dataset.remap(&mapping)?;
-			let oformat: DataForm = Format::try_from(self.input_format.clone())?.into();
-			oformat.write(&self.output_path, &new_ds, settings.interpreters())?;
-		}
+		let new_ds = datasets.remap(&mapping)?;
+		let oformat: DataForm = Format::try_from(self.input_format.clone())?.into();
+		oformat.write(&self.output_path, &new_ds, settings.interpreters())?;
 		Ok(())
 	}
 }
