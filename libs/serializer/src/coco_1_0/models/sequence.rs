@@ -174,10 +174,10 @@ pub fn into_dsm(
 	if let Some(desc) = description {
 		metadata = metadata.set_description(desc);
 	}
-	return Ok(DsmSets::new(metadata.build(), entries));
+	Ok(DsmSets::new(metadata.build(), entries))
 }
 
-fn into_group_entries(sequences: &Sequence, group: &String, root: &Path) -> Vec<DsmEntry> {
+fn into_group_entries(sequences: &Sequence, group: &str, root: &Path) -> Vec<DsmEntry> {
 	let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::DsmAnnotation>> =
 		HashMap::new();
 	for ann in &sequences.annotations {
@@ -191,7 +191,7 @@ fn into_group_entries(sequences: &Sequence, group: &String, root: &Path) -> Vec<
 		}
 	}
 	let mut data_entries = Vec::new();
-	let path = PathBuf::from(&IMAGE_PATH).join(group.clone());
+	let path = PathBuf::from(&IMAGE_PATH).join(group);
 	for imgs in &sequences.images {
 		data_entries.push(
 			DsmEntryBuilder::new(
@@ -214,7 +214,7 @@ fn into_group_entries(sequences: &Sequence, group: &String, root: &Path) -> Vec<
 			.build(),
 		)
 	}
-	return data_entries;
+	data_entries
 }
 
 fn strip_name(json_name: String) -> anyhow::Result<String> {
