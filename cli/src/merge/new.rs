@@ -17,7 +17,7 @@ pub struct New {
 	#[clap(short, long)]
 	datasets: Vec<String>,
 
-	/// Datasets from a path, must be: <FORMAT>:<PATH>:<ASSIGN_GROUP>
+	/// Datasets from a path, must be: <FORMAT>=<PATH>=<ASSIGN_GROUP>
 	#[clap(short, long)]
 	paths: Vec<String>,
 

@@ -1,5 +1,5 @@
 use interfaces::log_err;
-use interfaces::models::classes::DsmClasses;
+use interfaces::models::datasets::Classes;
 use interfaces::paths::write_to_file;
 use log::debug;
 use std::collections::HashMap;
@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 
 pub(crate) const FILE_NAME: &str = "obj.names";
 
-pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
+pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, Classes>> {
 	debug!("Reading '{}'", path.display());
 	let contents = match read_to_string(&path) {
 		Ok(contents) => contents,
@@ -21,14 +21,14 @@ pub(crate) fn read(path: PathBuf) -> anyhow::Result<HashMap<u32, DsmClasses>> {
 	for line in contents.lines() {
 		let trimmed = line.trim();
 		if !trimmed.is_empty() {
-			classes.insert(index, DsmClasses::new(trimmed.to_string(), None));
+			classes.insert(index, Classes::new(trimmed.to_string(), None));
 			index += 1;
 		}
 	}
 	Ok(classes)
 }
 
-pub(crate) fn write(root: &Path, classes: HashMap<u32, DsmClasses>) -> anyhow::Result<()> {
+pub(crate) fn write(root: &Path, classes: HashMap<u32, Classes>) -> anyhow::Result<()> {
 	let mut vec: Vec<String> = Vec::with_capacity(classes.capacity());
 	for i in 0..classes.len() {
 		let index = i as u32;

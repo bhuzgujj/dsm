@@ -7,7 +7,8 @@ use interfaces::{
 	log_err,
 	models::{
 		actions::{Action, SetInfo},
-		DsmSets, MergedSet, StorableMerged,
+		datasets::Dataset,
+		MergedSet, StorableMerged,
 	},
 	paths::write_to_file,
 };
@@ -76,7 +77,7 @@ impl Storable for MergedSet {
 		}
 		let storable: StorableMerged = read_dsm(&datasets_ledger)?;
 
-		let mut datasets: Vec<(String, DsmSets)> = Vec::new();
+		let mut datasets: Vec<(String, Dataset)> = Vec::new();
 		for (name, set) in storable.datasets() {
 			datasets.push((
 				set.group().to_owned(),

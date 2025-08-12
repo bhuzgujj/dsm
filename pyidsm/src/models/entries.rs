@@ -1,5 +1,5 @@
 use crate::models::{annotation::PyAnnotation, DsmToPy};
-use interfaces::models::entries::DsmEntry;
+use interfaces::models::datasets::Entry;
 use pyo3::pyclass;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
 use std::path::PathBuf;
@@ -28,7 +28,7 @@ pub struct PyEntry {
 	annotation: Vec<PyAnnotation>,
 }
 
-impl DsmToPy<PyEntry> for DsmEntry {
+impl DsmToPy<PyEntry> for Entry {
 	fn to_py(&self) -> PyEntry {
 		PyEntry {
 			file_name: self.file_name().clone(),

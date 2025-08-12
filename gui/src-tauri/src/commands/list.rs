@@ -1,4 +1,4 @@
-use interfaces::models::{DsmSets, MergedSet, Settings};
+use interfaces::models::{datasets::Dataset, MergedSet, Settings};
 use log::error;
 use storage::Storage;
 use tauri::async_runtime::Mutex;
@@ -19,7 +19,7 @@ pub async fn list_merged(state: State<'_, Mutex<Settings>>) -> Result<Vec<Merged
 }
 
 #[tauri::command]
-pub async fn list_raw(state: State<'_, Mutex<Settings>>) -> Result<Vec<DsmSets>, Error> {
+pub async fn list_raw(state: State<'_, Mutex<Settings>>) -> Result<Vec<Dataset>, Error> {
 	let state = state.lock().await;
 	let storage = Storage::Local {
 		ledger_directory: state.ledger_path(),

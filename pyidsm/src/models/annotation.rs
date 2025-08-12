@@ -1,5 +1,5 @@
 use crate::models::DsmToPy;
-use interfaces::models::annotation::DsmAnnotation;
+use interfaces::models::datasets::Annotation;
 use pyo3::pyclass;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
 
@@ -27,7 +27,7 @@ pub struct PyAnnotation {
 	rotation: Option<f64>,
 }
 
-impl DsmToPy<PyAnnotation> for DsmAnnotation {
+impl DsmToPy<PyAnnotation> for Annotation {
 	fn to_py(&self) -> PyAnnotation {
 		PyAnnotation {
 			class_id: *self.class(),

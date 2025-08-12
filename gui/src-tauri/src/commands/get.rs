@@ -1,4 +1,4 @@
-use interfaces::models::{DsmSets, MergedSet, Settings};
+use interfaces::models::{datasets::Dataset, MergedSet, Settings};
 use storage::Storage;
 use tauri::async_runtime::Mutex;
 use tauri::{Error, State};
@@ -8,7 +8,7 @@ pub async fn get_raw_set(
 	state: State<'_, Mutex<Settings>>,
 	name: String,
 	version: String,
-) -> Result<Option<DsmSets>, Error> {
+) -> Result<Option<Dataset>, Error> {
 	let state = state.lock().await;
 	let storage = Storage::Local {
 		ledger_directory: state.ledger_path(),

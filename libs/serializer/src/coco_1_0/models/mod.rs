@@ -1,4 +1,4 @@
-use crate::coco_1_0::models::sequence::Sequence;
+use crate::coco_1_0::models::sequence::CocoSequence;
 use interfaces::log_err;
 use std::collections::HashMap;
 use std::fs::{read_dir, read_to_string};
@@ -12,14 +12,14 @@ pub mod info;
 pub mod license;
 pub mod sequence;
 
-pub(crate) fn read(root: &PathBuf) -> anyhow::Result<HashMap<String, Sequence>> {
+pub(crate) fn read(root: &PathBuf) -> anyhow::Result<HashMap<String, CocoSequence>> {
 	match read_dir(root) {
 		Ok(dir) => {
-			let mut sequences: HashMap<String, Sequence> = HashMap::new();
+			let mut sequences: HashMap<String, CocoSequence> = HashMap::new();
 			for files in dir {
 				let f = files?;
 				if let Ok(content) = read_to_string(f.path()) {
-					let sequence: Sequence = match serde_json::from_str(content.as_str()) {
+					let sequence: CocoSequence = match serde_json::from_str(content.as_str()) {
 						Ok(s) => s,
 						Err(err) => {
 							return log_err!(format!(

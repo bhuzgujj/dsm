@@ -3,9 +3,9 @@ mod obj_data;
 mod obj_names;
 
 use crate::yolo_1_1::obj_data::ObjData;
-use interfaces::models::metadata::DsmMetaDataBuilder;
+use interfaces::models::datasets::Dataset;
+use interfaces::models::datasets::MetaDataBuilder;
 use interfaces::models::DsmDataForm;
-use interfaces::models::DsmSets;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::Path;
@@ -17,7 +17,7 @@ pub(crate) fn read(
 	name: Option<String>,
 	version: String,
 	formatter: DsmDataForm,
-) -> anyhow::Result<DsmSets> {
+) -> anyhow::Result<Dataset> {
 	let obj_data = ObjData::read(root)?;
 	let classes = obj_names::read(root.join(obj_data.names()))?;
 	let mut sets = HashMap::new();
@@ -34,11 +34,11 @@ pub(crate) fn read(
 		}
 		sets.insert(key.clone(), entries);
 	}
-	let metadata = DsmMetaDataBuilder::new(new_name, version, formatter, classes).build();
-	Ok(DsmSets::new(metadata, sets))
+	let metadata = MetaDataBuilder::new(new_name, version, formatter, classes).build();
+	Ok(Dataset::new(metadata, sets))
 }
 
-pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
+pub(crate) fn write(output: &Path, datasets: &Dataset) -> anyhow::Result<()> {
 	create_dir_all(output)?;
 	obj_names::write(output, datasets.classes().clone())?;
 	let mut sets = HashMap::new();

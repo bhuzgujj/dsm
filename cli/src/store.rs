@@ -1,18 +1,18 @@
 use crate::format::Format;
 use clap::Args;
-use interfaces::models::{DsmLocation, Settings};
+use interfaces::models::{Location, Settings};
 use log::debug;
 use serializer::DataForm;
 use std::path::PathBuf;
 use storage::Storage;
 
-/// Parse the files in a known standard format and store the set in a storage
+/// Read a directory using a format and store a copy into the store directory in settings. It will also create a json representation of the dataset in the ledger directory
 #[derive(Args, Debug)]
 pub struct Store {
-	/// Root directory of the files
+	/// Root directory of the dataset to store
 	path: String,
 
-	/// In which format the files will be read as.
+	/// In which format the dataset will be read as.
 	///
 	/// If it is not a known standard, it will pick a script in scripts directory.
 	///
@@ -25,11 +25,11 @@ pub struct Store {
 	#[clap(short, long, verbatim_doc_comment)]
 	formats: String,
 
-	/// Datasets registered name
+	/// Name in which the dataset will be stored as (default: directory name)
 	#[clap(short, long)]
 	name: Option<String>,
 
-	/// Datasets registered version
+	/// Version in which the dataset will be stored
 	#[clap(short, long, default_value = "1")]
 	version: String,
 }
@@ -47,7 +47,7 @@ impl Store {
 		)?;
 		let storage = Storage::local(settings);
 		let save_path = storage.store(&dataset, &path).await?;
-		let new_location = DsmLocation::Local {
+		let new_location = Location::Local {
 			path: save_path
 				.canonicalize()?
 				.to_str()

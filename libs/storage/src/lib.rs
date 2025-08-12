@@ -1,9 +1,9 @@
 mod local;
 
 use interfaces::models::actions::add_action;
-use interfaces::models::metadata::DsmMetaDataBuilder;
+use interfaces::models::datasets::{Dataset, MetaDataBuilder};
 use interfaces::models::remotes::Remote;
-use interfaces::models::{DsmSets, MergedSet, Settings};
+use interfaces::models::{MergedSet, Settings};
 use local::Storable;
 pub use local::FORMAT_FILE_NAME;
 use std::collections::HashMap;
@@ -96,16 +96,16 @@ impl Storage {
 }
 
 pub async fn add_merge_link_to(
-	datasets: &HashMap<String, (String, DsmSets)>,
+	datasets: &HashMap<String, (String, Dataset)>,
 	storage: Storage,
 	merge_set: MergedSet,
 ) -> anyhow::Result<()> {
 	for (_, set) in datasets.values() {
 		let merged_key = format!("{}~{}", merge_set.name(), merge_set.version());
 		let builder =
-			DsmMetaDataBuilder::from(set.metadata().clone()).add_contained_in_merged(merged_key);
+			MetaDataBuilder::from(set.metadata().clone()).add_contained_in_merged(merged_key);
 		storage
-			.ledge(&DsmSets::new(builder.build(), set.entries().clone()))
+			.ledge(&Dataset::new(builder.build(), set.entries().clone()))
 			.await?;
 	}
 	Ok(())

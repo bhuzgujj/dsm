@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct StorableMerged {
 	name: String,
 	version: String,
-	datasets: HashMap<String, GroupSet>,
+	datasets: HashMap<String, StorableGroupSet>,
 	class_mapper: ClassMapper,
 	license_mapper: LicenseMapper,
 }
@@ -16,7 +16,7 @@ impl StorableMerged {
 	pub fn new(
 		name: String,
 		version: String,
-		datasets: HashMap<String, GroupSet>,
+		datasets: HashMap<String, StorableGroupSet>,
 		class_mapper: ClassMapper,
 		license_mapper: LicenseMapper,
 	) -> Self {
@@ -37,7 +37,7 @@ impl StorableMerged {
 		&self.version
 	}
 
-	pub fn datasets(&self) -> &HashMap<String, GroupSet> {
+	pub fn datasets(&self) -> &HashMap<String, StorableGroupSet> {
 		&self.datasets
 	}
 
@@ -51,16 +51,16 @@ impl StorableMerged {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct GroupSet {
+pub struct StorableGroupSet {
 	group: String,
-	location: Location,
+	location: StorableLocation,
 }
 
-impl GroupSet {
+impl StorableGroupSet {
 	pub fn local(group: String) -> Self {
 		Self {
 			group,
-			location: Location::Local,
+			location: StorableLocation::Local,
 		}
 	}
 
@@ -68,13 +68,13 @@ impl GroupSet {
 		&self.group
 	}
 
-	pub fn location(&self) -> &Location {
+	pub fn location(&self) -> &StorableLocation {
 		&self.location
 	}
 }
 
 #[derive(Serialize, Deserialize)]
-pub enum Location {
+pub enum StorableLocation {
 	Remote { url: String },
 	Local,
 }

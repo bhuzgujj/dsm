@@ -9,18 +9,23 @@ use serializer::DataForm;
 
 use crate::format::Format;
 
-/// Map a dataset at a path location
+/// Remap a dataset from a specified path to another. It will convert from a form to another and map its classes
 #[derive(Debug, Args)]
 pub struct Untrack {
 	/// Path to the dataset
 	#[clap(long)]
 	input_path: PathBuf,
 
-	/// In which format the files will be read as.
+	/// In which format the dataset will be read as.
+	///
 	/// If it is not a known standard, it will pick a script in scripts directory.
+	///
 	/// Standard supported:
-	///  - coco-1-0
-	///  - yolo-1-1
+	/// - coco-1-0
+	/// - yolo-1-1
+	///
+	/// To use a custom reader, prefix it with custom:<NAME>
+	/// The name needs to be in the settings
 	#[clap(long, verbatim_doc_comment)]
 	input_format: String,
 
@@ -28,11 +33,16 @@ pub struct Untrack {
 	#[clap(long)]
 	output_path: PathBuf,
 
-	/// In which format the files will be written into.
+	/// In which format the dataset will be written as.
+	///
 	/// If it is not a known standard, it will pick a script in scripts directory.
+	///
 	/// Standard supported:
-	///  - coco-1-0
-	///  - yolo-1-1
+	/// - coco-1-0
+	/// - yolo-1-1
+	///
+	/// To use a custom reader, prefix it with custom:<NAME>
+	/// The name needs to be in the settings
 	#[clap(long, verbatim_doc_comment)]
 	output_format: String,
 

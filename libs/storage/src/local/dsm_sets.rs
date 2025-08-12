@@ -1,6 +1,6 @@
 use interfaces::{
 	log_err,
-	models::{actions::Action, DsmSets},
+	models::{actions::Action, datasets::Dataset},
 	paths::write_to_file,
 };
 use std::{
@@ -10,7 +10,7 @@ use std::{
 
 use super::{copy_recursively, read_dsm, Storable, FORMAT_FILE_NAME, RAW_SET, SEPARATOR};
 
-impl Storable for DsmSets {
+impl Storable for Dataset {
 	fn ledge(&self, ledger_directory: &std::path::Path) -> anyhow::Result<bool> {
 		let json_filename = format!("{}{SEPARATOR}{}.json", self.name(), self.version());
 
@@ -83,7 +83,7 @@ impl Storable for DsmSets {
 		if !datasets_path.exists() {
 			return Ok(None);
 		}
-		let dsm_sets: DsmSets = read_dsm(&datasets_path)?;
+		let dsm_sets: Dataset = read_dsm(&datasets_path)?;
 		Ok(Some(dsm_sets))
 	}
 
@@ -101,7 +101,7 @@ impl Storable for DsmSets {
 					if path.is_dir() || path.extension().is_none_or(|ext| ext != "json") {
 						continue;
 					}
-					let dataset: DsmSets = read_dsm(&path)?;
+					let dataset: Dataset = read_dsm(&path)?;
 					datasets.push(dataset);
 				}
 				Ok(datasets)

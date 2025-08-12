@@ -1,6 +1,7 @@
 mod models;
 
-use interfaces::models::{ClassMapper, DsmSets, MergedSet, Settings};
+use interfaces::models::datasets::Dataset;
+use interfaces::models::{ClassMapper, MergedSet, Settings};
 use interfaces::{log_err, logger};
 use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;
@@ -24,7 +25,7 @@ async fn save_merge_set(
 	name: String,
 	version: String,
 	storage: Storage,
-	datasets: HashMap<String, (String, DsmSets)>,
+	datasets: HashMap<String, (String, Dataset)>,
 	mapping: ClassMapper,
 ) -> anyhow::Result<()> {
 	let merge_set = MergedSet::new(datasets.clone(), name.clone(), version, mapping);
@@ -36,7 +37,7 @@ async fn save_merge_set(
 #[pyfunction]
 async fn list_raw_sets() -> anyhow::Result<Vec<PySet>> {
 	let settings = Settings::load();
-	let resp: Vec<DsmSets> = Storage::local(&settings).list().await?;
+	let resp: Vec<Dataset> = Storage::local(&settings).list().await?;
 	Ok(resp.to_py())
 }
 
@@ -84,7 +85,7 @@ async fn new_merge(
 	let path = PathBuf::from(mapping_path);
 	let mapping = ClassMapper::read_from_file(&path)?;
 	for (name, version, group) in dataset_to_add.iter() {
-		let dsm: DsmSets = storage
+		let dsm: Dataset = storage
 			.read(name.clone(), version.clone())
 			.await?
 			.unwrap_or_else(|| panic!("Cannot read dataset {name} {version}"));
@@ -122,7 +123,7 @@ async fn merge_on(
 		}
 	}
 	for (name, version, group) in dataset_to_add.iter() {
-		let dsm: DsmSets = storage
+		let dsm: Dataset = storage
 			.read(name.clone(), version.clone())
 			.await?
 			.unwrap_or_else(|| panic!("Cannot read dataset {name} {version}"));

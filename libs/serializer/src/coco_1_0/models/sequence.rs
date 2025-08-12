@@ -1,13 +1,13 @@
-use crate::coco_1_0::models::annotation::Annotation;
-use crate::coco_1_0::models::category::Category;
-use crate::coco_1_0::models::image::Image;
-use crate::coco_1_0::models::info::Info;
-use crate::coco_1_0::models::license::License;
+use crate::coco_1_0::models::annotation::CocoAnnotation;
+use crate::coco_1_0::models::category::CocoCategory;
+use crate::coco_1_0::models::image::CocoImage;
+use crate::coco_1_0::models::info::CocoInfo;
+use crate::coco_1_0::models::license::CocoLicense;
 use interfaces::log_err;
-use interfaces::models::entries::{DsmEntry, DsmEntryBuilder};
-use interfaces::models::metadata::{DsmMetaData, DsmMetaDataBuilder};
-use interfaces::models::DsmSets;
-use interfaces::models::{DsmDataForm, DsmLocation};
+use interfaces::models::datasets::{Annotation, Dataset};
+use interfaces::models::datasets::{Entry, EntryBuilder};
+use interfaces::models::datasets::{MetaData, MetaDataBuilder};
+use interfaces::models::{DsmDataForm, Location};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -15,16 +15,16 @@ use std::path::{Path, PathBuf};
 pub(crate) const IMAGE_PATH: &str = "images";
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct Sequence {
-	pub(crate) licenses: Vec<License>,
-	pub(crate) info: Info,
-	pub(crate) categories: Vec<Category>,
-	pub(crate) images: Vec<Image>,
-	pub(crate) annotations: Vec<Annotation>,
+pub(crate) struct CocoSequence {
+	pub(crate) licenses: Vec<CocoLicense>,
+	pub(crate) info: CocoInfo,
+	pub(crate) categories: Vec<CocoCategory>,
+	pub(crate) images: Vec<CocoImage>,
+	pub(crate) annotations: Vec<CocoAnnotation>,
 }
 
-impl Sequence {
-	pub(crate) fn from_dsm(datasets: &DsmSets) -> HashMap<String, Self> {
+impl CocoSequence {
+	pub(crate) fn from_dsm(datasets: &Dataset) -> HashMap<String, Self> {
 		let mut sequences = HashMap::new();
 		let mut images_index: u32 = 0;
 		let mut annotations_index: u32 = 0;
@@ -44,39 +44,39 @@ impl Sequence {
 	}
 
 	fn from_parts(
-		meta_data: &DsmMetaData,
-		entries: Vec<DsmEntry>,
+		meta_data: &MetaData,
+		entries: Vec<Entry>,
 		images_i: &u32,
 		annotations_i: &u32,
 	) -> (Self, u32, u32) {
-		let licenses: Vec<License> =
+		let licenses: Vec<CocoLicense> =
 			meta_data
 				.licenses()
 				.clone()
 				.iter()
 				.fold(Vec::new(), |mut acc, (index, license)| {
-					acc.push(License::from_dsm(index, license));
+					acc.push(CocoLicense::from_dsm(index, license));
 					acc
 				});
 		let mut images_index = *images_i;
 		let mut annotations_index = *annotations_i;
-		let info: Info = Info::from_dsm(meta_data);
-		let categories: Vec<Category> =
+		let info: CocoInfo = CocoInfo::from_dsm(meta_data);
+		let categories: Vec<CocoCategory> =
 			meta_data
 				.classes()
 				.iter()
 				.fold(Vec::new(), |mut acc, (index, class)| {
-					acc.push(Category::from_dsm(class, *index));
+					acc.push(CocoCategory::from_dsm(class, *index));
 					acc
 				});
-		let mut images: Vec<Image> = Vec::with_capacity(entries.len());
-		let mut annotations: Vec<Annotation> = Vec::with_capacity(entries.len());
+		let mut images: Vec<CocoImage> = Vec::with_capacity(entries.len());
+		let mut annotations: Vec<CocoAnnotation> = Vec::with_capacity(entries.len());
 		for entry in entries {
 			images_index += 1;
-			images.push(Image::from_dsm(images_index, &entry));
+			images.push(CocoImage::from_dsm(images_index, &entry));
 			for annotation in entry.annotation() {
 				annotations_index += 1;
-				annotations.push(Annotation::from_dsm(
+				annotations.push(CocoAnnotation::from_dsm(
 					annotations_index,
 					images_index,
 					annotation,
@@ -99,15 +99,15 @@ impl Sequence {
 }
 
 pub fn into_dsm(
-	sequences: HashMap<String, Sequence>,
+	sequences: HashMap<String, CocoSequence>,
 	data_form: &DsmDataForm,
 	name: &str,
 	version: &str,
 	root: &Path,
-) -> anyhow::Result<DsmSets> {
+) -> anyhow::Result<Dataset> {
 	let mut entries = HashMap::new();
-	let mut categories: Vec<Category> = Vec::new();
-	let mut licenses: Vec<License> = Vec::new();
+	let mut categories: Vec<CocoCategory> = Vec::new();
+	let mut licenses: Vec<CocoLicense> = Vec::new();
 	let mut contributor: Option<String> = None;
 	let mut date_created: Option<String> = None;
 	let mut url: Option<String> = None;
@@ -146,7 +146,7 @@ pub fn into_dsm(
 		}
 	}
 
-	let mut metadata = DsmMetaDataBuilder::new(
+	let mut metadata = MetaDataBuilder::new(
 		name.to_string(),
 		version.to_string(),
 		data_form.clone(),
@@ -174,12 +174,11 @@ pub fn into_dsm(
 	if let Some(desc) = description {
 		metadata = metadata.set_description(desc);
 	}
-	Ok(DsmSets::new(metadata.build(), entries))
+	Ok(Dataset::new(metadata.build(), entries))
 }
 
-fn into_group_entries(sequences: &Sequence, group: &str, root: &Path) -> Vec<DsmEntry> {
-	let mut annotations: HashMap<u32, Vec<interfaces::models::annotation::DsmAnnotation>> =
-		HashMap::new();
+fn into_group_entries(sequences: &CocoSequence, group: &str, root: &Path) -> Vec<Entry> {
+	let mut annotations: HashMap<u32, Vec<Annotation>> = HashMap::new();
 	for ann in &sequences.annotations {
 		if let std::collections::hash_map::Entry::Vacant(e) = annotations.entry(ann.image_id) {
 			e.insert(vec![ann.dsm()]);
@@ -194,12 +193,12 @@ fn into_group_entries(sequences: &Sequence, group: &str, root: &Path) -> Vec<Dsm
 	let path = PathBuf::from(&IMAGE_PATH).join(group);
 	for imgs in &sequences.images {
 		data_entries.push(
-			DsmEntryBuilder::new(
+			EntryBuilder::new(
 				imgs.file_name.clone(),
 				path.join(&imgs.file_name).clone(),
 				imgs.width,
 				imgs.height,
-				DsmLocation::Local {
+				Location::Local {
 					path: root
 						.to_str()
 						.expect("Could not stringify the rootpath?")

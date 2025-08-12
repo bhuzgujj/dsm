@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct DsmAnnotation {
+pub struct Annotation {
 	class: u32,
 	x: f64,
 	y: f64,
@@ -13,7 +13,7 @@ pub struct DsmAnnotation {
 	rotation: Option<f64>,
 }
 
-impl DsmAnnotation {
+impl Annotation {
 	pub fn to_file_percent_str(&self, width: u32, height: u32) -> String {
 		format!(
 			"{} {:.6} {:.6} {:.6} {:.6}",
@@ -80,7 +80,7 @@ impl DsmAnnotation {
 	}
 }
 
-pub struct DsmAnnotationBuilder {
+pub struct AnnotationBuilder {
 	class: u32,
 	x: f64,
 	y: f64,
@@ -92,7 +92,7 @@ pub struct DsmAnnotationBuilder {
 	rotation: Option<f64>,
 }
 
-impl DsmAnnotationBuilder {
+impl AnnotationBuilder {
 	pub fn builder(class: u32, x: f64, y: f64, width: f64, height: f64) -> Self {
 		Self {
 			class,
@@ -127,8 +127,8 @@ impl DsmAnnotationBuilder {
 		self
 	}
 
-	pub fn build(self) -> DsmAnnotation {
-		DsmAnnotation {
+	pub fn build(self) -> Annotation {
+		Annotation {
 			class: self.class,
 			x: self.x,
 			y: self.y,

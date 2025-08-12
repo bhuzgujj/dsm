@@ -1,7 +1,7 @@
 use clap::Args;
 use interfaces::models::{actions::get_actions, Settings};
 
-/// Action recently done
+/// List actions taken in order
 #[derive(Args, Debug)]
 pub struct Actions {}
 

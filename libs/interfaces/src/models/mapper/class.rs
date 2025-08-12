@@ -1,5 +1,5 @@
 use crate::log_err;
-use crate::models::{classes::DsmClasses, DsmSets};
+use crate::models::datasets::{Classes, Dataset};
 use crate::paths::read_from_file;
 use log::trace;
 use serde::{Deserialize, Serialize};
@@ -41,7 +41,7 @@ impl ClassMapper {
 		}
 	}
 
-	pub(crate) fn get_class_for(&self, name: &String, class: &DsmClasses) -> Option<&u32> {
+	pub(crate) fn get_class_for(&self, name: &String, class: &Classes) -> Option<&u32> {
 		if let Some(custom) = &self.custom {
 			if let Some(k) = custom.get(name) {
 				if let Some(new_name) = k.mapping.get(class.class()) {
@@ -66,19 +66,18 @@ impl ClassMapper {
 		None
 	}
 
-	pub(crate) fn get_dsm_classes(&self) -> HashMap<u32, DsmClasses> {
-		self.classes.iter().fold(
-			HashMap::<u32, DsmClasses>::new(),
-			|mut acc, (class, index)| {
-				acc.insert(*index, DsmClasses::new(class.clone(), None));
+	pub(crate) fn get_dsm_classes(&self) -> HashMap<u32, Classes> {
+		self.classes
+			.iter()
+			.fold(HashMap::<u32, Classes>::new(), |mut acc, (class, index)| {
+				acc.insert(*index, Classes::new(class.clone(), None));
 				acc
-			},
-		)
+			})
 	}
 }
 
-impl From<&DsmSets> for ClassMapper {
-	fn from(value: &DsmSets) -> Self {
+impl From<&Dataset> for ClassMapper {
+	fn from(value: &Dataset) -> Self {
 		let mut classes = HashMap::new();
 		let mut mapping = HashMap::new();
 		for (index, class) in value.classes() {

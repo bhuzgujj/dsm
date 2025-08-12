@@ -1,6 +1,7 @@
 use interfaces::log_err;
+use interfaces::models::datasets::Dataset;
 use interfaces::models::interpreter::Interpreter;
-use interfaces::models::{DsmDataForm, DsmSets};
+use interfaces::models::DsmDataForm;
 use log::debug;
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -33,7 +34,7 @@ impl DataForm {
 		name: Option<String>,
 		version: String,
 		interpreters: &HashMap<String, Interpreter>,
-	) -> anyhow::Result<DsmSets> {
+	) -> anyhow::Result<Dataset> {
 		debug!(
 			"Reading files format '{}' at '{}'",
 			&path.canonicalize()?.to_str().unwrap_or("<Unknown path>"),
@@ -55,7 +56,7 @@ impl DataForm {
 	pub fn write(
 		&self,
 		output: &Path,
-		datasets: &DsmSets,
+		datasets: &Dataset,
 		interpreters: &HashMap<String, Interpreter>,
 	) -> anyhow::Result<()> {
 		match self {

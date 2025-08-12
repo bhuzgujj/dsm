@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::models::DsmToPy;
-use interfaces::models::{classes::DsmClasses, ClassMapper, CustomClassMapping};
+use interfaces::models::{datasets::Classes, ClassMapper, CustomClassMapping};
 use pyo3::pyclass;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
 
@@ -15,7 +15,7 @@ pub struct PyClasses {
 	subclass: Option<String>,
 }
 
-impl DsmToPy<PyClasses> for DsmClasses {
+impl DsmToPy<PyClasses> for Classes {
 	fn to_py(&self) -> PyClasses {
 		PyClasses {
 			name: self.class().clone(),

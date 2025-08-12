@@ -76,12 +76,12 @@ impl Log for Logger {
 		}
 
 		let log_line = log(record);
-		println!("{}", record.args());
-
 		if let Some(file_path) = &self.file {
 			let mut file = OpenOptions::new().append(true).open(file_path).unwrap();
 			file.write_all(format!("{log_line}\n").as_bytes())
 				.expect("Could not write to the log file");
+		} else {
+			println!("{log_line}");
 		}
 	}
 

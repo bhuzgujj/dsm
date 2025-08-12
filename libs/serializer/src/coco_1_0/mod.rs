@@ -1,8 +1,8 @@
 use crate::coco_1_0::models::sequence::into_dsm;
-use crate::coco_1_0::models::sequence::{Sequence, IMAGE_PATH};
+use crate::coco_1_0::models::sequence::{CocoSequence, IMAGE_PATH};
 use interfaces::log_err;
+use interfaces::models::datasets::Dataset;
 use interfaces::models::DsmDataForm;
-use interfaces::models::DsmSets;
 use interfaces::paths::write_to_file;
 use std::fs::{copy, create_dir_all};
 use std::path::Path;
@@ -16,7 +16,7 @@ pub(crate) fn read(
 	name: Option<String>,
 	version: String,
 	data_form: DsmDataForm,
-) -> anyhow::Result<DsmSets> {
+) -> anyhow::Result<Dataset> {
 	let sequences = models::read(&root.join(ANNOTATION_DIR))?;
 	let new_name = name.clone().unwrap_or(
 		root.file_name()
@@ -27,7 +27,7 @@ pub(crate) fn read(
 	into_dsm(sequences, &data_form, &new_name, &version, root)
 }
 
-pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
+pub(crate) fn write(output: &Path, datasets: &Dataset) -> anyhow::Result<()> {
 	if let Err(err) = create_dir_all(output.join(ANNOTATION_DIR)) {
 		return log_err!(format!(
 			"Failed to create dir {}: {}",
@@ -35,7 +35,7 @@ pub(crate) fn write(output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
 			err
 		));
 	}
-	let sequences = Sequence::from_dsm(datasets);
+	let sequences = CocoSequence::from_dsm(datasets);
 	for (name, sequence) in sequences {
 		let json = match serde_json::to_string_pretty(&sequence) {
 			Ok(ctnt) => ctnt,

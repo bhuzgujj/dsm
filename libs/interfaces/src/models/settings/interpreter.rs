@@ -2,7 +2,7 @@ use std::{fs, path::Path, process::Command};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{log_err, models::DsmSets, paths::write_to_file};
+use crate::{log_err, models::datasets::Dataset, paths::write_to_file};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Interpreter {
@@ -16,7 +16,7 @@ impl Interpreter {
 		path: &Path,
 		name: Option<String>,
 		version: String,
-	) -> anyhow::Result<DsmSets> {
+	) -> anyhow::Result<Dataset> {
 		let new_name = name.clone().unwrap_or(
 			path.file_name()
 				.expect("Could not get the directory name")
@@ -32,13 +32,13 @@ impl Interpreter {
 			.output()?;
 
 		let output = String::from_utf8(result.stdout)?;
-		match serde_json::from_str::<DsmSets>(&output) {
+		match serde_json::from_str::<Dataset>(&output) {
 			Ok(sets) => Ok(sets),
 			Err(_) => log_err!(format!("Error from the custom interpreter: {output}")),
 		}
 	}
 
-	pub fn write(&self, output: &Path, datasets: &DsmSets) -> anyhow::Result<()> {
+	pub fn write(&self, output: &Path, datasets: &Dataset) -> anyhow::Result<()> {
 		fs::create_dir_all(output)?;
 		let metadata_path = output.join("dsm_metadata.json");
 		let content = serde_json::to_string(datasets)?;

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::models::DsmToPy;
-use interfaces::models::{licence::DsmLicense, LicenseMapper};
+use interfaces::models::{datasets::License, LicenseMapper};
 use pyo3::pyclass;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
 
@@ -15,7 +15,7 @@ pub struct PyLicense {
 	url: String,
 }
 
-impl DsmToPy<PyLicense> for DsmLicense {
+impl DsmToPy<PyLicense> for License {
 	fn to_py(&self) -> PyLicense {
 		PyLicense {
 			name: self.name().to_string(),

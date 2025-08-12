@@ -1,8 +1,8 @@
-use interfaces::models::metadata::DsmMetaData;
+use interfaces::models::datasets::MetaData;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct Info {
+pub(crate) struct CocoInfo {
 	pub(crate) contributor: String,
 	pub(crate) date_created: String,
 	pub(crate) description: String,
@@ -11,8 +11,8 @@ pub(crate) struct Info {
 	pub(crate) year: String,
 }
 
-impl Info {
-	pub(crate) fn from_dsm(meta: &DsmMetaData) -> Self {
+impl CocoInfo {
+	pub(crate) fn from_dsm(meta: &MetaData) -> Self {
 		Self {
 			contributor: meta.contributor().clone(),
 			date_created: meta.date_created().clone(),

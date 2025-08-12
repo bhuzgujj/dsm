@@ -1,11 +1,11 @@
-use crate::models::datasets::classes::DsmClasses;
-use crate::models::datasets::licence::DsmLicense;
+use crate::models::datasets::classes::Classes;
+use crate::models::datasets::licence::License;
 use crate::models::form::DsmDataForm;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct DsmMetaData {
+pub struct MetaData {
 	pub name: String,
 	pub version: String,
 	pub subset_version: Option<String>,
@@ -16,12 +16,12 @@ pub struct DsmMetaData {
 	pub url: String,
 	pub year: String,
 	pub formatter: DsmDataForm,
-	pub classes: HashMap<u32, DsmClasses>,
-	pub licenses: HashMap<u32, DsmLicense>,
+	pub classes: HashMap<u32, Classes>,
+	pub licenses: HashMap<u32, License>,
 	pub contained_in_merged: Vec<String>,
 }
 
-impl DsmMetaData {
+impl MetaData {
 	pub fn name(&self) -> &String {
 		&self.name
 	}
@@ -30,7 +30,7 @@ impl DsmMetaData {
 		&self.version
 	}
 
-	pub fn classes(&self) -> &HashMap<u32, DsmClasses> {
+	pub fn classes(&self) -> &HashMap<u32, Classes> {
 		&self.classes
 	}
 
@@ -62,7 +62,7 @@ impl DsmMetaData {
 		&self.formatter
 	}
 
-	pub fn licenses(&self) -> &HashMap<u32, DsmLicense> {
+	pub fn licenses(&self) -> &HashMap<u32, License> {
 		&self.licenses
 	}
 
@@ -75,7 +75,7 @@ impl DsmMetaData {
 	}
 }
 
-pub struct DsmMetaDataBuilder {
+pub struct MetaDataBuilder {
 	name: String,
 	version: String,
 	subset_version: Option<String>,
@@ -86,17 +86,17 @@ pub struct DsmMetaDataBuilder {
 	year: String,
 	is_incomplete: bool,
 	formatter: DsmDataForm,
-	classes: HashMap<u32, DsmClasses>,
-	licenses: HashMap<u32, DsmLicense>,
+	classes: HashMap<u32, Classes>,
+	licenses: HashMap<u32, License>,
 	contained_in_merged: Vec<String>,
 }
 
-impl DsmMetaDataBuilder {
+impl MetaDataBuilder {
 	pub fn new(
 		name: String,
 		version: String,
 		formatter: DsmDataForm,
-		classes: HashMap<u32, DsmClasses>,
+		classes: HashMap<u32, Classes>,
 	) -> Self {
 		Self {
 			name,
@@ -140,12 +140,12 @@ impl DsmMetaDataBuilder {
 		self
 	}
 
-	pub fn set_licenses(mut self, licenses: HashMap<u32, DsmLicense>) -> Self {
+	pub fn set_licenses(mut self, licenses: HashMap<u32, License>) -> Self {
 		self.licenses = licenses;
 		self
 	}
 
-	pub fn set_classes(mut self, classes: HashMap<u32, DsmClasses>) -> Self {
+	pub fn set_classes(mut self, classes: HashMap<u32, Classes>) -> Self {
 		self.classes = classes;
 		self
 	}
@@ -168,8 +168,8 @@ impl DsmMetaDataBuilder {
 		self
 	}
 
-	pub fn build(self) -> DsmMetaData {
-		DsmMetaData {
+	pub fn build(self) -> MetaData {
+		MetaData {
 			name: self.name,
 			version: self.version,
 			subset_version: self.subset_version,
@@ -187,8 +187,8 @@ impl DsmMetaDataBuilder {
 	}
 }
 
-impl From<DsmMetaData> for DsmMetaDataBuilder {
-	fn from(value: DsmMetaData) -> Self {
+impl From<MetaData> for MetaDataBuilder {
+	fn from(value: MetaData) -> Self {
 		Self {
 			name: value.name,
 			version: value.version,

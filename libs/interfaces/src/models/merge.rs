@@ -1,14 +1,15 @@
 use crate::log_err;
-use crate::models::entries::DsmEntry;
-use crate::models::metadata::DsmMetaDataBuilder;
+use crate::models::datasets::Dataset;
+use crate::models::datasets::MetaDataBuilder;
+use crate::models::datasets::Entry;
 use crate::models::storable_merged::StorableMerged;
-use crate::models::{ClassMapper, DsmDataForm, DsmSets, GroupSet, LicenseMapper};
+use crate::models::{ClassMapper, DsmDataForm, LicenseMapper, StorableGroupSet};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct MergedSet {
-	datasets: HashMap<String, Vec<DsmSets>>,
+	datasets: HashMap<String, Vec<Dataset>>,
 	name: String,
 	version: String,
 	class_mapper: ClassMapper,
@@ -19,13 +20,13 @@ pub struct MergedSet {
 
 impl MergedSet {
 	pub fn new(
-		datasets: HashMap<String, (String, DsmSets)>,
+		datasets: HashMap<String, (String, Dataset)>,
 		name: String,
 		version: String,
 		class_mapper: ClassMapper,
 	) -> Self {
-		let sets: Vec<(String, DsmSets)> = datasets.values().cloned().collect();
-		let mut datasets: HashMap<String, Vec<DsmSets>> = HashMap::new();
+		let sets: Vec<(String, Dataset)> = datasets.values().cloned().collect();
+		let mut datasets: HashMap<String, Vec<Dataset>> = HashMap::new();
 		let mut license_mapper = LicenseMapper::new();
 		for (group, dataset) in &sets {
 			for (id, licence) in dataset.licenses() {
@@ -49,13 +50,13 @@ impl MergedSet {
 	}
 
 	pub fn from_storable(
-		datasets: Vec<(String, DsmSets)>,
+		datasets: Vec<(String, Dataset)>,
 		name: String,
 		version: String,
 		class_mapper: ClassMapper,
 		license_mapper: LicenseMapper,
 	) -> Self {
-		let mut map_set: HashMap<String, Vec<DsmSets>> = HashMap::new();
+		let mut map_set: HashMap<String, Vec<Dataset>> = HashMap::new();
 		for (group, set) in datasets {
 			if let Some(ds) = map_set.get_mut(&group) {
 				ds.push(set.clone());
@@ -76,15 +77,15 @@ impl MergedSet {
 	}
 
 	pub fn from_dsm(
-		datasets: DsmSets,
+		datasets: Dataset,
 		class_mapper: ClassMapper,
 		license_mapper: LicenseMapper,
 	) -> Self {
-		let mut map_set: HashMap<String, Vec<DsmSets>> = HashMap::new();
+		let mut map_set: HashMap<String, Vec<Dataset>> = HashMap::new();
 		for (group, entries) in datasets.entries() {
 			let mut sub_entries = HashMap::new();
 			sub_entries.insert(group.clone(), entries.clone());
-			let set: DsmSets = DsmSets::new(datasets.metadata().clone(), sub_entries);
+			let set: Dataset = Dataset::new(datasets.metadata().clone(), sub_entries);
 			if let Some(ds) = map_set.get_mut(group) {
 				ds.push(set);
 			} else {
@@ -111,15 +112,15 @@ impl MergedSet {
 		&self.version
 	}
 
-	pub fn to_dataset(&self, form: DsmDataForm) -> anyhow::Result<DsmSets> {
+	pub fn to_dataset(&self, form: DsmDataForm) -> anyhow::Result<Dataset> {
 		let classes = self.class_mapper.get_dsm_classes();
 		let metadata =
-			DsmMetaDataBuilder::new(self.name.clone(), self.version.clone(), form, classes)
+			MetaDataBuilder::new(self.name.clone(), self.version.clone(), form, classes)
 				.set_date_created(self.date_created.clone())
 				.set_licenses(self.license_mapper.licences().clone())
 				.set_description(self.description.clone())
 				.build();
-		let mut data_entries: HashMap<String, Vec<DsmEntry>> = HashMap::new();
+		let mut data_entries: HashMap<String, Vec<Entry>> = HashMap::new();
 		for (group, datasets) in &self.datasets {
 			if !data_entries.contains_key(group) {
 				data_entries.insert(group.to_string(), Vec::new());
@@ -145,10 +146,10 @@ impl MergedSet {
 				}
 			}
 		}
-		Ok(DsmSets::new(metadata, data_entries))
+		Ok(Dataset::new(metadata, data_entries))
 	}
 
-	pub fn datasets_include(&self) -> &HashMap<String, Vec<DsmSets>> {
+	pub fn datasets_include(&self) -> &HashMap<String, Vec<Dataset>> {
 		&self.datasets
 	}
 
@@ -175,7 +176,7 @@ impl MergedSet {
 			for dataset in datasets {
 				sets.insert(
 					format!("{}~{}", dataset.name(), dataset.version()),
-					GroupSet::local(group.clone()),
+					StorableGroupSet::local(group.clone()),
 				);
 			}
 		}

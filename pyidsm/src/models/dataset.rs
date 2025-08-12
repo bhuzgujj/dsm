@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::models::{entries::PyEntry, metadata::PyMetaData, DsmToPy};
-use interfaces::models::DsmSets;
+use interfaces::models::datasets::Dataset;
 use pyo3::pyclass;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
 
@@ -15,7 +15,7 @@ pub struct PySet {
 	entries: HashMap<String, Vec<PyEntry>>,
 }
 
-impl DsmToPy<PySet> for DsmSets {
+impl DsmToPy<PySet> for Dataset {
 	fn to_py(&self) -> PySet {
 		PySet {
 			metadata: self.metadata().to_py(),

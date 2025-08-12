@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use interfaces::log_err;
-use interfaces::models::metadata::DsmMetaDataBuilder;
-use interfaces::models::{ClassMapper, DsmSets, MergedSet, Settings};
+use interfaces::models::datasets::MetaDataBuilder;
+use interfaces::models::{datasets::Dataset, ClassMapper, MergedSet, Settings};
 use serde::{Deserialize, Serialize};
 use storage::Storage;
 use tauri::async_runtime::Mutex;
@@ -31,7 +31,7 @@ pub async fn merge_new(
 		action_log_limit: state.action_count(),
 	};
 	for include in included {
-		let local_set: Option<DsmSets> = storage
+		let local_set: Option<Dataset> = storage
 			.read(include.names.clone(), include.version.clone())
 			.await?;
 		let sets_label = format!("{}~{}", &include.names, &include.version);
@@ -56,9 +56,9 @@ pub async fn merge_new(
 	for (_, set) in datasets.values() {
 		let merged_key = format!("{}~{}", merge_set.name(), merge_set.version());
 		let builder =
-			DsmMetaDataBuilder::from(set.metadata().to_owned()).add_contained_in_merged(merged_key);
+			MetaDataBuilder::from(set.metadata().to_owned()).add_contained_in_merged(merged_key);
 		storage
-			.ledge(&DsmSets::new(builder.build(), set.entries().to_owned()))
+			.ledge(&Dataset::new(builder.build(), set.entries().to_owned()))
 			.await?;
 	}
 	Ok(())

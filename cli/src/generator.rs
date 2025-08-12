@@ -8,7 +8,7 @@ use serializer::DataForm;
 use std::path::PathBuf;
 use storage::Storage;
 
-/// Create a direvative dataset from storage in a known format at the path location
+/// Create a direvative dataset from storage in a known format at the specified path location
 #[derive(Args, Debug)]
 pub struct Generator {
 	/// Target location for the resulting direvative
@@ -27,11 +27,11 @@ pub struct Generator {
 	#[clap(short, long, verbatim_doc_comment)]
 	formats: String,
 
-	/// Datasets to include
+	/// Registered name of the dataset
 	#[clap(short, long)]
 	datasets: String,
 
-	/// Datasets registered version
+	/// Registered version of the dataset
 	#[clap(short, long)]
 	version: String,
 }

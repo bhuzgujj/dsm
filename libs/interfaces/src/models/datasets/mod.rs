@@ -1,26 +1,30 @@
-use crate::models::licence::DsmLicense;
-use crate::models::{classes::DsmClasses, DsmLocation};
-use entries::DsmEntry;
-use metadata::{DsmMetaData, DsmMetaDataBuilder};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::models::Location;
+
 use super::{ClassMapper, LicenseMapper};
 
-pub mod annotation;
-pub mod classes;
-pub mod entries;
-pub mod licence;
-pub mod metadata;
+mod annotation;
+mod classes;
+mod entries;
+mod licence;
+mod metadata;
+
+pub use annotation::*;
+pub use classes::*;
+pub use entries::*;
+pub use licence::*;
+pub use metadata::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct DsmSets {
-	pub metadata: DsmMetaData,
-	pub entries: HashMap<String, Vec<DsmEntry>>,
+pub struct Dataset {
+	pub metadata: MetaData,
+	pub entries: HashMap<String, Vec<Entry>>,
 }
 
-impl DsmSets {
-	pub fn new(metadata: DsmMetaData, entries: HashMap<String, Vec<DsmEntry>>) -> DsmSets {
+impl Dataset {
+	pub fn new(metadata: MetaData, entries: HashMap<String, Vec<Entry>>) -> Dataset {
 		Self { metadata, entries }
 	}
 
@@ -32,11 +36,11 @@ impl DsmSets {
 		format!("{}={}", self.metadata.name(), self.metadata.version())
 	}
 
-	pub fn metadata(&self) -> &DsmMetaData {
+	pub fn metadata(&self) -> &MetaData {
 		&self.metadata
 	}
 
-	pub fn licenses(&self) -> &HashMap<u32, DsmLicense> {
+	pub fn licenses(&self) -> &HashMap<u32, License> {
 		self.metadata.licenses()
 	}
 
@@ -44,15 +48,15 @@ impl DsmSets {
 		self.metadata.version()
 	}
 
-	pub fn entries_mut(&mut self) -> &mut HashMap<String, Vec<DsmEntry>> {
+	pub fn entries_mut(&mut self) -> &mut HashMap<String, Vec<Entry>> {
 		&mut self.entries
 	}
 
-	pub fn entries(&self) -> &HashMap<String, Vec<DsmEntry>> {
+	pub fn entries(&self) -> &HashMap<String, Vec<Entry>> {
 		&self.entries
 	}
 
-	pub fn classes(&self) -> &HashMap<u32, DsmClasses> {
+	pub fn classes(&self) -> &HashMap<u32, Classes> {
 		self.metadata.classes()
 	}
 
@@ -102,14 +106,14 @@ impl DsmSets {
 			new_entries.insert(name.clone(), subset);
 		}
 		Ok(Self {
-			metadata: DsmMetaDataBuilder::from(self.metadata.clone())
+			metadata: MetaDataBuilder::from(self.metadata.clone())
 				.set_classes(map.get_dsm_classes())
 				.build(),
 			entries: new_entries,
 		})
 	}
 
-	pub fn update_location(&mut self, save_location: DsmLocation) {
+	pub fn update_location(&mut self, save_location: Location) {
 		for (_, entries) in self.entries.iter_mut() {
 			for entry in entries.iter_mut() {
 				entry.update_location(&save_location);

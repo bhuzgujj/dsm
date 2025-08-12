@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct DsmLicense {
+pub struct License {
 	name: String,
 	url: String,
 }
 
-impl DsmLicense {
+impl License {
 	pub fn new(name: String, url: String) -> Self {
 		Self { name, url }
 	}

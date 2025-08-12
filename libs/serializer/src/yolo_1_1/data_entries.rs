@@ -1,10 +1,10 @@
 use crate::yolo_1_1::strip_prefix;
 use image::image_dimensions;
 use interfaces::log_err;
-use interfaces::models::annotation::{DsmAnnotation, DsmAnnotationBuilder};
-use interfaces::models::classes::DsmClasses;
-use interfaces::models::entries::{DsmEntry, DsmEntryBuilder};
-use interfaces::models::DsmLocation;
+use interfaces::models::datasets::Classes;
+use interfaces::models::datasets::{Annotation, AnnotationBuilder};
+use interfaces::models::datasets::{EntryBuilder, Entry};
+use interfaces::models::Location;
 use interfaces::paths::write_to_file;
 use std::collections::HashMap;
 use std::fs::{copy, create_dir_all, read_to_string};
@@ -14,8 +14,8 @@ use std::str::FromStr;
 pub(crate) fn read(
 	refs: &Path,
 	root: &Path,
-	classes: &HashMap<u32, DsmClasses>,
-) -> anyhow::Result<Vec<DsmEntry>> {
+	classes: &HashMap<u32, Classes>,
+) -> anyhow::Result<Vec<Entry>> {
 	let content = match read_to_string(refs) {
 		Ok(ctnt) => ctnt,
 		Err(err) => return log_err!(format!("Could not read '{}': {}", refs.display(), err)),
@@ -58,7 +58,7 @@ pub(crate) fn read(
 			}
 		}
 		entries.push(
-			DsmEntryBuilder::new(
+			EntryBuilder::new(
 				images_path
 					.file_name()
 					.unwrap()
@@ -68,7 +68,7 @@ pub(crate) fn read(
 				PathBuf::from(&image_relative_path),
 				img_width,
 				img_height,
-				DsmLocation::Local {
+				Location::Local {
 					path: root.to_str().unwrap().to_string(),
 				},
 			)
@@ -81,10 +81,10 @@ pub(crate) fn read(
 
 fn parse_annotation(
 	entry: &str,
-	classes: &HashMap<u32, DsmClasses>,
+	classes: &HashMap<u32, Classes>,
 	img_width: u32,
 	img_height: u32,
-) -> anyhow::Result<DsmAnnotation> {
+) -> anyhow::Result<Annotation> {
 	let fields: Vec<&str> = entry.split(&['\t', ' ']).collect();
 	if fields.len() != 5 {
 		return Err(anyhow::anyhow!(
@@ -101,13 +101,13 @@ fn parse_annotation(
 	let y = f64::from_str(fields[2])? * img_height as f64;
 	let width = f64::from_str(fields[3])? * img_width as f64;
 	let height = f64::from_str(fields[4])? * img_height as f64;
-	Ok(DsmAnnotationBuilder::builder(class_id, x, y, width, height).build())
+	Ok(AnnotationBuilder::builder(class_id, x, y, width, height).build())
 }
 
 pub(crate) fn write(
 	output: &Path,
 	sets_name: &String,
-	dataset_entry: &Vec<DsmEntry>,
+	dataset_entry: &Vec<Entry>,
 ) -> anyhow::Result<String> {
 	let dir = format!("obj_{sets_name}_data");
 	let img_dir = output.join(&dir);

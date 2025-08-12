@@ -1,22 +1,22 @@
 use clap::Args;
 use colored::Colorize;
-use interfaces::models::{DsmSets, MergedSet, Settings};
+use interfaces::models::{datasets::Dataset, MergedSet, Settings};
 use storage::Storage;
 
-/// Show currently stored sets
-#[derive(Args, Debug)]
-pub struct List {
+/// List currently stored datasets
+#[derive(Debug, Args)]
+pub struct Datasets {
 	/// Add azure's sets
 	#[clap(long, default_value = "false")]
 	azure_included: bool,
 }
 
-impl List {
+impl Datasets {
 	pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
-		let mut sets: Vec<DsmSets> = Storage::local(settings).list().await?;
+		let mut sets: Vec<Dataset> = Storage::local(settings).list().await?;
 
 		if self.azure_included {
-			let azure_sets: Vec<DsmSets> = Storage::Remote {
+			let azure_sets: Vec<Dataset> = Storage::Remote {
 				service: settings.remote(String::from("my_account")).unwrap().clone(),
 			}
 			.list()

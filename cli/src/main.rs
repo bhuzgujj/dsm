@@ -1,4 +1,3 @@
-mod actions;
 mod configuration;
 mod format;
 mod generator;
@@ -15,7 +14,6 @@ use std::fs::create_dir_all;
 
 use interfaces::models::{requires_migration, Settings};
 
-use crate::actions::Actions;
 use crate::configuration::Configuration;
 use crate::generator::Generator;
 use crate::list::List;
@@ -26,9 +24,10 @@ use crate::store::Store;
 #[clap(author, version, about, long_about = None)]
 enum Cli {
 	Store(Store),
-	Gen(Generator),
+	Generate(Generator),
+
+	#[command(subcommand)]
 	List(List),
-	Action(Actions),
 
 	#[command(subcommand)]
 	Map(Mapping),
@@ -50,9 +49,8 @@ async fn main() -> anyhow::Result<()> {
 	}
 
 	match Cli::parse() {
-		Cli::Action(action) => action.execute(&settings).await?,
 		Cli::Store(store) => store.execute(&settings).await?,
-		Cli::Gen(generator) => generator.execute(&settings).await?,
+		Cli::Generate(generator) => generator.execute(&settings).await?,
 		Cli::List(ls) => ls.execute(&settings).await?,
 		Cli::Merge(merge) => merge.execute(&settings).await?,
 		Cli::Map(map) => map.execute(&settings).await?,

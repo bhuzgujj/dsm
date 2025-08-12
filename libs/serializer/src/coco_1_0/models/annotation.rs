@@ -1,9 +1,9 @@
-use crate::coco_1_0::models::attribute::Attribute;
-use interfaces::models::annotation::{DsmAnnotation, DsmAnnotationBuilder};
+use crate::coco_1_0::models::attribute::CocoAttribute;
+use interfaces::models::datasets::{Annotation, AnnotationBuilder};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub(crate) struct Annotation {
+pub(crate) struct CocoAnnotation {
 	pub(crate) id: u32,
 	pub(crate) image_id: u32,
 	pub(crate) category_id: u32,
@@ -12,12 +12,12 @@ pub(crate) struct Annotation {
 	pub(crate) bbox: Vec<f64>,
 	pub(crate) iscrowd: u32,
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub(crate) attributes: Option<Attribute>,
+	pub(crate) attributes: Option<CocoAttribute>,
 }
 
-impl Annotation {
-	pub(crate) fn dsm(&self) -> DsmAnnotation {
-		DsmAnnotationBuilder::builder(
+impl CocoAnnotation {
+	pub(crate) fn dsm(&self) -> Annotation {
+		AnnotationBuilder::builder(
 			self.category_id,
 			self.bbox[0] + (self.bbox[2] / 2f64),
 			self.bbox[1] + (self.bbox[3] / 2f64),
@@ -31,7 +31,7 @@ impl Annotation {
 		.build()
 	}
 
-	pub(crate) fn from_dsm(id: u32, image_id: u32, data_entry: &DsmAnnotation) -> Annotation {
+	pub(crate) fn from_dsm(id: u32, image_id: u32, data_entry: &Annotation) -> CocoAnnotation {
 		Self {
 			id,
 			image_id,
@@ -45,7 +45,7 @@ impl Annotation {
 				*data_entry.height(),
 			],
 			iscrowd: *data_entry.iscrowd(),
-			attributes: Attribute::new(*data_entry.occluded(), *data_entry.rotation()),
+			attributes: CocoAttribute::new(*data_entry.occluded(), *data_entry.rotation()),
 		}
 	}
 }

@@ -1,28 +1,28 @@
 use crate::log_err;
-use crate::models::classes::DsmClasses;
-use crate::models::datasets::annotation::DsmAnnotation;
-use crate::models::{ClassMapper, DsmLocation, LicenseMapper};
+use crate::models::datasets::annotation::Annotation;
+use crate::models::datasets::classes::Classes;
+use crate::models::{ClassMapper, LicenseMapper, Location};
 use log::warn;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct DsmEntry {
+pub struct Entry {
 	file_name: String,
 	image_relative_path: PathBuf,
-	image_location: DsmLocation,
+	image_location: Location,
 	width: u32,
 	height: u32,
 	license: Option<u32>,
 	flickr_url: Option<String>,
 	coco_url: Option<String>,
 	date_captured: Option<String>,
-	annotation: Vec<DsmAnnotation>,
+	annotation: Vec<Annotation>,
 	original_id: Option<String>,
 }
 
-impl DsmEntry {
+impl Entry {
 	pub fn image_location(&self) -> PathBuf {
 		self.image_location.image(&self.image_relative_path)
 	}
@@ -51,7 +51,7 @@ impl DsmEntry {
 		&self.coco_url
 	}
 
-	pub fn annotation(&self) -> &Vec<DsmAnnotation> {
+	pub fn annotation(&self) -> &Vec<Annotation> {
 		&self.annotation
 	}
 
@@ -68,7 +68,7 @@ impl DsmEntry {
 		name: &String,
 		class_mapper: &ClassMapper,
 		licence_mapper: &LicenseMapper,
-		classes: &HashMap<u32, DsmClasses>,
+		classes: &HashMap<u32, Classes>,
 	) -> anyhow::Result<Self> {
 		let mut new_annotation = Vec::new();
 		for ann in &self.annotation {
@@ -114,7 +114,7 @@ impl DsmEntry {
 		version: String,
 		class_mapper: &ClassMapper,
 		licence_mapper: &LicenseMapper,
-		classes: HashMap<u32, DsmClasses>,
+		classes: HashMap<u32, Classes>,
 	) -> Self {
 		let prefix = format!("{name}-v{version}");
 		let mut new_annotation = Vec::new();
@@ -144,32 +144,32 @@ impl DsmEntry {
 		}
 	}
 
-	pub(crate) fn update_location(&mut self, save_location: &DsmLocation) {
+	pub(crate) fn update_location(&mut self, save_location: &Location) {
 		self.image_location = save_location.clone()
 	}
 }
 
-pub struct DsmEntryBuilder {
+pub struct EntryBuilder {
 	file_name: String,
 	image_relative_path: PathBuf,
-	image_location: DsmLocation,
+	image_location: Location,
 	width: u32,
 	height: u32,
 	license: Option<u32>,
 	flickr_url: Option<String>,
 	coco_url: Option<String>,
 	date_captured: Option<String>,
-	annotation: Vec<DsmAnnotation>,
+	annotation: Vec<Annotation>,
 	original_id: Option<String>,
 }
 
-impl DsmEntryBuilder {
+impl EntryBuilder {
 	pub fn new(
 		file_name: String,
 		image_relative_path: PathBuf,
 		width: u32,
 		height: u32,
-		image_location: DsmLocation,
+		image_location: Location,
 	) -> Self {
 		Self {
 			file_name,
@@ -211,13 +211,13 @@ impl DsmEntryBuilder {
 		self
 	}
 
-	pub fn set_annotation(mut self, annotation: Vec<DsmAnnotation>) -> Self {
+	pub fn set_annotation(mut self, annotation: Vec<Annotation>) -> Self {
 		self.annotation = annotation;
 		self
 	}
 
-	pub fn build(self) -> DsmEntry {
-		DsmEntry {
+	pub fn build(self) -> Entry {
+		Entry {
 			file_name: self.file_name,
 			image_relative_path: self.image_relative_path,
 			image_location: self.image_location,

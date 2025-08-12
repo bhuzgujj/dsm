@@ -1,9 +1,9 @@
-use interfaces::models::entries::DsmEntry;
+use interfaces::models::datasets::Entry;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct Image {
+pub(crate) struct CocoImage {
 	pub(crate) id: u32,
 	pub(crate) width: u32,
 	pub(crate) height: u32,
@@ -15,8 +15,8 @@ pub(crate) struct Image {
 	pub(crate) date_captured: String,
 }
 
-impl Image {
-	pub(crate) fn from_dsm(id: u32, data_entry: &DsmEntry) -> Self {
+impl CocoImage {
+	pub(crate) fn from_dsm(id: u32, data_entry: &Entry) -> Self {
 		Self {
 			id,
 			width: *data_entry.width(),
@@ -32,7 +32,7 @@ impl Image {
 		}
 	}
 
-	pub(crate) fn is_entry(&self, entry: &DsmEntry) -> bool {
+	pub(crate) fn is_entry(&self, entry: &Entry) -> bool {
 		self.file_name.eq(entry.file_name())
 			&& (entry.original_id().is_none()
 				|| entry

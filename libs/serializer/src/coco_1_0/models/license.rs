@@ -1,16 +1,15 @@
-use interfaces::models::licence::DsmLicense;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) struct License {
+pub(crate) struct CocoLicense {
 	pub(crate) id: u32,
 	pub(crate) name: String,
 	pub(crate) url: String,
 }
 
-impl License {
-	pub(crate) fn from_dsm(id: &u32, license: &DsmLicense) -> Self {
+impl CocoLicense {
+	pub(crate) fn from_dsm(id: &u32, license: &interfaces::models::datasets::License) -> Self {
 		Self {
 			id: *id,
 			name: license.name().to_string(),
@@ -18,7 +17,7 @@ impl License {
 		}
 	}
 
-	pub fn dsm(&self) -> DsmLicense {
-		DsmLicense::new(self.name.clone(), self.url.clone())
+	pub fn dsm(&self) -> interfaces::models::datasets::License {
+		interfaces::models::datasets::License::new(self.name.clone(), self.url.clone())
 	}
 }

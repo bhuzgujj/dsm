@@ -1,4 +1,4 @@
-use crate::models::{licence::DsmLicense, DsmSets};
+use crate::models::datasets::{Dataset, License};
 use log::trace;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -6,14 +6,14 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LicenseMapper {
 	current_id: u32,
-	licences: HashMap<u32, DsmLicense>,
+	licences: HashMap<u32, License>,
 	mapping: HashMap<String, HashMap<u32, u32>>,
 }
 
 impl LicenseMapper {
 	pub(crate) fn new() -> Self {
 		let mut licences = HashMap::new();
-		licences.insert(0, DsmLicense::new(String::new(), String::new()));
+		licences.insert(0, License::new(String::new(), String::new()));
 		Self {
 			current_id: 1,
 			licences,
@@ -21,7 +21,7 @@ impl LicenseMapper {
 		}
 	}
 
-	pub(crate) fn add_licence(&mut self, id: u32, set_name: String, license: DsmLicense) {
+	pub(crate) fn add_licence(&mut self, id: u32, set_name: String, license: License) {
 		let mut remap = true;
 		let mut new_id = self.current_id;
 		for licenses in self.licences.values() {
@@ -53,7 +53,7 @@ impl LicenseMapper {
 		self.mapping.get(set_name).and_then(|map| map.get(&id))
 	}
 
-	pub fn licences(&self) -> &HashMap<u32, DsmLicense> {
+	pub fn licences(&self) -> &HashMap<u32, License> {
 		&self.licences
 	}
 
@@ -62,8 +62,8 @@ impl LicenseMapper {
 	}
 }
 
-impl From<&DsmSets> for LicenseMapper {
-	fn from(dataset: &DsmSets) -> Self {
+impl From<&Dataset> for LicenseMapper {
+	fn from(dataset: &Dataset) -> Self {
 		let licences = dataset.licenses().clone();
 		let mut mapper = Self {
 			current_id: licences.len() as u32,
@@ -77,8 +77,8 @@ impl From<&DsmSets> for LicenseMapper {
 	}
 }
 
-impl From<&mut DsmSets> for LicenseMapper {
-	fn from(dataset: &mut DsmSets) -> Self {
+impl From<&mut Dataset> for LicenseMapper {
+	fn from(dataset: &mut Dataset) -> Self {
 		let licences = dataset.licenses().clone();
 		let mut mapper = Self {
 			current_id: licences.len() as u32,

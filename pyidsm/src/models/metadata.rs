@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::models::{classes::PyClasses, licence::PyLicense, DsmToPy};
-use interfaces::models::metadata::DsmMetaData;
+use interfaces::models::datasets::MetaData;
 use pyo3::pyclass;
 use pyo3_stub_gen_derive::gen_stub_pyclass;
 
@@ -35,7 +35,7 @@ pub struct PyMetaData {
 	licenses: HashMap<u32, PyLicense>,
 }
 
-impl DsmToPy<PyMetaData> for DsmMetaData {
+impl DsmToPy<PyMetaData> for MetaData {
 	fn to_py(&self) -> PyMetaData {
 		PyMetaData {
 			name: self.name().clone(),

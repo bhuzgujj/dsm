@@ -1,16 +1,16 @@
-use interfaces::models::classes::DsmClasses;
+use interfaces::models::datasets::Classes;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) struct Category {
+pub(crate) struct CocoCategory {
 	pub(crate) id: u32,
 	pub(crate) name: String,
 	pub(crate) supercategory: String,
 }
 
-impl Category {
-	pub fn from_dsm(classes: &DsmClasses, id: u32) -> Self {
+impl CocoCategory {
+	pub fn from_dsm(classes: &Classes, id: u32) -> Self {
 		Self {
 			id: id + 1,
 			name: classes.class().clone(),
@@ -18,7 +18,7 @@ impl Category {
 		}
 	}
 
-	pub fn dsm(&self) -> DsmClasses {
-		DsmClasses::new(self.name.clone(), Some(self.supercategory.clone()))
+	pub fn dsm(&self) -> Classes {
+		Classes::new(self.name.clone(), Some(self.supercategory.clone()))
 	}
 }

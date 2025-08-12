@@ -1,4 +1,4 @@
-mod datasets;
+pub mod datasets;
 mod form;
 mod location;
 mod mapper;
@@ -6,7 +6,6 @@ mod merge;
 mod settings;
 mod storable_merged;
 
-pub use datasets::*;
 pub use form::*;
 pub use location::*;
 pub use mapper::*;
