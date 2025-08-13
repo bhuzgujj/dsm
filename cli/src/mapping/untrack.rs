@@ -5,7 +5,7 @@ use interfaces::{
 	log_err,
 	models::{ClassMapper, Settings},
 };
-use serializer::DataForm;
+use serializer::Serializer;
 
 use crate::format::Format;
 
@@ -58,7 +58,7 @@ pub struct Untrack {
 impl Untrack {
 	pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
 		let _ = settings;
-		let iformat: DataForm = Format::try_from(self.input_format.clone())?.into();
+		let iformat: Serializer = Format::try_from(self.input_format.clone())?.into();
 		let content = match read_to_string(&self.mapping_file) {
 			Ok(content) => content,
 			Err(err) => {
@@ -84,7 +84,7 @@ impl Untrack {
 			settings.interpreters(),
 		)?;
 		let new_ds = datasets.remap(&mapping)?;
-		let oformat: DataForm = Format::try_from(self.input_format.clone())?.into();
+		let oformat: Serializer = Format::try_from(self.input_format.clone())?.into();
 		oformat.write(&self.output_path, &new_ds, settings.interpreters())?;
 		Ok(())
 	}

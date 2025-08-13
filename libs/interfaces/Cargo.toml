@@ -1,12 +1,13 @@
 [package]
 edition = "2021"
 name = "interfaces"
-version = "0.1.0"
+version = "0.2.0"
 
 [dependencies]
 anyhow.workspace = true
 
 chrono = {workspace = true, features = ["serde"]}
+colored.workspace = true
 
 dirs.workspace = true
 

@@ -1,7 +1,7 @@
 use interfaces::log_err;
 use interfaces::models::datasets::Dataset;
 use interfaces::models::interpreter::Interpreter;
-use interfaces::models::DsmDataForm;
+use interfaces::models::DataFormat;
 use log::debug;
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -11,23 +11,23 @@ mod coco_1_0;
 mod yolo_1_1;
 
 #[derive(Debug, Clone)]
-pub enum DataForm {
+pub enum Serializer {
 	Yolo1_1,
 	Coco1_0,
 	Custom(String),
 }
 
-impl Display for DataForm {
+impl Display for Serializer {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			DataForm::Yolo1_1 => write!(f, "Yolo 1.1"),
-			DataForm::Coco1_0 => write!(f, "Coco 1.0"),
-			DataForm::Custom(name) => write!(f, "Custom({name})"),
+			Serializer::Yolo1_1 => write!(f, "Yolo 1.1"),
+			Serializer::Coco1_0 => write!(f, "Coco 1.0"),
+			Serializer::Custom(name) => write!(f, "Custom({name})"),
 		}
 	}
 }
 
-impl DataForm {
+impl Serializer {
 	pub fn read(
 		&self,
 		path: &Path,
@@ -41,9 +41,9 @@ impl DataForm {
 			&self
 		);
 		match &self {
-			DataForm::Yolo1_1 => yolo_1_1::read(path, name, version, self.clone().into()),
-			DataForm::Coco1_0 => coco_1_0::read(path, name, version, self.clone().into()),
-			DataForm::Custom(interpreter) => {
+			Serializer::Yolo1_1 => yolo_1_1::read(path, name, version, self.clone().into()),
+			Serializer::Coco1_0 => coco_1_0::read(path, name, version, self.clone().into()),
+			Serializer::Custom(interpreter) => {
 				if let Some(interpreter) = interpreters.get(interpreter) {
 					interpreter.read(path, name, version)
 				} else {
@@ -60,9 +60,9 @@ impl DataForm {
 		interpreters: &HashMap<String, Interpreter>,
 	) -> anyhow::Result<()> {
 		match self {
-			DataForm::Yolo1_1 => yolo_1_1::write(output, datasets),
-			DataForm::Coco1_0 => coco_1_0::write(output, datasets),
-			DataForm::Custom(interpreter) => {
+			Serializer::Yolo1_1 => yolo_1_1::write(output, datasets),
+			Serializer::Coco1_0 => coco_1_0::write(output, datasets),
+			Serializer::Custom(interpreter) => {
 				if let Some(interpreter) = interpreters.get(interpreter) {
 					interpreter.write(output, datasets)
 				} else {
@@ -72,31 +72,31 @@ impl DataForm {
 		}
 	}
 
-	pub fn to_data_form(&self) -> DsmDataForm {
+	pub fn to_data_form(&self) -> DataFormat {
 		match self {
-			DataForm::Yolo1_1 => DsmDataForm::Yolo1_1,
-			DataForm::Coco1_0 => DsmDataForm::Coco1_0,
-			DataForm::Custom(custom) => DsmDataForm::Custom(custom.clone()),
+			Serializer::Yolo1_1 => DataFormat::Yolo1_1,
+			Serializer::Coco1_0 => DataFormat::Coco1_0,
+			Serializer::Custom(custom) => DataFormat::Custom(custom.clone()),
 		}
 	}
 }
 
-impl From<DataForm> for DsmDataForm {
-	fn from(form: DataForm) -> Self {
+impl From<Serializer> for DataFormat {
+	fn from(form: Serializer) -> Self {
 		match form {
-			DataForm::Yolo1_1 => DsmDataForm::Yolo1_1,
-			DataForm::Coco1_0 => DsmDataForm::Coco1_0,
-			DataForm::Custom(f) => DsmDataForm::Custom(f.clone()),
+			Serializer::Yolo1_1 => DataFormat::Yolo1_1,
+			Serializer::Coco1_0 => DataFormat::Coco1_0,
+			Serializer::Custom(f) => DataFormat::Custom(f.clone()),
 		}
 	}
 }
 
-impl From<DsmDataForm> for DataForm {
-	fn from(form: DsmDataForm) -> Self {
+impl From<DataFormat> for Serializer {
+	fn from(form: DataFormat) -> Self {
 		match form {
-			DsmDataForm::Yolo1_1 => DataForm::Yolo1_1,
-			DsmDataForm::Coco1_0 => DataForm::Coco1_0,
-			DsmDataForm::Custom(f) => DataForm::Custom(f.clone()),
+			DataFormat::Yolo1_1 => Serializer::Yolo1_1,
+			DataFormat::Coco1_0 => Serializer::Coco1_0,
+			DataFormat::Custom(f) => Serializer::Custom(f.clone()),
 		}
 	}
 }

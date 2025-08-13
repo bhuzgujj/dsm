@@ -2,6 +2,7 @@ use crate::models::Settings;
 use crate::paths::dsm_dir;
 use anyhow::anyhow;
 use chrono::Local;
+use colored::Colorize;
 use log::{trace, Log, Metadata, Record};
 use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
@@ -16,11 +17,9 @@ static mut LOGGER: Logger = Logger { file: None };
 pub fn refresh(settings: &Settings) -> anyhow::Result<()> {
 	let dir = dsm_dir();
 	if let Err(err) = create_dir_all(&dir) {
-		println!("Failed to create {} directory: {err}", dir.display());
-		return Err(anyhow!(
-			"Failed to create {} directory: {err}",
-			dir.display()
-		));
+		let msg = format!("Failed to create {} directory: {err}", dir.display()).red();
+		println!("{msg}");
+		return Err(anyhow!(msg));
 	}
 
 	let log_file_path = dsm_dir().join(FILE_NAME);
@@ -30,11 +29,9 @@ pub fn refresh(settings: &Settings) -> anyhow::Result<()> {
 		.write(true)
 		.open(&log_file_path)
 	{
-		println!("Failed to create {}: {err}", &log_file_path.display());
-		return Err(anyhow!(
-			"Failed to create {}: {err}",
-			&log_file_path.display()
-		));
+		let msg = format!("Failed to create {}: {err}", &log_file_path.display()).red();
+		println!("{msg}");
+		return Err(anyhow!(msg));
 	}
 	log::set_max_level(settings.log_level());
 	#[allow(static_mut_refs)]
@@ -53,8 +50,9 @@ pub fn bind_logger(settings: &Settings) -> anyhow::Result<()> {
 	#[allow(static_mut_refs)]
 	unsafe {
 		if let Err(err) = log::set_logger(&LOGGER) {
-			println!("Failed set logger: {err}");
-			return Err(anyhow!("Failed set logger: {err}"));
+			let msg = format!("Failed set logger: {err}").red();
+			println!("{msg}");
+			return Err(anyhow!(msg));
 		}
 	}
 	trace!("Logger bound!");

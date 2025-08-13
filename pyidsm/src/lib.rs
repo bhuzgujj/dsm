@@ -6,7 +6,7 @@ use interfaces::{log_err, logger};
 use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;
 use pyo3_stub_gen_derive::gen_stub_pyfunction;
-use serializer::DataForm;
+use serializer::Serializer;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
@@ -53,10 +53,10 @@ async fn list_merged_sets() -> anyhow::Result<Vec<PyMergedSet>> {
 #[pyfunction]
 async fn store(name: String, version: String, setform: String, path: String) -> anyhow::Result<()> {
 	let settings = init()?;
-	let formatter: DataForm = match setform.as_str() {
-		"yolo-1-1" => DataForm::Yolo1_1,
-		"coco-1-0" => DataForm::Coco1_0,
-		other => DataForm::Custom(other.to_string()),
+	let formatter: Serializer = match setform.as_str() {
+		"yolo-1-1" => Serializer::Yolo1_1,
+		"coco-1-0" => Serializer::Coco1_0,
+		other => Serializer::Custom(other.to_string()),
 	};
 	let path = PathBuf::from(path);
 	let datasets = formatter.read(
@@ -160,10 +160,10 @@ async fn generate(
 	if name.is_empty() {
 		return log_err!("Require at least one dataset");
 	}
-	let formatter: DataForm = match format.as_str() {
-		"yolo-1-1" => DataForm::Yolo1_1,
-		"coco-1-0" => DataForm::Coco1_0,
-		other => DataForm::Custom(other.to_string()),
+	let formatter: Serializer = match format.as_str() {
+		"yolo-1-1" => Serializer::Yolo1_1,
+		"coco-1-0" => Serializer::Coco1_0,
+		other => Serializer::Custom(other.to_string()),
 	};
 	let storage = Storage::local(&settings);
 	let new_set = if let Some(dsm_set) = storage.read(name.clone(), version.clone()).await? {

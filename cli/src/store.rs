@@ -1,8 +1,11 @@
 use crate::format::Format;
 use clap::Args;
-use interfaces::models::{Location, Settings};
+use interfaces::{
+	log_err,
+	models::{Location, Settings},
+};
 use log::debug;
-use serializer::DataForm;
+use serializer::Serializer;
 use std::path::PathBuf;
 use storage::Storage;
 
@@ -37,8 +40,13 @@ pub struct Store {
 impl Store {
 	pub async fn execute(&self, settings: &Settings) -> anyhow::Result<()> {
 		let path = PathBuf::from(self.path.clone());
-		let formatter: DataForm = Format::try_from(self.formats.clone())?.into();
-		debug!("Storing dataset '{}' with '{}'", path.display(), formatter);
+		let formatter: Serializer = Format::try_from(self.formats.clone())?.into();
+
+		debug!(
+			"Storing datasets at '{}' using format '{}'",
+			path.display(),
+			formatter
+		);
 		let mut dataset = formatter.read(
 			&path,
 			self.name.clone(),
@@ -47,15 +55,23 @@ impl Store {
 		)?;
 		let storage = Storage::local(settings);
 		let save_path = storage.store(&dataset, &path).await?;
-		let new_location = Location::Local {
-			path: save_path
-				.canonicalize()?
-				.to_str()
-				.expect("Save path incorrect")
-				.to_string(),
-		};
-		dataset.update_location(new_location);
-		storage.ledge(&dataset).await?;
-		Ok(())
+		match save_path.canonicalize()?.to_str() {
+			Some(path) => {
+				debug!(
+					"Update location of images of {} to {}",
+					dataset.name(),
+					&path
+				);
+				let new_location = Location::Local {
+					path: path.to_string(),
+				};
+				dataset.update_location(new_location);
+				storage.ledge(&dataset).await
+			},
+			None => log_err!(format!(
+				"Could not stringify the path of {}",
+				save_path.display()
+			)),
+		}
 	}
 }

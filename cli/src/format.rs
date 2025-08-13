@@ -1,5 +1,5 @@
 use interfaces::log_err;
-use serializer::DataForm;
+use serializer::Serializer;
 
 #[derive(Debug, Clone)]
 pub enum Format {
@@ -12,12 +12,12 @@ pub enum Format {
 	Custom(String),
 }
 
-impl From<Format> for DataForm {
+impl From<Format> for Serializer {
 	fn from(val: Format) -> Self {
 		match val {
-			Format::Coco1_0 => DataForm::Coco1_0,
-			Format::Yolo1_1 => DataForm::Yolo1_1,
-			Format::Custom(s) => DataForm::Custom(s),
+			Format::Coco1_0 => Serializer::Coco1_0,
+			Format::Yolo1_1 => Serializer::Yolo1_1,
+			Format::Custom(s) => Serializer::Custom(s),
 		}
 	}
 }
@@ -34,7 +34,7 @@ impl TryFrom<String> for Format {
 				if splits.len() > 1 {
 					Ok(Format::Custom(splits[1..].join(":").to_string()))
 				} else {
-					log_err!("Unknown standard: {s}")
+					log_err!(format!("Unknown standard: '{s}'"))
 				}
 			},
 		}

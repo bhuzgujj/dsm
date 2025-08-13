@@ -7,7 +7,7 @@ use interfaces::log_err;
 use interfaces::models::datasets::{Annotation, Dataset};
 use interfaces::models::datasets::{Entry, EntryBuilder};
 use interfaces::models::datasets::{MetaData, MetaDataBuilder};
-use interfaces::models::{DsmDataForm, Location};
+use interfaces::models::{DataFormat, Location};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -100,7 +100,7 @@ impl CocoSequence {
 
 pub fn into_dsm(
 	sequences: HashMap<String, CocoSequence>,
-	data_form: &DsmDataForm,
+	data_form: &DataFormat,
 	name: &str,
 	version: &str,
 	root: &Path,

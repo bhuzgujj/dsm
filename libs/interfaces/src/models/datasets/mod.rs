@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::models::Location;
+use crate::{models::Location, namable::Namable};
 
 use super::{ClassMapper, LicenseMapper};
 
@@ -19,8 +19,8 @@ pub use metadata::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Dataset {
-	pub metadata: MetaData,
-	pub entries: HashMap<String, Vec<Entry>>,
+	metadata: MetaData,
+	entries: HashMap<String, Vec<Entry>>,
 }
 
 impl Dataset {
@@ -119,5 +119,19 @@ impl Dataset {
 				entry.update_location(&save_location);
 			}
 		}
+	}
+}
+
+impl Namable for Dataset {
+	fn name(&self) -> String {
+		self.name().to_string()
+	}
+
+	fn version(&self) -> String {
+		self.version().to_string()
+	}
+
+	fn type_name() -> &'static str {
+		"RawDataSet"
 	}
 }

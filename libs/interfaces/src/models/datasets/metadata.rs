@@ -1,24 +1,24 @@
 use crate::models::datasets::classes::Classes;
 use crate::models::datasets::licence::License;
-use crate::models::form::DsmDataForm;
+use crate::models::form::DataFormat;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct MetaData {
-	pub name: String,
-	pub version: String,
-	pub subset_version: Option<String>,
-	pub contributor: String,
-	pub date_created: String,
-	pub description: String,
-	pub is_incomplete: bool,
-	pub url: String,
-	pub year: String,
-	pub formatter: DsmDataForm,
-	pub classes: HashMap<u32, Classes>,
-	pub licenses: HashMap<u32, License>,
-	pub contained_in_merged: Vec<String>,
+	name: String,
+	version: String,
+	subset_version: Option<String>,
+	contributor: String,
+	date_created: String,
+	description: String,
+	is_incomplete: bool,
+	url: String,
+	year: String,
+	formatter: DataFormat,
+	classes: HashMap<u32, Classes>,
+	licenses: HashMap<u32, License>,
+	contained_in_merged: Vec<String>,
 }
 
 impl MetaData {
@@ -58,7 +58,7 @@ impl MetaData {
 		&self.year
 	}
 
-	pub fn formatter(&self) -> &DsmDataForm {
+	pub fn formatter(&self) -> &DataFormat {
 		&self.formatter
 	}
 
@@ -85,7 +85,7 @@ pub struct MetaDataBuilder {
 	url: String,
 	year: String,
 	is_incomplete: bool,
-	formatter: DsmDataForm,
+	formatter: DataFormat,
 	classes: HashMap<u32, Classes>,
 	licenses: HashMap<u32, License>,
 	contained_in_merged: Vec<String>,
@@ -95,7 +95,7 @@ impl MetaDataBuilder {
 	pub fn new(
 		name: String,
 		version: String,
-		formatter: DsmDataForm,
+		formatter: DataFormat,
 		classes: HashMap<u32, Classes>,
 	) -> Self {
 		Self {

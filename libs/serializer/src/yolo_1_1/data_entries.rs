@@ -3,7 +3,7 @@ use image::image_dimensions;
 use interfaces::log_err;
 use interfaces::models::datasets::Classes;
 use interfaces::models::datasets::{Annotation, AnnotationBuilder};
-use interfaces::models::datasets::{EntryBuilder, Entry};
+use interfaces::models::datasets::{Entry, EntryBuilder};
 use interfaces::models::Location;
 use interfaces::paths::write_to_file;
 use std::collections::HashMap;
@@ -155,7 +155,7 @@ pub(crate) fn write(
 			entry
 				.annotation()
 				.iter()
-				.map(|a| a.to_file_percent_str(img_width, img_height))
+				.map(|a| annotation_to_yolo_str(a, img_width, img_height))
 				.collect::<Vec<String>>()
 				.join("\n"),
 			true,
@@ -165,4 +165,15 @@ pub(crate) fn write(
 	let set_file = format!("{sets_name}.txt");
 	write_to_file(&output.join(&set_file), sets.join("\n"), true, true)?;
 	Ok(set_file)
+}
+
+fn annotation_to_yolo_str(annotation: &Annotation, width: u32, height: u32) -> String {
+	format!(
+		"{} {:.6} {:.6} {:.6} {:.6}",
+		annotation.class(),
+		annotation.x() / width as f64,
+		annotation.y() / height as f64,
+		annotation.width() / width as f64,
+		annotation.height() / height as f64
+	)
 }

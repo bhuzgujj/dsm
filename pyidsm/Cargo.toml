@@ -1,12 +1,12 @@
 [package]
+edition = "2021"
 name = "pyidsm"
 version = "0.1.0"
-edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "pyidsm"
 crate-type = ["cdylib", "rlib"]
+name = "pyidsm"
 
 [dependencies]
 # Internal
@@ -18,9 +18,9 @@ storage.workspace = true
 anyhow.workspace = true
 log.workspace = true
 
-pyo3 = { workspace = true, features = ["extension-module", "serde", "anyhow", "experimental-async"] }
-pyo3-stub-gen.workspace = true
+pyo3 = {workspace = true, features = ["extension-module", "serde", "anyhow", "experimental-async"]}
 pyo3-stub-gen-derive.workspace = true
+pyo3-stub-gen.workspace = true
 
 [package.metadata.maturin]
 include = ["pyidsm.pyi"]

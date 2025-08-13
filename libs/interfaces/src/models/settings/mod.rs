@@ -15,10 +15,10 @@ use std::{fs::read_to_string, str::FromStr};
 const SETTINGS_FILENAME: &str = "settings.toml";
 const STORE: &str = "datasets-store";
 const LEDGER_DIRECTORY: &str = "files-ledger";
-const LEDGER_CURRENT_VERSION: u32 = 1;
+pub const LEDGER_CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-fn default_ledger_version() -> u32 {
-	0
+fn default_ledger_version() -> String {
+	"".to_string()
 }
 
 fn default_log_level() -> String {
@@ -51,7 +51,7 @@ fn default_interpreters() -> HashMap<String, Interpreter> {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Settings {
 	#[serde(default = "default_ledger_version")]
-	ledger_version: u32,
+	ledger_version: String,
 
 	#[serde(default = "default_log_level")]
 	log_level: String,
@@ -75,7 +75,7 @@ pub struct Settings {
 impl Default for Settings {
 	fn default() -> Self {
 		Self {
-			ledger_version: LEDGER_CURRENT_VERSION,
+			ledger_version: LEDGER_CURRENT_VERSION.to_string(),
 			log_level: default_log_level(),
 			ledger_path: default_ledger_path(),
 			store_path: default_store_path(),
@@ -95,8 +95,8 @@ impl Settings {
 		self.log_level = log_level.to_string();
 	}
 
-	pub fn ledger_version(&self) -> u32 {
-		self.ledger_version
+	pub fn ledger_version(&self) -> &String {
+		&self.ledger_version
 	}
 
 	pub fn action_count(&self) -> usize {
@@ -147,8 +147,12 @@ impl Settings {
 	pub fn remote(&self, name: String) -> Option<&Remote> {
 		self.remotes.get(&name)
 	}
+
+	pub fn update_ledger_version(&mut self) {
+		self.ledger_version = LEDGER_CURRENT_VERSION.to_string()
+	}
 }
 
-pub fn requires_migration(current_version: u32) -> bool {
-	current_version == LEDGER_CURRENT_VERSION
+pub fn requires_migration(current_version: &String) -> bool {
+	current_version != LEDGER_CURRENT_VERSION
 }

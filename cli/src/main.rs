@@ -4,15 +4,16 @@ mod generator;
 mod list;
 mod mapping;
 mod merge;
-mod migration;
 mod store;
 
 use clap::Parser;
+use colored::Colorize;
 use interfaces::logger;
+use log::info;
 use mapping::Mapping;
 use std::fs::create_dir_all;
 
-use interfaces::models::{requires_migration, Settings};
+use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
 
 use crate::configuration::Configuration;
 use crate::generator::Generator;
@@ -38,24 +39,33 @@ enum Cli {
 	Config(Configuration),
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-	let mut settings = Settings::load();
-	logger::bind_logger(&settings)?;
+async fn execute(settings: &mut Settings) -> anyhow::Result<()> {
+	logger::bind_logger(settings)?;
 	create_dir_all(settings.store_path())?;
 	create_dir_all(settings.ledger_path())?;
 	if requires_migration(settings.ledger_version()) {
-		migration::migrate(&settings).await?;
+		info!("Migrate to version {LEDGER_CURRENT_VERSION}");
+		storage::migrate(settings).await?;
+		settings.update_ledger_version();
+		settings.save()?;
 	}
 
 	match Cli::parse() {
-		Cli::Store(store) => store.execute(&settings).await?,
-		Cli::Generate(generator) => generator.execute(&settings).await?,
-		Cli::List(ls) => ls.execute(&settings).await?,
-		Cli::Merge(merge) => merge.execute(&settings).await?,
-		Cli::Map(map) => map.execute(&settings).await?,
+		Cli::Store(store) => store.execute(settings).await,
+		Cli::Generate(generator) => generator.execute(settings).await,
+		Cli::List(ls) => ls.execute(settings).await,
+		Cli::Merge(merge) => merge.execute(settings).await,
+		Cli::Map(map) => map.execute(settings).await,
 
-		Cli::Config(configuration) => configuration.configure(&mut settings)?,
-	};
+		Cli::Config(configuration) => configuration.configure(settings),
+	}
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+	let mut settings = Settings::load();
+	if let Err(err) = execute(&mut settings).await {
+		println!("{}", err.to_string().red());
+	}
 	settings.save()
 }

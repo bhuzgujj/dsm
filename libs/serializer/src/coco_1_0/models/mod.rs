@@ -1,5 +1,6 @@
 use crate::coco_1_0::models::sequence::CocoSequence;
 use interfaces::log_err;
+use log::debug;
 use std::collections::HashMap;
 use std::fs::{read_dir, read_to_string};
 use std::path::PathBuf;
@@ -19,6 +20,7 @@ pub(crate) fn read(root: &PathBuf) -> anyhow::Result<HashMap<String, CocoSequenc
 			for files in dir {
 				let f = files?;
 				if let Ok(content) = read_to_string(f.path()) {
+					debug!("Read Sequence at '{}'", f.path().display());
 					let sequence: CocoSequence = match serde_json::from_str(content.as_str()) {
 						Ok(s) => s,
 						Err(err) => {

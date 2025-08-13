@@ -4,11 +4,12 @@ mod models;
 
 use std::fs::create_dir_all;
 
-use tauri::async_runtime::Mutex;
+use log::info;
+use tauri::async_runtime::{block_on, Mutex};
 use tauri::Manager;
 
 use interfaces::logger;
-use interfaces::models::Settings;
+use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
 
 use crate::commands::*;
 use crate::error::UiError;
@@ -18,25 +19,9 @@ pub fn run() {
 	tauri::Builder::default()
 		.plugin(tauri_plugin_dialog::init())
 		//.plugin(tauri_plugin_updater::Builder::new().build()) TODO
-		.setup(|app| {
-			#[cfg(debug_assertions)] // only include this code on debug builds
-			{
-				let window = app.get_webview_window("main").unwrap();
-				window.open_devtools();
-				window.close_devtools();
-			}
-			let settings = Settings::load();
-			if let Err(e) = logger::bind_logger(&settings) {
-				return Err(Box::new(UiError::from(e)));
-			}
-			if let Err(e) = create_dir_all(settings.ledger_path()) {
-				return Err(Box::new(UiError::from(e)));
-			}
-			if let Err(e) = create_dir_all(settings.store_path()) {
-				return Err(Box::new(UiError::from(e)));
-			}
-			app.manage(Mutex::new(settings));
-			Ok(())
+		.setup(|app| match pre_start(app) {
+			Ok(_) => Ok(()),
+			Err(e) => Err(Box::new(UiError::from(e))),
 		})
 		.plugin(tauri_plugin_opener::init())
 		.invoke_handler(tauri::generate_handler![
@@ -51,4 +36,25 @@ pub fn run() {
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
+}
+
+fn pre_start(app: &mut tauri::App) -> anyhow::Result<()> {
+	#[cfg(debug_assertions)] // only include this code on debug builds
+	{
+		let window = app.get_webview_window("main").unwrap();
+		window.open_devtools();
+		window.close_devtools();
+	}
+	let mut settings = Settings::load();
+	logger::bind_logger(&settings)?;
+	create_dir_all(settings.ledger_path())?;
+	create_dir_all(settings.store_path())?;
+	if requires_migration(settings.ledger_version()) {
+		info!("Migrate to version {LEDGER_CURRENT_VERSION}");
+		block_on(storage::migrate(&settings))?;
+		settings.update_ledger_version();
+		settings.save()?;
+	}
+	app.manage(Mutex::new(settings));
+	Ok(())
 }

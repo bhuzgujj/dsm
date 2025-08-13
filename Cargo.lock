@@ -2206,10 +2206,11 @@ dependencies = [
 
 [[package]]
 name = "interfaces"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "chrono",
+ "colored",
  "dirs",
  "log",
  "serde",
@@ -4683,12 +4684,14 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
+ "colored",
  "futures",
  "interfaces",
  "log",
  "reqwest",
  "serde",
  "serde_json",
+ "serializer",
 ]
 
 [[package]]

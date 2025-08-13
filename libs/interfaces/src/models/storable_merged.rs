@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::models::{ClassMapper, LicenseMapper};
+use crate::{
+	models::{ClassMapper, LicenseMapper},
+	namable::Namable,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -77,4 +80,18 @@ impl StorableGroupSet {
 pub enum StorableLocation {
 	Remote { url: String },
 	Local,
+}
+
+impl Namable for StorableMerged {
+	fn name(&self) -> String {
+		self.name().to_string()
+	}
+
+	fn version(&self) -> String {
+		self.version().to_string()
+	}
+
+	fn type_name() -> &'static str {
+		"StorableMerged"
+	}
 }

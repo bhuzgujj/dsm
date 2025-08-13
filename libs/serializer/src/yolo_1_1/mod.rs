@@ -5,7 +5,8 @@ mod obj_names;
 use crate::yolo_1_1::obj_data::ObjData;
 use interfaces::models::datasets::Dataset;
 use interfaces::models::datasets::MetaDataBuilder;
-use interfaces::models::DsmDataForm;
+use interfaces::models::DataFormat;
+use log::debug;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::Path;
@@ -16,8 +17,9 @@ pub(crate) fn read(
 	root: &Path,
 	name: Option<String>,
 	version: String,
-	formatter: DsmDataForm,
+	formatter: DataFormat,
 ) -> anyhow::Result<Dataset> {
+	debug!("Read in yolo format");
 	let obj_data = ObjData::read(root)?;
 	let classes = obj_names::read(root.join(obj_data.names()))?;
 	let mut sets = HashMap::new();
@@ -39,6 +41,7 @@ pub(crate) fn read(
 }
 
 pub(crate) fn write(output: &Path, datasets: &Dataset) -> anyhow::Result<()> {
+	debug!("Write in yolo format");
 	create_dir_all(output)?;
 	obj_names::write(output, datasets.classes().clone())?;
 	let mut sets = HashMap::new();

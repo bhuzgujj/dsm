@@ -1,4 +1,4 @@
-use serializer::DataForm;
+use serializer::Serializer;
 
 #[derive(Debug, Clone)]
 pub enum DatasetFormat {
@@ -7,12 +7,12 @@ pub enum DatasetFormat {
 	Custom(String),
 }
 
-impl From<DatasetFormat> for DataForm {
+impl From<DatasetFormat> for Serializer {
 	fn from(val: DatasetFormat) -> Self {
 		match val {
-			DatasetFormat::Coco1_0 => DataForm::Coco1_0,
-			DatasetFormat::Yolo1_1 => DataForm::Yolo1_1,
-			DatasetFormat::Custom(s) => DataForm::Custom(s),
+			DatasetFormat::Coco1_0 => Serializer::Coco1_0,
+			DatasetFormat::Yolo1_1 => Serializer::Yolo1_1,
+			DatasetFormat::Custom(s) => Serializer::Custom(s),
 		}
 	}
 }

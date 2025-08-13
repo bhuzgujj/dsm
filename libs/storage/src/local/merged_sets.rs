@@ -1,6 +1,6 @@
 use std::{
 	fs::{create_dir_all, read_dir},
-	path::PathBuf,
+	path::{Path, PathBuf},
 };
 
 use interfaces::{
@@ -10,31 +10,52 @@ use interfaces::{
 		datasets::Dataset,
 		MergedSet, StorableMerged,
 	},
+	namable::Namable,
 	paths::write_to_file,
 };
+use log::{debug, info};
 
 use super::{read_dsm, Storable, MERGED_SET, RAW_SET, SEPARATOR};
 
 impl Storable for MergedSet {
-	fn ledge(&self, ledger_directory: &std::path::Path) -> anyhow::Result<bool> {
-		let storable: interfaces::models::StorableMerged = self.to_storable();
+	fn ledge(&self, ledger_directory: &Path) -> anyhow::Result<bool> {
+		let storable: StorableMerged = self.to_storable();
 		let merged_file = format!("{}{SEPARATOR}{}.json", self.name(), self.version());
 		let merged_dir = ledger_directory.join(MERGED_SET);
 		let merged_path = merged_dir.join(&merged_file);
+
+		debug!(
+			"Verifying if a {} already exists at '{}'",
+			MergedSet::type_name(),
+			merged_path.display()
+		);
 		if merged_path.exists() {
 			return log_err!(format!(
-				"Merged set '{} v{}' already exists",
+				"{} already has the name '{}' and version '{}'",
+				MergedSet::type_name(),
 				self.name(),
 				self.version()
 			));
 		}
+
+		debug!(
+			"Verifying if a {} already exists at '{}'",
+			Dataset::type_name(),
+			merged_path.display()
+		);
 		if ledger_directory.join(RAW_SET).join(merged_file).exists() {
 			return log_err!(format!(
-				"Raw set already exists with '{} v{}'",
+				"{} already has the name '{}' and version '{}'",
+				Dataset::type_name(),
 				self.name(),
 				self.version()
 			));
 		}
+
+		debug!(
+			"Creating ledger directory for raw sets if it does not exists at '{}'",
+			merged_dir.display()
+		);
 		if let Err(err) = create_dir_all(&merged_dir) {
 			return log_err!(format!(
 				"Failed to create dir {}: {}",
@@ -42,8 +63,14 @@ impl Storable for MergedSet {
 				err
 			));
 		}
+
+		debug!("Serializing content of {} into json", self.log_name());
 		match serde_json::to_string_pretty(&storable) {
 			Ok(content) => {
+				debug!(
+					"Writing into the raw datasets ledger at '{}'",
+					merged_path.display()
+				);
 				write_to_file(&merged_path, content, true, true)?;
 				Ok(false)
 			},
@@ -55,16 +82,12 @@ impl Storable for MergedSet {
 		}
 	}
 
-	fn store(
-		&self,
-		_store_directory: &std::path::Path,
-		_originals_path: &std::path::Path,
-	) -> anyhow::Result<PathBuf> {
-		todo!("Not implemented")
+	fn store(&self, _store_directory: &Path, _originals_path: &Path) -> anyhow::Result<PathBuf> {
+		todo!("Not implemented, It should be capable of querying dsm from remotes")
 	}
 
 	fn read(
-		ledger_directory: &std::path::Path,
+		ledger_directory: &Path,
 		name: String,
 		version: String,
 	) -> anyhow::Result<Option<Self>> {
@@ -72,15 +95,26 @@ impl Storable for MergedSet {
 		let datasets_ledger = ledger_directory
 			.join(MERGED_SET)
 			.join(format!("{name}{SEPARATOR}{version}.json"));
+
+		debug!(
+			"Reading {} ledger at '{}'",
+			MergedSet::type_name(),
+			datasets_ledger.display()
+		);
 		if !datasets_ledger.exists() {
 			return Ok(None);
 		}
-		let storable: StorableMerged = read_dsm(&datasets_ledger)?;
 
+		let storable: StorableMerged = read_dsm(&datasets_ledger)?;
 		let mut datasets: Vec<(String, Dataset)> = Vec::new();
-		for (name, set) in storable.datasets() {
+		debug!(
+			"Reading all {} included {}.",
+			storable.datasets().len(),
+			Dataset::type_name()
+		);
+		for (name, storable_group_set) in storable.datasets() {
 			datasets.push((
-				set.group().to_owned(),
+				storable_group_set.group().to_owned(),
 				read_dsm(&ledger_raw_dir.join(format!("{}.json", &name)))?,
 			));
 		}
@@ -93,12 +127,31 @@ impl Storable for MergedSet {
 		)))
 	}
 
-	fn list(ledger_directory: &std::path::Path) -> anyhow::Result<Vec<Self>> {
+	fn list(ledger_directory: &Path) -> anyhow::Result<Vec<Self>> {
 		let ledger_raw_dir = ledger_directory.join(RAW_SET);
 		let ledger_merged_dir = ledger_directory.join(MERGED_SET);
-		if !ledger_raw_dir.exists() || !ledger_merged_dir.exists() {
+		if !ledger_raw_dir.exists() {
+			info!(
+				"Ledger's {} directory at '{}' does not exists",
+				Dataset::type_name(),
+				ledger_raw_dir.display()
+			);
 			return Ok(Vec::new());
 		}
+		if !ledger_merged_dir.exists() {
+			info!(
+				"Ledger's {} directory at '{}' does not exists",
+				MergedSet::type_name(),
+				ledger_merged_dir.display()
+			);
+			return Ok(Vec::new());
+		}
+
+		debug!(
+			"Read ledger's {} directory at '{}'",
+			MergedSet::type_name(),
+			ledger_merged_dir.display()
+		);
 		match read_dir(&ledger_merged_dir) {
 			Ok(dir) => {
 				let mut mergedsets = Vec::new();

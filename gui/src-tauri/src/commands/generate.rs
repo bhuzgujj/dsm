@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use interfaces::models::{MergedSet, Settings};
-use serializer::DataForm;
+use serializer::Serializer;
 use storage::Storage;
 use tauri::async_runtime::Mutex;
 use tauri::{Error, State};
@@ -22,7 +22,7 @@ pub async fn generate_merged_set(
 		store_directory: state.store_path(),
 		action_log_limit: state.action_count(),
 	};
-	let formatter: DataForm = DatasetFormat::from(formats).into();
+	let formatter: Serializer = DatasetFormat::from(formats).into();
 	if let Some(merged) = storage.read::<MergedSet>(name, version).await? {
 		let new_set = merged.to_dataset(formatter.to_data_form())?;
 		let path = PathBuf::from(&path);

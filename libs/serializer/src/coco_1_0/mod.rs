@@ -2,8 +2,9 @@ use crate::coco_1_0::models::sequence::into_dsm;
 use crate::coco_1_0::models::sequence::{CocoSequence, IMAGE_PATH};
 use interfaces::log_err;
 use interfaces::models::datasets::Dataset;
-use interfaces::models::DsmDataForm;
+use interfaces::models::DataFormat;
 use interfaces::paths::write_to_file;
+use log::debug;
 use std::fs::{copy, create_dir_all};
 use std::path::Path;
 
@@ -15,8 +16,9 @@ pub(crate) fn read(
 	root: &Path,
 	name: Option<String>,
 	version: String,
-	data_form: DsmDataForm,
+	data_form: DataFormat,
 ) -> anyhow::Result<Dataset> {
+	debug!("Read in coco format");
 	let sequences = models::read(&root.join(ANNOTATION_DIR))?;
 	let new_name = name.clone().unwrap_or(
 		root.file_name()
@@ -28,6 +30,7 @@ pub(crate) fn read(
 }
 
 pub(crate) fn write(output: &Path, datasets: &Dataset) -> anyhow::Result<()> {
+	debug!("Write in coco format");
 	if let Err(err) = create_dir_all(output.join(ANNOTATION_DIR)) {
 		return log_err!(format!(
 			"Failed to create dir {}: {}",

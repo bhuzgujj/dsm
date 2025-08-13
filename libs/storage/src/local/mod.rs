@@ -6,9 +6,10 @@ use std::{
 	path::{Path, PathBuf},
 };
 
+use log::debug;
 use serde::{de::DeserializeOwned, Serialize};
 
-use interfaces::{log_err, models::actions::Action};
+use interfaces::{log_err, models::actions::Action, namable::Namable};
 
 pub const RAW_SET: &str = "raw_sets";
 pub const MERGED_SET: &str = "merged_sets";
@@ -17,17 +18,22 @@ pub const FORMAT_FILE_NAME: &str = "formats.dsm.txt";
 
 pub trait Storable
 where
-	Self: DeserializeOwned + Serialize,
+	Self: DeserializeOwned + Serialize + Namable,
 {
+	/// Store a cache version of the datasets information.
 	fn ledge(&self, ledger_directory: &Path) -> anyhow::Result<bool>;
-	fn store(
-		&self,
-		store_directory: &Path,
-		originals_path: &std::path::Path,
-	) -> anyhow::Result<PathBuf>;
+
+	/// Store the actual data of said datasets
+	fn store(&self, store_directory: &Path, originals_path: &Path) -> anyhow::Result<PathBuf>;
+
+	/// Read the datasets information from the ledger
 	fn read(ledger_directory: &Path, name: String, version: String)
 		-> anyhow::Result<Option<Self>>;
+
+	/// Get all datasets information logged in the ledger
 	fn list(ledger_directory: &Path) -> anyhow::Result<Vec<Self>>;
+
+	/// Convert dataset into an action
 	fn to_action(&self) -> Action;
 }
 
@@ -45,8 +51,9 @@ fn copy_recursively(src: &Path, dst: &Path) -> anyhow::Result<()> {
 	Ok(())
 }
 
-#[inline]
-fn read_dsm<T: DeserializeOwned>(path: &Path) -> anyhow::Result<T> {
+#[inline(always)]
+fn read_dsm<T: DeserializeOwned + Namable>(path: &Path) -> anyhow::Result<T> {
+	debug!("Parsing '{}' into a {}", path.display(), T::type_name());
 	let content = match read_to_string(path) {
 		Ok(ctnt) => ctnt,
 		Err(err) => return log_err!(format!("Failed to read {}: {}", path.display(), err)),

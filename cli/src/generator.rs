@@ -4,7 +4,7 @@ use interfaces::{
 	log_err,
 	models::{MergedSet, Settings},
 };
-use serializer::DataForm;
+use serializer::Serializer;
 use std::path::PathBuf;
 use storage::Storage;
 
@@ -41,7 +41,7 @@ impl Generator {
 		if self.datasets.is_empty() {
 			return log_err!("Require at least one dataset");
 		}
-		let formatter: DataForm = Format::try_from(self.formats.clone())?.into();
+		let formatter: Serializer = Format::try_from(self.formats.clone())?.into();
 		let storage = Storage::local(settings);
 		let datasets = storage
 			.read(self.datasets.clone(), self.version.clone())

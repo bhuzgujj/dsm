@@ -1,9 +1,10 @@
 use crate::log_err;
 use crate::models::datasets::Dataset;
-use crate::models::datasets::MetaDataBuilder;
 use crate::models::datasets::Entry;
+use crate::models::datasets::MetaDataBuilder;
 use crate::models::storable_merged::StorableMerged;
-use crate::models::{ClassMapper, DsmDataForm, LicenseMapper, StorableGroupSet};
+use crate::models::{ClassMapper, DataFormat, LicenseMapper, StorableGroupSet};
+use crate::namable::Namable;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -112,14 +113,13 @@ impl MergedSet {
 		&self.version
 	}
 
-	pub fn to_dataset(&self, form: DsmDataForm) -> anyhow::Result<Dataset> {
+	pub fn to_dataset(&self, form: DataFormat) -> anyhow::Result<Dataset> {
 		let classes = self.class_mapper.get_dsm_classes();
-		let metadata =
-			MetaDataBuilder::new(self.name.clone(), self.version.clone(), form, classes)
-				.set_date_created(self.date_created.clone())
-				.set_licenses(self.license_mapper.licences().clone())
-				.set_description(self.description.clone())
-				.build();
+		let metadata = MetaDataBuilder::new(self.name.clone(), self.version.clone(), form, classes)
+			.set_date_created(self.date_created.clone())
+			.set_licenses(self.license_mapper.licences().clone())
+			.set_description(self.description.clone())
+			.build();
 		let mut data_entries: HashMap<String, Vec<Entry>> = HashMap::new();
 		for (group, datasets) in &self.datasets {
 			if !data_entries.contains_key(group) {
@@ -188,5 +188,19 @@ impl MergedSet {
 			self.class_mapper.clone(),
 			self.license_mapper.clone(),
 		)
+	}
+}
+
+impl Namable for MergedSet {
+	fn name(&self) -> String {
+		self.name().to_string()
+	}
+
+	fn version(&self) -> String {
+		self.version().to_string()
+	}
+
+	fn type_name() -> &'static str {
+		"MergedDataSet"
 	}
 }

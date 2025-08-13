@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use interfaces::models::Settings;
-use serializer::DataForm;
+use serializer::Serializer;
 use storage::Storage;
 use tauri::async_runtime::Mutex;
 use tauri::{Error, State};
@@ -23,7 +23,7 @@ pub async fn store_raw_set(
 		action_log_limit: state.action_count(),
 	};
 	let path = PathBuf::from(path.clone());
-	let formatter: DataForm = DatasetFormat::from(formats).into();
+	let formatter: Serializer = DatasetFormat::from(formats).into();
 	let datasets = formatter.read(
 		&path,
 		Some(name.clone()),

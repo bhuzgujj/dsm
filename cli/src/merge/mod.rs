@@ -7,7 +7,7 @@ use crate::merge::new::New;
 use clap::Subcommand;
 use interfaces::log_err;
 use interfaces::models::{datasets::Dataset, Settings};
-use serializer::DataForm;
+use serializer::Serializer;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use storage::Storage;
@@ -68,7 +68,7 @@ pub async fn extract_dsm_from_path(
 		if splits.len() != 3 {
 			return log_err!(format!("Can only have 2 equals sign in {}", path));
 		}
-		let format: DataForm = Format::try_from(splits[0].trim().to_string())?.into();
+		let format: Serializer = Format::try_from(splits[0].trim().to_string())?.into();
 		let dataset_path = PathBuf::from(splits[1].trim());
 		let group = splits[2];
 		let dataset = format.read(

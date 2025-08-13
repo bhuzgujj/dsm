@@ -14,17 +14,6 @@ pub struct Annotation {
 }
 
 impl Annotation {
-	pub fn to_file_percent_str(&self, width: u32, height: u32) -> String {
-		format!(
-			"{} {:.6} {:.6} {:.6} {:.6}",
-			self.class,
-			self.x / width as f64,
-			self.y / height as f64,
-			self.width / width as f64,
-			self.height / height as f64
-		)
-	}
-
 	pub fn map_in(&self, new_class: u32) -> Self {
 		Self {
 			class: new_class,

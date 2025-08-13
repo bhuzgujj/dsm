@@ -1,17 +1,19 @@
 [package]
+edition = "2024"
 name = "storage"
 version = "0.1.0"
-edition = "2024"
 
 [dependencies]
 # Internal
 interfaces.workspace = true
+serializer.workspace = true
 
 # External
 anyhow.workspace = true
 
 # Azure
 chrono.workspace = true
+colored.workspace = true
 
 futures.workspace = true
 
