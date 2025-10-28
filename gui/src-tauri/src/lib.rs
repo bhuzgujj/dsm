@@ -8,9 +8,8 @@ use log::info;
 use tauri::async_runtime::{block_on, Mutex};
 use tauri::Manager;
 
-use interfaces::logger;
 use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
-
+use interfaces::paths::log_path;
 use crate::commands::*;
 use crate::error::UiError;
 
@@ -46,7 +45,7 @@ fn pre_start(app: &mut tauri::App) -> anyhow::Result<()> {
 		window.close_devtools();
 	}
 	let mut settings = Settings::load();
-	logger::bind_logger(&settings)?;
+	bhomz::logger::bind_logger(settings.log_level(), Some(log_path()))?;
 	create_dir_all(settings.ledger_path())?;
 	create_dir_all(settings.store_path())?;
 	if requires_migration(settings.ledger_version()) {

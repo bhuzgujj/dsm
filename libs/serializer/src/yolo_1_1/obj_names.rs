@@ -1,10 +1,10 @@
-use interfaces::log_err;
 use interfaces::models::datasets::Classes;
 use interfaces::paths::write_to_file;
 use log::debug;
 use std::collections::HashMap;
 use std::fs::read_to_string;
 use std::path::{Path, PathBuf};
+use bhomz::log_err;
 
 pub(crate) const FILE_NAME: &str = "obj.names";
 

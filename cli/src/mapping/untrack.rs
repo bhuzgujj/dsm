@@ -1,8 +1,7 @@
 use std::{fs::read_to_string, path::PathBuf};
-
+use bhomz::log_err;
 use clap::Args;
 use interfaces::{
-	log_err,
 	models::{ClassMapper, Settings},
 };
 use serializer::Serializer;

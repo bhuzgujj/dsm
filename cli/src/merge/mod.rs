@@ -5,11 +5,11 @@ use crate::format::Format;
 use crate::merge::add::Add;
 use crate::merge::new::New;
 use clap::Subcommand;
-use interfaces::log_err;
 use interfaces::models::{datasets::Dataset, Settings};
 use serializer::Serializer;
 use std::collections::HashMap;
 use std::path::PathBuf;
+use bhomz::log_err;
 use storage::Storage;
 
 const SEPERATOR: char = '=';

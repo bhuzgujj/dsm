@@ -1,4 +1,3 @@
-use crate::log_err;
 use crate::models::datasets::Dataset;
 use crate::models::datasets::Entry;
 use crate::models::datasets::MetaDataBuilder;
@@ -7,6 +6,7 @@ use crate::models::{ClassMapper, DataFormat, LicenseMapper, StorableGroupSet};
 use crate::namable::Namable;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use bhomz::log_err;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct MergedSet {

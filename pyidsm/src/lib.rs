@@ -2,7 +2,6 @@ mod models;
 
 use interfaces::models::datasets::Dataset;
 use interfaces::models::{ClassMapper, MergedSet, Settings};
-use interfaces::{log_err, logger};
 use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;
 use pyo3_stub_gen_derive::gen_stub_pyfunction;
@@ -10,6 +9,8 @@ use serializer::Serializer;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
+use bhomz::log_err;
+use interfaces::paths::log_path;
 use storage::{add_merge_link_to, Storage};
 
 use crate::models::annotation::PyAnnotation;
@@ -184,7 +185,7 @@ async fn generate(
 #[pymodule]
 fn pyidsm(module: &Bound<'_, PyModule>) -> PyResult<()> {
 	let settings = init()?;
-	logger::bind_logger(&settings)?;
+	bhomz::logger::bind_logger(settings.log_level(), Some(log_path()))?;
 	create_dir_all(settings.ledger_path())?;
 	create_dir_all(settings.store_path())?;
 	module.add_class::<PyAnnotation>()?;

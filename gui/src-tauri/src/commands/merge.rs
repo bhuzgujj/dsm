@@ -1,6 +1,5 @@
 use std::collections::HashMap;
-
-use interfaces::log_err;
+use bhomz::log_err;
 use interfaces::models::datasets::MetaDataBuilder;
 use interfaces::models::{datasets::Dataset, ClassMapper, MergedSet, Settings};
 use serde::{Deserialize, Serialize};
@@ -39,9 +38,9 @@ pub async fn merge_new(
 			datasets.insert(sets_label, (include.group, local_set));
 		} else {
 			let any: anyhow::Result<()> = log_err!(format!("Could not find {}", sets_label));
-			match any {
-				Ok(_) => return Ok(()),
-				Err(err) => return Err(Error::Anyhow(err)),
+			return match any {
+				Ok(_) => Ok(()),
+				Err(err) => Err(Error::Anyhow(err)),
 			}
 		}
 	}

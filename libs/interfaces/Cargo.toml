@@ -6,6 +6,8 @@ version = "0.2.0"
 [dependencies]
 anyhow.workspace = true
 
+bhomz = {workspace = true, features = ["anyhow"]}
+
 chrono = {workspace = true, features = ["serde"]}
 colored.workspace = true
 

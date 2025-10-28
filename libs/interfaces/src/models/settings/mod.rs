@@ -2,7 +2,6 @@ pub mod actions;
 pub mod interpreter;
 pub mod remotes;
 
-use crate::log_err;
 use crate::models::interpreter::Interpreter;
 use crate::paths::{dsm_dir, write_to_file};
 use log::{trace, LevelFilter};
@@ -11,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::{fs::read_to_string, str::FromStr};
+use bhomz::log_err;
 
 const SETTINGS_FILENAME: &str = "settings.toml";
 const STORE: &str = "datasets-store";

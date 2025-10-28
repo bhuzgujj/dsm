@@ -1,11 +1,11 @@
 use crate::format::Format;
 use clap::Args;
 use interfaces::{
-	log_err,
 	models::{MergedSet, Settings},
 };
 use serializer::Serializer;
 use std::path::PathBuf;
+use bhomz::log_err;
 use storage::Storage;
 
 /// Create a direvative dataset from storage in a known format at the specified path location

@@ -25,6 +25,7 @@ storage.workspace = true
 
 # External
 anyhow.workspace = true
+bhomz = {workspace = true, features = ["anyhow"]}
 log.workspace = true
 serde = {workspace = true, features = ["derive"]}
 serde_json.workspace = true

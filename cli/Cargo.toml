@@ -12,6 +12,8 @@ storage.workspace = true
 # External
 anyhow.workspace = true
 
+bhomz = {workspace = true, features = ["anyhow"]}
+
 clap.workspace = true
 colored.workspace = true
 

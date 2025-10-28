@@ -5,11 +5,11 @@ use std::{
 	fs::{self, read_to_string},
 	path::{Path, PathBuf},
 };
-
+use bhomz::log_err;
 use log::debug;
 use serde::{de::DeserializeOwned, Serialize};
 
-use interfaces::{log_err, models::actions::Action, namable::Namable};
+use interfaces::{models::actions::Action, namable::Namable};
 
 pub const RAW_SET: &str = "raw_sets";
 pub const MERGED_SET: &str = "merged_sets";

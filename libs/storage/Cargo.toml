@@ -10,6 +10,7 @@ serializer.workspace = true
 
 # External
 anyhow.workspace = true
+bhomz = {workspace = true, features = ["anyhow"]}
 
 # Azure
 chrono.workspace = true

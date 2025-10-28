@@ -1,8 +1,8 @@
 use clap::Args;
-use interfaces::log_err;
 use interfaces::models::{ClassMapper, MergedSet, Settings};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use bhomz::log_err;
 use storage::{add_merge_link_to, Storage};
 
 use crate::merge::{extract_dsm_from_path, extract_dsm_from_storage};

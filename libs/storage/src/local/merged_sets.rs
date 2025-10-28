@@ -2,9 +2,8 @@ use std::{
 	fs::{create_dir_all, read_dir},
 	path::{Path, PathBuf},
 };
-
+use bhomz::log_err;
 use interfaces::{
-	log_err,
 	models::{
 		actions::{Action, SetInfo},
 		datasets::Dataset,

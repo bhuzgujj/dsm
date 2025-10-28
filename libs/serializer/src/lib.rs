@@ -1,4 +1,3 @@
-use interfaces::log_err;
 use interfaces::models::datasets::Dataset;
 use interfaces::models::interpreter::Interpreter;
 use interfaces::models::DataFormat;
@@ -6,6 +5,7 @@ use log::debug;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::path::Path;
+use bhomz::log_err;
 
 mod coco_1_0;
 mod yolo_1_1;
@@ -47,7 +47,7 @@ impl Serializer {
 				if let Some(interpreter) = interpreters.get(interpreter) {
 					interpreter.read(path, name, version)
 				} else {
-					log_err!("Unknown interpreter: {interpreter}")
+					log_err!("Unknown interpreter: {}", interpreter)
 				}
 			},
 		}

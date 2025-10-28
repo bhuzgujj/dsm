@@ -1,10 +1,10 @@
-use crate::log_err;
 use crate::models::datasets::{Classes, Dataset};
 use crate::paths::read_from_file;
 use log::trace;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::{collections::HashMap, vec};
+use bhomz::log_err;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClassMapper {

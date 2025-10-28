@@ -1,4 +1,3 @@
-use crate::log_err;
 use crate::models::datasets::annotation::Annotation;
 use crate::models::datasets::classes::Classes;
 use crate::models::{ClassMapper, LicenseMapper, Location};
@@ -6,6 +5,7 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use bhomz::log_err;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Entry {
