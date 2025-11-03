@@ -18,13 +18,11 @@ storage = {path = "./libs/storage"}
 # External
 anyhow = "1.0.100"
 
-bhomz = {git = "https://github.com/bhuzgujj/bhomz.git", tag = "1.0.0"}
+bhomz = {git = "https://github.com/bhuzgujj/bhomz.git", tag = "1.1.0"}
 
 chrono = "0.4.41"
 clap = {version = "4.5.38", features = ["derive"]}
 colored = "3.0.0"
-
-dirs = "6.0.0"
 
 futures = "0.3"
 

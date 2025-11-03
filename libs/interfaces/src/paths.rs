@@ -1,3 +1,4 @@
+use std::env::home_dir;
 use std::fs::{read_to_string, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -13,7 +14,7 @@ pub fn log_path() -> PathBuf {
 
 #[inline]
 pub fn dsm_dir() -> PathBuf {
-	dirs::home_dir()
+	home_dir()
 		.expect("Could not find home directory")
 		.join(DSM_DIR)
 }

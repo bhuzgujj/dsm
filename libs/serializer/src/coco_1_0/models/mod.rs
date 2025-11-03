@@ -38,7 +38,7 @@ pub(crate) fn read(root: &PathBuf) -> anyhow::Result<HashMap<String, CocoSequenc
 		},
 		Err(err) => {
 			log_err!(format!(
-				"Failed to read dataset directory '{}': {err}",
+				"Failed to read input directory '{}': {err}",
 				root.display()
 			))
 		},

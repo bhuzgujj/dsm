@@ -19,7 +19,7 @@ colored.workspace = true
 
 log.workspace = true
 
-serde_json.workspace = true
+serde_json = {workspace = true, features = ["float_roundtrip"] }
 
 tokio = {workspace = true, features = ["full"]}
 toml.workspace = true

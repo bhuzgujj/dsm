@@ -12,6 +12,9 @@ mod models;
 
 const ANNOTATION_DIR: &str = "annotations";
 
+#[cfg(test)]
+pub const FORMATTER: DataFormat = DataFormat::Coco1_0;
+
 pub(crate) fn read(
 	root: &Path,
 	name: Option<String>,

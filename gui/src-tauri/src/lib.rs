@@ -3,7 +3,7 @@ mod error;
 mod models;
 
 use std::fs::create_dir_all;
-
+use bhomz::logger;
 use log::info;
 use tauri::async_runtime::{block_on, Mutex};
 use tauri::Manager;
@@ -45,7 +45,7 @@ fn pre_start(app: &mut tauri::App) -> anyhow::Result<()> {
 		window.close_devtools();
 	}
 	let mut settings = Settings::load();
-	bhomz::logger::bind_logger(settings.log_level(), Some(log_path()))?;
+	logger::bind_logger(settings.log_level(), Some(log_path()))?;
 	create_dir_all(settings.ledger_path())?;
 	create_dir_all(settings.store_path())?;
 	if requires_migration(settings.ledger_version()) {
