@@ -1,6 +1,6 @@
 use crate::coco_1_0::models::sequence::into_dsm;
 use crate::coco_1_0::models::sequence::{CocoSequence, IMAGE_PATH};
-use interfaces::log_err;
+use bhomz::log_err;
 use interfaces::models::datasets::Dataset;
 use interfaces::models::DataFormat;
 use interfaces::paths::write_to_file;
@@ -11,6 +11,9 @@ use std::path::Path;
 mod models;
 
 const ANNOTATION_DIR: &str = "annotations";
+
+#[cfg(test)]
+pub const FORMATTER: DataFormat = DataFormat::Coco1_0;
 
 pub(crate) fn read(
 	root: &Path,

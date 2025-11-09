@@ -1,8 +1,8 @@
+use bhomz::log_err;
+use serde::{Deserialize, Serialize};
 use std::{fs, path::Path, process::Command};
 
-use serde::{Deserialize, Serialize};
-
-use crate::{log_err, models::datasets::Dataset, paths::write_to_file};
+use crate::{models::datasets::Dataset, paths::write_to_file};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Interpreter {

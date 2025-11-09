@@ -25,9 +25,10 @@ storage.workspace = true
 
 # External
 anyhow.workspace = true
+bhomz = {workspace = true, features = ["anyhow"]}
 log.workspace = true
 serde = {workspace = true, features = ["derive"]}
-serde_json.workspace = true
+serde_json = {workspace = true, features = ["float_roundtrip"] }
 tauri = {version = "2", features = []}
 
 # Plugins

@@ -15,34 +15,38 @@ jobs:
         include:
           - platform: 'windows-latest'
             args: ''
+          # TODO: Linux
 
     runs-on: ${{ matrix.platform }}
     steps:
-      # Setups
-      - uses: actions/checkout@v4
+      - name: "Setup: Repo"
+        uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: "Setup: Node"
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
-      - name: Setup Python
+      - name: "Setup: Python"
         uses: actions/setup-python@v5
         with:
           python-version: '3.12' 
 
-      - name: Setup Rust
+      - name: "Setup: Rust"
         uses: dtolnay/rust-toolchain@stable
 
-      - name: JS Install
+      - name: "Node: fetch packages"
         working-directory: gui
-        run: npm i
+        run: npm ci
 
-      - name: Rust Clippy
-        run: cargo clippy -- -D warnings
-
-      - name: Rust Build
+      - name: "Rust: Build"
         run: cargo build --workspace --release
 
-      - name: Rust tests
+      - name: "Rust: Test"
         run: cargo test
+
+      - name: "Rust: Clippy"
+        run: cargo clippy -- -D warnings
+
+      - name: "Rust: Format"
+        run: cargo fmt --check

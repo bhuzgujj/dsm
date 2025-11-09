@@ -2,17 +2,16 @@ mod commands;
 mod error;
 mod models;
 
-use std::fs::create_dir_all;
-
+use bhomz::logger;
 use log::info;
+use std::fs::create_dir_all;
 use tauri::async_runtime::{block_on, Mutex};
 use tauri::Manager;
 
-use interfaces::logger;
-use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
-
 use crate::commands::*;
 use crate::error::UiError;
+use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
+use interfaces::paths::log_path;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -46,7 +45,7 @@ fn pre_start(app: &mut tauri::App) -> anyhow::Result<()> {
 		window.close_devtools();
 	}
 	let mut settings = Settings::load();
-	logger::bind_logger(&settings)?;
+	logger::bind_logger(settings.log_level(), Some(log_path()))?;
 	create_dir_all(settings.ledger_path())?;
 	create_dir_all(settings.store_path())?;
 	if requires_migration(settings.ledger_version()) {

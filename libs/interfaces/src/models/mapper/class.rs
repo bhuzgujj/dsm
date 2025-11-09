@@ -1,6 +1,6 @@
-use crate::log_err;
 use crate::models::datasets::{Classes, Dataset};
 use crate::paths::read_from_file;
+use bhomz::log_err;
 use log::trace;
 use serde::{Deserialize, Serialize};
 use std::path::Path;

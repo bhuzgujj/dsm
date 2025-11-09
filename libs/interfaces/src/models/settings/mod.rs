@@ -2,9 +2,9 @@ pub mod actions;
 pub mod interpreter;
 pub mod remotes;
 
-use crate::log_err;
 use crate::models::interpreter::Interpreter;
 use crate::paths::{dsm_dir, write_to_file};
+use bhomz::log_err;
 use log::{trace, LevelFilter};
 use remotes::Remote;
 use serde::{Deserialize, Serialize};

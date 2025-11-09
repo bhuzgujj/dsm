@@ -1,0 +1,219 @@
+{
+  "metadata": {
+    "name": "input",
+    "version": "1",
+    "subset_version": null,
+    "contributor": "",
+    "date_created": "",
+    "description": "",
+    "is_incomplete": false,
+    "url": "",
+    "year": "",
+    "formatter": "Yolo1_1",
+    "classes": {
+      "0": {
+        "class": "bird",
+        "subclass": null
+      },
+      "1": {
+        "class": "human",
+        "subclass": null
+      },
+      "2": {
+        "class": "doggo",
+        "subclass": null
+      }
+    },
+    "licenses": {},
+    "contained_in_merged": []
+  },
+  "entries": {
+    "train": [
+      {
+        "file_name": "birb.jpg",
+        "image_relative_path": "obj_train_data/birb.jpg",
+        "image_location": {
+          "Local": {
+            "path": "./resources/yolo_1_1\\rectangle-only_correct\\input"
+          }
+        },
+        "width": 3600,
+        "height": 4500,
+        "license": null,
+        "flickr_url": null,
+        "coco_url": null,
+        "date_captured": null,
+        "annotation": [
+          {
+            "class": 0,
+            "x": 2044.5515999999998,
+            "y": 2523.591,
+            "width": 3110.9004,
+            "height": 3952.8179999999998,
+            "segmentation": [],
+            "iscrowd": 0,
+            "occluded": null,
+            "rotation": null
+          }
+        ],
+        "original_id": null
+      },
+      {
+        "file_name": "bird.jpg",
+        "image_relative_path": "obj_train_data/bird.jpg",
+        "image_location": {
+          "Local": {
+            "path": "./resources/yolo_1_1\\rectangle-only_correct\\input"
+          }
+        },
+        "width": 4800,
+        "height": 6000,
+        "license": null,
+        "flickr_url": null,
+        "coco_url": null,
+        "date_captured": null,
+        "annotation": [
+          {
+            "class": 0,
+            "x": 2202.48,
+            "y": 3445.788,
+            "width": 3266.16,
+            "height": 3112.7819999999997,
+            "segmentation": [],
+            "iscrowd": 0,
+            "occluded": null,
+            "rotation": null
+          }
+        ],
+        "original_id": null
+      },
+      {
+        "file_name": "doggo.jpg",
+        "image_relative_path": "obj_train_data/doggo.jpg",
+        "image_location": {
+          "Local": {
+            "path": "./resources/yolo_1_1\\rectangle-only_correct\\input"
+          }
+        },
+        "width": 5464,
+        "height": 8192,
+        "license": null,
+        "flickr_url": null,
+        "coco_url": null,
+        "date_captured": null,
+        "annotation": [
+          {
+            "class": 2,
+            "x": 1929.999544,
+            "y": 4076.003328,
+            "width": 3760.002424,
+            "height": 5609.996288,
+            "segmentation": [],
+            "iscrowd": 0,
+            "occluded": null,
+            "rotation": null
+          },
+          {
+            "class": 1,
+            "x": 4496.9976719999995,
+            "y": 3155.501056,
+            "width": 1933.999192,
+            "height": 6311.002112,
+            "segmentation": [],
+            "iscrowd": 0,
+            "occluded": null,
+            "rotation": null
+          }
+        ],
+        "original_id": null
+      },
+      {
+        "file_name": "face.jpg",
+        "image_relative_path": "obj_train_data/face.jpg",
+        "image_location": {
+          "Local": {
+            "path": "./resources/yolo_1_1\\rectangle-only_correct\\input"
+          }
+        },
+        "width": 3004,
+        "height": 2003,
+        "license": null,
+        "flickr_url": null,
+        "coco_url": null,
+        "date_captured": null,
+        "annotation": [
+          {
+            "class": 1,
+            "x": 1501.366156,
+            "y": 1030.229029,
+            "width": 1375.489544,
+            "height": 1247.4804179999999,
+            "segmentation": [],
+            "iscrowd": 0,
+            "occluded": null,
+            "rotation": null
+          }
+        ],
+        "original_id": null
+      },
+      {
+        "file_name": "person.jpg",
+        "image_relative_path": "obj_train_data/person.jpg",
+        "image_location": {
+          "Local": {
+            "path": "./resources/yolo_1_1\\rectangle-only_correct\\input"
+          }
+        },
+        "width": 4492,
+        "height": 5615,
+        "license": null,
+        "flickr_url": null,
+        "coco_url": null,
+        "date_captured": null,
+        "annotation": [
+          {
+            "class": 1,
+            "x": 2110.786308,
+            "y": 3472.316,
+            "width": 2814.5299800000003,
+            "height": 3989.609105,
+            "segmentation": [],
+            "iscrowd": 0,
+            "occluded": null,
+            "rotation": null
+          }
+        ],
+        "original_id": null
+      },
+      {
+        "file_name": "pup.jpg",
+        "image_relative_path": "obj_train_data/pup.jpg",
+        "image_location": {
+          "Local": {
+            "path": "./resources/yolo_1_1\\rectangle-only_correct\\input"
+          }
+        },
+        "width": 2832,
+        "height": 4240,
+        "license": null,
+        "flickr_url": null,
+        "coco_url": null,
+        "date_captured": null,
+        "annotation": [
+          {
+            "class": 2,
+            "x": 1491.9060960000002,
+            "y": 3126.8049600000004,
+            "width": 2236.8891839999997,
+            "height": 1700.2484800000002,
+            "segmentation": [],
+            "iscrowd": 0,
+            "occluded": null,
+            "rotation": null
+          }
+        ],
+        "original_id": null
+      }
+    ]
+  }
+}

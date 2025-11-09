@@ -8,18 +8,17 @@ mod store;
 
 use clap::Parser;
 use colored::Colorize;
-use interfaces::logger;
 use log::info;
 use mapping::Mapping;
 use std::fs::create_dir_all;
-
-use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
 
 use crate::configuration::Configuration;
 use crate::generator::Generator;
 use crate::list::List;
 use crate::merge::Merge;
 use crate::store::Store;
+use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
+use interfaces::paths::log_path;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -40,7 +39,7 @@ enum Cli {
 }
 
 async fn execute(settings: &mut Settings) -> anyhow::Result<()> {
-	logger::bind_logger(settings)?;
+	bhomz::logger::bind_logger(settings.log_level(), Some(log_path()))?;
 	create_dir_all(settings.store_path())?;
 	create_dir_all(settings.ledger_path())?;
 	if requires_migration(settings.ledger_version()) {

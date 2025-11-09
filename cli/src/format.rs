@@ -1,4 +1,4 @@
-use interfaces::log_err;
+use bhomz::log_err;
 use serializer::Serializer;
 
 #[derive(Debug, Clone)]

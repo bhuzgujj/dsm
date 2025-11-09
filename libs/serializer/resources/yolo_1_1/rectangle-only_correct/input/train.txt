@@ -1,0 +1,6 @@
+data/obj_train_data/birb.jpg
+data/obj_train_data/bird.jpg
+data/obj_train_data/doggo.jpg
+data/obj_train_data/face.jpg
+data/obj_train_data/person.jpg
+data/obj_train_data/pup.jpg

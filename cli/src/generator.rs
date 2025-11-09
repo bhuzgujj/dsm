@@ -1,9 +1,7 @@
 use crate::format::Format;
+use bhomz::log_err;
 use clap::Args;
-use interfaces::{
-	log_err,
-	models::{MergedSet, Settings},
-};
+use interfaces::models::{MergedSet, Settings};
 use serializer::Serializer;
 use std::path::PathBuf;
 use storage::Storage;

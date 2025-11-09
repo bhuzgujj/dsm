@@ -1,6 +1,6 @@
 use crate::yolo_1_1::obj_names;
 use crate::yolo_1_1::strip_prefix;
-use interfaces::log_err;
+use bhomz::log_err;
 use interfaces::paths::write_to_file;
 use log::{debug, warn};
 use std::collections::HashMap;

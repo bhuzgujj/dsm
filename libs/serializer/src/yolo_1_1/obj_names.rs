@@ -1,4 +1,4 @@
-use interfaces::log_err;
+use bhomz::log_err;
 use interfaces::models::datasets::Classes;
 use interfaces::paths::write_to_file;
 use log::debug;

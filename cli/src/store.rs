@@ -1,9 +1,7 @@
 use crate::format::Format;
+use bhomz::log_err;
 use clap::Args;
-use interfaces::{
-	log_err,
-	models::{Location, Settings},
-};
+use interfaces::models::{Location, Settings};
 use log::debug;
 use serializer::Serializer;
 use std::path::PathBuf;

@@ -15,42 +15,34 @@ jobs:
         include:
           - platform: 'windows-latest'
             args: ''
+          # TODO: Linux
 
     runs-on: ${{ matrix.platform }}
     steps:
-      # Setups
-      - uses: actions/checkout@v4
+      - name: "Setup: Repo"
+        uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: "Setup: Python"
         uses: actions/setup-python@v5
         with:
           python-version: '3.12' 
 
-      - name: Setup Rust
+      - name: "Setup: Rust"
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install python packages
-        working-directory: py-interface
+      - name: "Pip: fetch packages"
+        working-directory: pyidsm
         run: pip install -r requirements.txt
 
-      # Build
-      - name: Build Cli
-        working-directory: py-interface
-        run: cargo build --workspace --release
-
-      - name: Build Python Interface (devmode)
-        working-directory: py-interface
-        run: maturin develop
-
-      - name: Generate types
-        working-directory: py-interface
+      - name: "Rust: Generate python interface"
+        working-directory: pyidsm
         run: cargo run --bin stub_gen
 
-      - name: Build Python Interface
-        working-directory: py-interface
+      - name: "Maturin: build"
+        working-directory: pyidsm
         run: maturin build
 
-      - name: Upload Wheels
+      - name: "Upload: Wheels"
         uses: actions/upload-artifact@v4
         with:
           name: Python package
@@ -70,31 +62,30 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
     steps:
-      # Setups
-      - uses: actions/checkout@v4
+      - name: "Setup: Repo"
+        uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: "Setup: Node"
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
-      - name: Setup Rust
+      - name: "Setup: Rust"
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Npm Install
+      - name: "Node: fetch packages"
         working-directory: gui
         run: npm i
 
-      - name: Build Cli
+      - name: "Rust: Build"
         working-directory: cli
         run: cargo build --release
 
-      - name: Build Gui
+      - name: "Node: Build"
         working-directory: gui
         run: npm run tauri build -- --release
 
-      # Uploads
-      - name: Upload Msi
+      - name: "Upload: Msi"
         uses: actions/upload-artifact@v4
         with:
           name: DataSets-Manager-MSI
@@ -102,7 +93,7 @@ jobs:
           path: |
             target/release/bundle/msi/*.msi
 
-      - name: Upload Exe
+      - name: "Upload: Exe"
         uses: actions/upload-artifact@v4
         with:
           name: DataSets-Manager-EXE

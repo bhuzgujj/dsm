@@ -13,6 +13,9 @@ use std::path::Path;
 
 const PREFIX: &str = "data/";
 
+#[cfg(test)]
+pub const FORMATTER: DataFormat = DataFormat::Yolo1_1;
+
 pub(crate) fn read(
 	root: &Path,
 	name: Option<String>,
