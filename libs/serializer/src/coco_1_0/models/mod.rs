@@ -1,9 +1,9 @@
 use crate::coco_1_0::models::sequence::CocoSequence;
+use bhomz::log_err;
 use log::debug;
 use std::collections::HashMap;
 use std::fs::{read_dir, read_to_string};
 use std::path::PathBuf;
-use bhomz::log_err;
 
 pub mod annotation;
 pub mod attribute;

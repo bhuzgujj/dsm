@@ -12,13 +12,13 @@ use log::info;
 use mapping::Mapping;
 use std::fs::create_dir_all;
 
-use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
-use interfaces::paths::log_path;
 use crate::configuration::Configuration;
 use crate::generator::Generator;
 use crate::list::List;
 use crate::merge::Merge;
 use crate::store::Store;
+use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
+use interfaces::paths::log_path;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]

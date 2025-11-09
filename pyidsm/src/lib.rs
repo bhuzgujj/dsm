@@ -1,7 +1,9 @@
 mod models;
 
+use bhomz::log_err;
 use interfaces::models::datasets::Dataset;
 use interfaces::models::{ClassMapper, MergedSet, Settings};
+use interfaces::paths::log_path;
 use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;
 use pyo3_stub_gen_derive::gen_stub_pyfunction;
@@ -9,8 +11,6 @@ use serializer::Serializer;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
-use bhomz::log_err;
-use interfaces::paths::log_path;
 use storage::{add_merge_link_to, Storage};
 
 use crate::models::annotation::PyAnnotation;

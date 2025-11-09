@@ -2,16 +2,16 @@ mod commands;
 mod error;
 mod models;
 
-use std::fs::create_dir_all;
 use bhomz::logger;
 use log::info;
+use std::fs::create_dir_all;
 use tauri::async_runtime::{block_on, Mutex};
 use tauri::Manager;
 
-use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
-use interfaces::paths::log_path;
 use crate::commands::*;
 use crate::error::UiError;
+use interfaces::models::{requires_migration, Settings, LEDGER_CURRENT_VERSION};
+use interfaces::paths::log_path;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

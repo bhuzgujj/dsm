@@ -1,8 +1,8 @@
+use bhomz::log_err;
 use std::env::home_dir;
 use std::fs::{read_to_string, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use bhomz::log_err;
 
 const FILE_NAME: &str = "dsm.log";
 const DSM_DIR: &str = ".dsm";

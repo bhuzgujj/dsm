@@ -4,13 +4,13 @@ pub mod remotes;
 
 use crate::models::interpreter::Interpreter;
 use crate::paths::{dsm_dir, write_to_file};
+use bhomz::log_err;
 use log::{trace, LevelFilter};
 use remotes::Remote;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::{fs::read_to_string, str::FromStr};
-use bhomz::log_err;
 
 const SETTINGS_FILENAME: &str = "settings.toml";
 const STORE: &str = "datasets-store";

@@ -1,7 +1,3 @@
-use std::{
-	fs::{create_dir_all, read_dir},
-	path::{Path, PathBuf},
-};
 use bhomz::log_err;
 use interfaces::{
 	models::{
@@ -13,6 +9,10 @@ use interfaces::{
 	paths::write_to_file,
 };
 use log::{debug, info};
+use std::{
+	fs::{create_dir_all, read_dir},
+	path::{Path, PathBuf},
+};
 
 use super::{read_dsm, Storable, MERGED_SET, RAW_SET, SEPARATOR};
 

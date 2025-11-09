@@ -1,5 +1,4 @@
 use crate::{local::FORMAT_FILE_NAME, Storage};
-use colored::Colorize;
 use interfaces::{
 	models::{DataFormat, Settings},
 	paths::read_from_file,
@@ -35,7 +34,6 @@ pub async fn migrate(settings: &Settings) -> anyhow::Result<()> {
 						version_dir.path().display()
 					);
 					warn!("{msg}");
-					println!("{}", msg.yellow());
 					continue;
 				},
 			}

@@ -1,13 +1,13 @@
 mod dsm_sets;
 mod merged_sets;
 
+use bhomz::log_err;
+use log::debug;
+use serde::{de::DeserializeOwned, Serialize};
 use std::{
 	fs::{self, read_to_string},
 	path::{Path, PathBuf},
 };
-use bhomz::log_err;
-use log::debug;
-use serde::{de::DeserializeOwned, Serialize};
 
 use interfaces::{models::actions::Action, namable::Namable};
 

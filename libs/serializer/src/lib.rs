@@ -1,3 +1,4 @@
+use bhomz::log_err;
 use interfaces::models::datasets::Dataset;
 use interfaces::models::interpreter::Interpreter;
 use interfaces::models::DataFormat;
@@ -5,7 +6,6 @@ use log::debug;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::path::Path;
-use bhomz::log_err;
 
 mod coco_1_0;
 mod yolo_1_1;
@@ -134,52 +134,68 @@ mod tests {
 
 #[cfg(test)]
 macro_rules! test_metadata {
-    ($dataset_name:ident) => {
-        const BASE_DIR: &str = concat!("./resources/", stringify!($dataset_name));
+	($dataset_name:ident) => {
+		const BASE_DIR: &str = concat!("./resources/", stringify!($dataset_name));
 
-        #[test]
-        fn rectangle_only_correct_read_metadata() {
+		#[test]
+		fn rectangle_only_correct_read_metadata() {
 			let base_path = std::path::PathBuf::from(BASE_DIR).join("rectangle-only_correct");
-			let result: interfaces::models::datasets::Dataset = read(base_path.join("input").as_path(), None, String::from("1"), FORMATTER).unwrap();
+			let result: interfaces::models::datasets::Dataset = read(
+				base_path.join("input").as_path(),
+				None,
+				String::from("1"),
+				FORMATTER,
+			)
+			.unwrap();
 			let expected = std::fs::read_to_string(base_path.join("expected.json")).unwrap();
-			let expected_dataset = serde_json::from_str::<interfaces::models::datasets::Dataset>(&expected).unwrap();
+			let expected_dataset =
+				serde_json::from_str::<interfaces::models::datasets::Dataset>(&expected).unwrap();
 			assert_eq!(expected_dataset.entries(), result.entries());
 			assert_eq!(expected_dataset.metadata(), result.metadata());
-        }
-    };
+		}
+	};
 }
 
 #[cfg(test)]
 mod yolo_1_0_test {
+	use crate::yolo_1_1::*;
 	use std::env::temp_dir;
 	use std::fs::{create_dir_all, remove_dir_all};
-	use crate::yolo_1_1::*;
 
 	test_metadata!(yolo_1_1);
 
 	#[test]
 	fn rectangle_only_correct_entry_write() {
-		let tmp_dir = temp_dir().join(".dsm.unit-test.yolo_1_0_test.rectangle_only_correct_entry_write");
+		let tmp_dir =
+			temp_dir().join(".dsm.unit-test.yolo_1_0_test.rectangle_only_correct_entry_write");
 		if tmp_dir.exists() {
 			remove_dir_all(&tmp_dir).unwrap();
 		}
 		create_dir_all(tmp_dir.clone()).unwrap();
 		let base_path = std::path::PathBuf::from(BASE_DIR).join("rectangle-only_correct");
 		let expected = std::fs::read_to_string(base_path.join("expected.json")).unwrap();
-		let expected_dataset = serde_json::from_str::<interfaces::models::datasets::Dataset>(&expected).unwrap();
+		let expected_dataset =
+			serde_json::from_str::<interfaces::models::datasets::Dataset>(&expected).unwrap();
 		write(tmp_dir.as_path(), &expected_dataset).unwrap();
 		let result = std::fs::read_dir(tmp_dir.join("obj_train_data").as_path());
 		assert!(&result.is_ok());
 		for file in result.unwrap() {
 			if let Ok(file) = file {
-				let current_file = base_path.join("input").join("obj_train_data").join(file.file_name().to_str().unwrap());
+				let current_file = base_path
+					.join("input")
+					.join("obj_train_data")
+					.join(file.file_name().to_str().unwrap());
 				if file.path().is_file() {
-					if  file.path().extension().is_some_and(|ext| ext == "txt") {
+					if file.path().extension().is_some_and(|ext| ext == "txt") {
 						let expected_annotation = std::fs::read_to_string(file.path()).unwrap();
 						let current_annotation = std::fs::read_to_string(current_file).unwrap();
 						assert_eq!(expected_annotation.trim(), current_annotation.trim());
 					} else {
-						assert!(current_file.exists(), "'{}' should exist", current_file.display());
+						assert!(
+							current_file.exists(),
+							"'{}' should exist",
+							current_file.display()
+						);
 					}
 				}
 			}

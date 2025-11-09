@@ -1,8 +1,8 @@
-use std::collections::HashMap;
 use bhomz::log_err;
 use interfaces::models::datasets::MetaDataBuilder;
 use interfaces::models::{datasets::Dataset, ClassMapper, MergedSet, Settings};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use storage::Storage;
 use tauri::async_runtime::Mutex;
 use tauri::{Error, State};
@@ -41,7 +41,7 @@ pub async fn merge_new(
 			return match any {
 				Ok(_) => Ok(()),
 				Err(err) => Err(Error::Anyhow(err)),
-			}
+			};
 		}
 	}
 	let merge_set = MergedSet::new(

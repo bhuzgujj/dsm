@@ -12,15 +12,7 @@ serializer.workspace = true
 anyhow.workspace = true
 bhomz = {workspace = true, features = ["anyhow"]}
 
-# Azure
-chrono.workspace = true
-colored.workspace = true
-
-futures.workspace = true
-
 log.workspace = true
-
-reqwest.workspace = true
 
 serde.workspace = true
 serde_json = {workspace = true, features = ["float_roundtrip"] }

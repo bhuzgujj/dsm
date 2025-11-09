@@ -1,12 +1,10 @@
 use crate::format::Format;
+use bhomz::log_err;
 use clap::Args;
-use interfaces::{
-	models::{Location, Settings},
-};
+use interfaces::models::{Location, Settings};
 use log::debug;
 use serializer::Serializer;
 use std::path::PathBuf;
-use bhomz::log_err;
 use storage::Storage;
 
 /// Read a directory using a format and store a copy into the store directory in settings. It will also create a json representation of the dataset in the ledger directory

@@ -1,10 +1,8 @@
-use std::{fs::read_to_string, path::PathBuf};
 use bhomz::log_err;
 use clap::Args;
-use interfaces::{
-	models::{ClassMapper, Settings},
-};
+use interfaces::models::{ClassMapper, Settings};
 use serializer::Serializer;
+use std::{fs::read_to_string, path::PathBuf};
 
 use crate::format::Format;
 
