@@ -1,0 +1,26 @@
+[package]
+name = "synchronizer"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+test = ["rand"]
+
+[dependencies]
+# Internal
+interfaces.workspace = true
+
+# External
+anyhow.workspace = true
+
+bhomz = {workspace = true, features = ["anyhow"]}
+
+clap = { workspace = true, optional = true }
+
+log.workspace = true
+
+rand = { workspace = true, optional = true }
+
+[[bin]]
+name = "client"
+required-features = ["clap"]
